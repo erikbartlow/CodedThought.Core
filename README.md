@@ -1,4 +1,4 @@
-# CodedThough.Core
+oof# CodedThough.Core
 
 The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.  It has many other useful aspects:
 * `HolidayCalculator`
@@ -16,33 +16,12 @@ Installation is simply done by referencing the CodedThought.Core library and any
 
 ## Usage
 
-Application Settings have moved to a custom configSection called HPCoreSettings.
+Application Settings are accessed via .NET Core appsetti ga.json while database or API connection details are stored in a custom json settings file named ctSettings.json.
 
-##### configSections
-Add the following section to the `<configSections>` node in your app.config or web.config.
-```xml
-  <configSections>
-    <section name="HPCoreSettings" type="CodedThought.Core.Configuration.CoreSection,CodedThought.Core.Configuration" />
-  </configSections>
-```
+##### appsettings
 
-##### HPCoreSettings
-Add the `<HPCoreSettings>` section after the `<appSettings>` node.
-```xml
-<HPCoreSettings>
-    <settings>
-      <add key="WINFORM" value="true" />
-    </settings>
-    <connections>
-      <add 
-      	connectionName="MainConnection" 
-      	primary="true"
-        providerType="SqlServer" 
-        defaultSchema="dbo" 
-        connectionString="[INSERT CONNECTION STRING HERE]" 
-        providerName="System.Data.SqlClient" />
-    </connections>
-  </HPCoreSettings>
+##### ctsettings
+
 ```
 ### Settings Parameters
 | Property | Options | Description
