@@ -23,7 +23,7 @@ Application Settings are accessed via .NET Core appsetti ga.json while database 
 ##### ctsettings
 
 ```
-### Settings Parameters
+### ctSettings Parameters
 | Property | Options | Description
 | ------ | ------ | ------
 | WINFORM | `true | false` | The purpose of this setting is to tell the CodedThought.Core framework if it is being used in a web environment or not.  The reason for this is so that the framework can cache the discovered data aware classes and associated types properly.
