@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AssemblyVersion>6.0.0.6</AssemblyVersion>
+		<FileVersion>6.0.0.6</FileVersion>
+		<VersionPrefix>6.0.0.6</VersionPrefix>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>CodedThought.Core.Data.SqlServer</Title>
+		<Authors>Erik Bartlow</Authors>
+		<Company>HP, Inc.</Company>
+		<Description>The CodedThought.Core.Data.SqlServer package is a custom database provider for use with Sql Server.</Description>
+		<PackageIcon>hp-logo72px.png</PackageIcon>
+		<RepositoryUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_git/CodedThought.Core</RepositoryUrl>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="hp-logo72px.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\CodedThought.Core\CodedThought.Core.csproj" />
+	</ItemGroup>
+
+</Project>

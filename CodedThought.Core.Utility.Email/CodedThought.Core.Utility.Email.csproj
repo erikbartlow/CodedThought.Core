@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>true</IsPackable>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>$(AssemblyName)</PackageId>
+		<Title>HP Core Utility Email Dotnet 6</Title>
+		<VersionPrefix>6.0.0.3</VersionPrefix>
+		<AssemblyVersion>6.0.0.3</AssemblyVersion>
+		<FileVersion>6.0.0.3</FileVersion>
+		<Description>The CodedThought.Core library is an email helper that utilizes MVC Razor templates to author emails.</Description>
+		<RepositoryUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_git/CodedThought.Core</RepositoryUrl>
+		<Version>$(AssemblyPrefix)</Version>
+		<Authors>Erik Bartlow</Authors>
+		<Company>HP, Inc.</Company>
+		<PackageProjectUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_artifacts/feed/CodedThought.Core/NuGet/CodedThought.Core.Utility.Email/overview/$(AssemblyVersion)</PackageProjectUrl>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="hp-logo72px.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.2.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	</ItemGroup>
+
+</Project>

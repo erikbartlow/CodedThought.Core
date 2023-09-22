@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AssemblyVersion>6.0.0.3</AssemblyVersion>
+		<FileVersion>6.0.0.3</FileVersion>
+		<VersionPrefix>6.0.0.3</VersionPrefix>
+		<Title>CodedThought.Core.Validation</Title>
+		<Authors>Erik Bartlow</Authors>
+		<Company>HP, Inc.</Company>
+		<Description>The CodedThought.Core.Validation package is a custom validation provider to use with imported files or data sets.</Description>
+		<RepositoryUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_git/CodedThought.Core</RepositoryUrl>
+		<PackageProjectUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_artifacts/feed/CodedThought.Core/NuGet/CodedThought.Core.Validation/overview/$(AssemblyVersion)</PackageProjectUrl>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="hp-logo72px.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\CodedThought.Core\CodedThought.Core.csproj" />
+	</ItemGroup>
+</Project>
