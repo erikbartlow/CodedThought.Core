@@ -6,26 +6,19 @@
 		<Nullable>enable</Nullable>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>$(AssemblyName)</PackageId>
-		<Title>HP Core REST API</Title>
+		<Title>CodedThought Core REST API</Title>
 		<VersionPrefix>1.0.0.4</VersionPrefix>
 		<AssemblyVersion>1.0.0.4</AssemblyVersion>
 		<FileVersion>1.0.0.4</FileVersion>
 		<Description>The CodedThought.Core.Data.Api library is a custom REST Api Data provider for the CodedThought.Core Data Entity library.</Description>
-		<RepositoryUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_git/CodedThought.Core</RepositoryUrl>
+		<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
 		<Version>$(VersionPrefix)</Version>
 		<Authors>Erik Bartlow</Authors>
-		<Company>HP, Inc.</Company>
-		<PackageProjectUrl>https://hpi-wehp-cits.visualstudio.com/_git/CodedThought.Core</PackageProjectUrl>
-		<PackageIcon>hp-logo72px.png</PackageIcon>
+		<Company>Erik Bartlow</Company>
+		<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
 		<AssemblyProductAttribute>CodedThought.Core.Data</AssemblyProductAttribute>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<None Include="hp-logo72px.png">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

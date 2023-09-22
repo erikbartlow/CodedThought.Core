@@ -6,15 +6,15 @@
 		<Nullable>enable</Nullable>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>$(AssemblyName)</PackageId>
-		<Title>HP Core Transport</Title>
+		<Title>CodedThought Core Transport</Title>
 		<VersionPrefix>6.0.0.8</VersionPrefix>
 		<AssemblyVersion>6.0.0.8</AssemblyVersion>
 		<FileVersion>6.0.0.8</FileVersion>
 		<Description>The CodedThought.Core.Transport library is a custom wrapper for various file transport methods like WinSCP.  Currently this version only support WinSCP.</Description>
-		<RepositoryUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_git/CodedThought.Core</RepositoryUrl>
+		<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
 		<Version>$(AssemblyPrefix)</Version>
 		<Authors>Erik Bartlow</Authors>
-		<Company>HP, Inc.</Company>
+		<Company>Erik Bartlow</Company>
 		<PackageProjectUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_artifacts/feed/CodedThought.Core/NuGet/CodedThought.Core.Transport/overview/$(AssemblyVersion)</PackageProjectUrl>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<IncludeSymbols>true</IncludeSymbols>
@@ -22,12 +22,7 @@
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 	</PropertyGroup>
-	<ItemGroup>
-		<None Include="hp-logo72px.png">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="WinSCP" Version="6.1.1" />
 	</ItemGroup>

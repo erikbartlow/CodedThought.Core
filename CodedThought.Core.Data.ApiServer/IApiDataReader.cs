@@ -24,7 +24,7 @@ namespace CodedThought.Core.Data.ApiServer {
 
 		#region Constructors
 
-		public ApiDataReader(HPConnectionSetting connectionSetting) {
+		public ApiDataReader(CoreConnectionSetting connectionSetting) {
 			PopulateCurrentConnection(connectionSetting);
 		}
 
@@ -55,7 +55,7 @@ namespace CodedThought.Core.Data.ApiServer {
 		/// <summary>Parses the passed REST Api connection string.</summary>
 		/// <param name="connectionString"></param>
 		/// <returns></returns>
-		private void PopulateCurrentConnection(HPConnectionSetting connectionSetting) {
+		private void PopulateCurrentConnection(CoreConnectionSetting connectionSetting) {
 			_connectionSetting = new() {
 				ConnectionName = connectionSetting.Name,
 				ConnectionString = connectionSetting.ConnectionString,
