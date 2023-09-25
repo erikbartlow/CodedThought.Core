@@ -23,13 +23,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="hp-logo72px.png">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="BouncyCastle.NetCore" Version="1.9.0" />
 		<PackageReference Include="ChoPGP.Core" Version="1.0.1.2" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />

@@ -1,6 +1,6 @@
 ﻿namespace CodedThought.Core.Exceptions {
 
-	public static class HPExceptionExtensions {
+	public static class CodedThoughtExceptionExtensions {
 
 		public enum ExceptionCodes {
 			ItemNotFound = 0,

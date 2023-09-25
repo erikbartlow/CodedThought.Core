@@ -18,7 +18,7 @@ namespace CodedThought.Core.Data {
 
         /// <summary>Initializes a new instance of the <see cref="GenericDataStore" /> class.</summary>
         /// <param name="databaseSchemaName">Name of the database schema.</param>
-        public GenericApiDataStore(IMemoryCache cache, HPConnectionSetting connectionSetting)
+        public GenericApiDataStore(IMemoryCache cache, ConnectionSetting connectionSetting)
             : base(cache, Assembly.GetCallingAssembly(), connectionSetting) {
             UseBasicAuth = false;
             PopulateCurrentConnection(connectionSetting);
@@ -125,7 +125,7 @@ namespace CodedThought.Core.Data {
                     dynamic responseObj = DeserializeApiResponse<TResponse>(reader);
                     return responseObj;
                 } else {
-                    throw new HPApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
+                    throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
                 }
             } catch {
 
@@ -161,7 +161,7 @@ namespace CodedThought.Core.Data {
                     dynamic responseObj = DeserializeApiResponse<T>(reader);
                     return responseObj;
                 } else {
-                    throw new HPApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
+                    throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
                 }
             } catch {
                 throw;
@@ -185,7 +185,7 @@ namespace CodedThought.Core.Data {
                     dynamic responseObj = DeserializeApiResponse<T>(reader);
                     return responseObj;
                 } else {
-                    throw new HPApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
+                    throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
                 }
 
             } catch {
@@ -204,7 +204,7 @@ namespace CodedThought.Core.Data {
             ApiDataControllerAttribute attr = GetApiDataControllerAttribute<B>();
             return attr.Action != null
                 ? await Post<T, B>(attr.Action, obj)
-                : throw new HPApplicationException($"The object type, {typeof(B).Name}, does not contain an action.  Please update its ApiDataControllerAttribute or use the other Save method to explicitly pass the action.");
+                : throw new Exceptions.CodedThoughtApplicationException($"The object type, {typeof(B).Name}, does not contain an action.  Please update its ApiDataControllerAttribute or use the other Save method to explicitly pass the action.");
         }
         /// <summary>Saves the passed object to the Api based on the current controller and passed action name.</summary>
         /// <typeparam name="T">The type of object to posted.</typeparam>
@@ -268,7 +268,7 @@ namespace CodedThought.Core.Data {
                             ApiResponseMessage = _rawResponse = apiResponse;
                             return DeserializeApiResponse<TResponse>(apiResponse);
                         } else {
-                            throw new HPApplicationException($"There was an error calling the web service.  The reported error was {apiCall.StatusCode}.");
+                            throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {apiCall.StatusCode}.");
                         }
                     }
                 }
@@ -293,10 +293,10 @@ namespace CodedThought.Core.Data {
                 }
             }
             return keyValue == null
-                ? throw new HPApplicationException($"The object type, {typeof(T).Name}, does not contain a default parameter.  Please add the DefaultParameter flag to an Api attribute or use the other Remove method to explicity pass the key value.")
+                ? throw new Exceptions.CodedThoughtApplicationException($"The object type, {typeof(T).Name}, does not contain a default parameter.  Please add the DefaultParameter flag to an Api attribute or use the other Remove method to explicity pass the key value.")
                 : attr.Action != null && keyValue != null
                 ? await Remove<T, B>(attr.Action, keyValue.ToString())
-                : throw new HPApplicationException($"The object type, {typeof(T).Name}, does not contain an action.  Please update its ApiDataControllerAttribute or use the other Remove method to explicitly pass the action.");
+                : throw new Exceptions.CodedThoughtApplicationException($"The object type, {typeof(T).Name}, does not contain an action.  Please update its ApiDataControllerAttribute or use the other Remove method to explicitly pass the action.");
         }
 
         /// <summary>Deletes the passed object using the Api based on the current controller and configured action.</summary>
@@ -326,7 +326,7 @@ namespace CodedThought.Core.Data {
                             ApiResponseMessage = _rawResponse = apiResponse;
                             return DeserializeApiResponse<T>(apiResponse);
                         } else {
-                            throw new HPApplicationException($"There was an error calling the web service.  The reported error was {apiCall.StatusCode}.");
+                            throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {apiCall.StatusCode}.");
                         }
                     }
                 }
@@ -359,7 +359,7 @@ namespace CodedThought.Core.Data {
         /// <summary>Parses the passed REST Api connection string.</summary>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        private void PopulateCurrentConnection(HPConnectionSetting? connectionSetting) {
+        private void PopulateCurrentConnection(ConnectionSetting? connectionSetting) {
             if (connectionSetting == null) throw new ArgumentNullException("The HPConnectionSetting cannot be null.");
             string[] urlParts = connectionSetting.ConnectionString.Split(";".ToCharArray());
             for (int i = 0; i <= urlParts.Length - 1; i++) {

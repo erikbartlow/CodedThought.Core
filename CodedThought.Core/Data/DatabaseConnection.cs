@@ -43,7 +43,7 @@ namespace CodedThought.Core.Data {
 		/// <returns></returns>
 		public String DecryptString(string encryptedString, string encryptionKey) {
 			try {
-				return CodedThought.Core.Security.HPEncryption.DecryptPassword(encryptedString);
+				return CodedThought.Core.Security.CodedThoughtEncryption.DecryptPassword(encryptedString);
 			} catch {
 				return string.Empty;
 			}
@@ -59,7 +59,7 @@ namespace CodedThought.Core.Data {
 		}
 
 		/// <summary>Initial constructor for DatabaseConnection</summary>
-		public DatabaseConnection(HPConnectionSetting connection) {
+		public DatabaseConnection(ConnectionSetting connection) {
 			ConnectionName = connection.Name;
 			ConnectionString = connection.ConnectionString;
 			string dbType = connection.ProviderType;
@@ -71,14 +71,14 @@ namespace CodedThought.Core.Data {
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
 		/// <param name="connectionName">Name of the connection.</param>
 		/// <param name="timeout">       The timeout.</param>
-		public DatabaseConnection(HPConnectionSetting connection, Int32 timeout) : this(connection) {
+		public DatabaseConnection(ConnectionSetting connection, Int32 timeout) : this(connection) {
 			CommandTimeout = timeout;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
 		/// <param name="connectionName">Name of the connection.</param>
 		/// <param name="timeout">       The timeout.</param>
-		public DatabaseConnection(HPConnectionSetting connection, string schemaName, Int32 timeout) : this(connection, timeout) {
+		public DatabaseConnection(ConnectionSetting connection, string schemaName, Int32 timeout) : this(connection, timeout) {
 			SchemaName = schemaName;
 			CommandTimeout = timeout;
 		}
@@ -86,7 +86,7 @@ namespace CodedThought.Core.Data {
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
 		/// <param name="connectionName">Name of the connection.</param>
 		/// <param name="decryptionKey"> The decryption key.</param>
-		public DatabaseConnection(HPConnectionSetting connection, string decryptionKey) : this(connection) {
+		public DatabaseConnection(ConnectionSetting connection, string decryptionKey) : this(connection) {
 			ConnectionString = DecryptString(connection.ConnectionString, decryptionKey);
 		}
 

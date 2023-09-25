@@ -30,7 +30,7 @@ namespace CodedThought.Core.Data {
         #region Properties
 
         public DatabaseConnection? CurrentDatabaseConnection { get; set; }
-        public HPConnectionSetting? ConnectionSetting { get; private set; }
+        public ConnectionSetting? ConnectionSetting { get; private set; }
 
         /// <summary>Gets or sets the database object instance.</summary>
         /// <value>The database object instance.</value>
@@ -159,7 +159,7 @@ namespace CodedThought.Core.Data {
         /// <param name="cache"></param>
         /// <param name="callingAssembly"></param>
         /// <param name="connectionSetting"></param>
-        public GenericDataStore(IMemoryCache cache, Assembly callingAssembly, HPConnectionSetting connectionSetting) : this(cache) {
+        public GenericDataStore(IMemoryCache cache, Assembly callingAssembly, ConnectionSetting connectionSetting) : this(cache) {
             // The calling assembly should be the assembly with the data aware classes to load into the ORM.
             if (ORM.Count == 0) {
                 LoadAssemblyAndORM(callingAssembly);
@@ -210,7 +210,7 @@ namespace CodedThought.Core.Data {
         /// <param name="cache"></param>
         /// <param name="connectionSetting"></param>
         /// <param name="databaseSchemaName"></param>
-        public GenericDataStore(IMemoryCache cache, HPConnectionSetting connectionSetting, string databaseSchemaName) : this(cache, Assembly.GetCallingAssembly(), connectionSetting) {
+        public GenericDataStore(IMemoryCache cache, ConnectionSetting connectionSetting, string databaseSchemaName) : this(cache, Assembly.GetCallingAssembly(), connectionSetting) {
             ConnectionSetting = connectionSetting;
             DefaultSchemaName = databaseSchemaName;
             DatabaseObjectInstance.DefaultSchemaName = databaseSchemaName;
@@ -472,7 +472,7 @@ namespace CodedThought.Core.Data {
             }
             //no primary key: throw error
             if (oParamWhere.Count == 0) {
-                throw new HPApplicationException("Cannot perform an update when no where clause is specified.");
+                throw new Exceptions.CodedThoughtApplicationException("Cannot perform an update when no where clause is specified.");
             }
             DatabaseObjectInstance.Update(GetTableNameFromObject<T>(), oParamColumns, oParamWhere);
         }
@@ -554,7 +554,7 @@ namespace CodedThought.Core.Data {
                     }
                 }
                 return true;
-            } catch (HPException ex) {
+            } catch (CodedThoughtException ex) {
                 throw ex;
             }
         }
@@ -614,7 +614,7 @@ namespace CodedThought.Core.Data {
                     }
                 }
                 return true;
-            } catch (HPException ex) {
+            } catch (CodedThoughtException ex) {
                 throw ex;
             }
         }
@@ -1619,7 +1619,7 @@ namespace CodedThought.Core.Data {
                     .Case(typeof(Object), () => returnVal = (value ?? DBNull.Value))
                     .Case(typeof(byte[]), () => returnVal = (value == null || ((byte[])value).Length == 0 ? DBNull.Value : value));
                 return returnVal;
-            } catch (HPException ex) {
+            } catch (CodedThoughtException ex) {
                 throw ex;
             }
         }
@@ -1680,7 +1680,7 @@ namespace CodedThought.Core.Data {
                 if (attrTable != null) {
                     DataTableUsageAttribute attrUsage = type.GetDataTableUsageAttribute(attrTable.IgnoreInherited);
                     attrUsage ??= new DataTableUsageAttribute();
-                    if (mapCollection.ContainsKey(type.FullName)) throw new HPException($"The type, {type.FullName}, already exists in the mapping.");
+                    if (mapCollection.ContainsKey(type.FullName)) throw new CodedThoughtException($"The type, {type.FullName}, already exists in the mapping.");
                     attrTable.ClassType = type;
                     attrTable.ClassName = type.Name;
                     attrTable.ReadOnly = attrUsage.UseAs.HasFlag(DataTableUsage.ReadOnly);
@@ -1696,7 +1696,7 @@ namespace CodedThought.Core.Data {
                 // Look for API Attributes
                 ApiDataControllerAttribute paramTable = type.GetApiDataControllerAttribute(false);
                 if (paramTable != null) {
-                    if (mapCollection.ContainsKey($"{type.FullName}.api")) throw new HPException($"The type, {type.FullName}.api, already exists in the mapping.");
+                    if (mapCollection.ContainsKey($"{type.FullName}.api")) throw new CodedThoughtException($"The type, {type.FullName}.api, already exists in the mapping.");
                     MapApiColumns(type, paramTable);
                     Dictionary<Type, Attribute> apiDic = new() {
                         { type, paramTable }
@@ -1759,7 +1759,7 @@ namespace CodedThought.Core.Data {
                 List<Assembly> dataAwareAssemblies = new();
                 List<Assembly> allAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
                 foreach (Assembly assembly in allAssemblies) {
-                    var isDataAware = Attribute.GetCustomAttribute(assembly, typeof(HPDataAwareAssemblyAttribute)) as HPDataAwareAssemblyAttribute;
+                    var isDataAware = Attribute.GetCustomAttribute(assembly, typeof(DataAwareAssemblyAttribute)) as DataAwareAssemblyAttribute;
                     if (isDataAware != null) { dataAwareAssemblies.Add(assembly); }
                 }
                 return dataAwareAssemblies;

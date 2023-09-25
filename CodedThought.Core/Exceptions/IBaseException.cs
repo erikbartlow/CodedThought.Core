@@ -5,7 +5,7 @@ namespace CodedThought.Core.Exceptions {
 	/// except for the name of the class and constructors deriving classes will also most likely provide custom messages within the call to base(message) such as for a logon exception - base:("You
 	/// failed to login with the userName: " + message) message having been passed in from calling code as the userName that failed
 	/// </summary>
-	public interface IHPBaseException {
+	public interface IBaseException {
 
 		#region Properties
 
@@ -23,7 +23,7 @@ namespace CodedThought.Core.Exceptions {
 
 		/// <summary>Gets or sets the exception code.</summary>
 		/// <value>The exception code.</value>
-		HPExceptionExtensions.ExceptionCodes ExceptionCode { get; set; }
+		CodedThoughtExceptionExtensions.ExceptionCodes ExceptionCode { get; set; }
 
 		#endregion Properties
 	}

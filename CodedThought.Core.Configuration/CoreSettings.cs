@@ -7,7 +7,7 @@
 			Settings = new();
 		}
 
-		public List<CoreConnectionSetting>? Connections { get; set; }
+		public List<ConnectionSetting>? Connections { get; set; }
 		public Dictionary<string, string> Settings { get; set; }
 
 		/// <summary>Gets whether this application instance is running on http or local.</summary>

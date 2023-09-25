@@ -1,14 +1,14 @@
 ﻿namespace CodedThought.Core.Configuration {
 
-	public class CoreConnectionSetting {
+	public class ConnectionSetting {
 		private string _providerType;
 		/// <summary>Primary constructor for the CoreSetting object.</summary>
-		public CoreConnectionSetting() {
+		public ConnectionSetting() {
 			Name = String.Empty;
 			ConnectionString = String.Empty;
 			DefaultSchema = "dbo";
 			Primary = false;
-			ProviderName = "Microsoft.Data.SqlClient";
+			ProviderName = "SqlServer";
 			ProviderType = "SqlServer";
 		}
 

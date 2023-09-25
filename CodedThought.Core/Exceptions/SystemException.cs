@@ -8,11 +8,11 @@ namespace CodedThought.Core.Exceptions {
 	/// failed to login with the userName: " + message) message having been passed in from calling code as the userName that failed
 	/// </summary>
 	[Serializable]
-	public class HPSystemException : SystemException, IHPBaseException {
+	public class SystemException : System.SystemException, IBaseException {
 
 		#region Declaration
 
-		public HPExceptionExtensions.ExceptionCodes _code;
+		public CodedThoughtExceptionExtensions.ExceptionCodes _code;
 		private Int32 _drillDownDepth = 3;
 
 		#endregion Declaration
@@ -30,7 +30,7 @@ namespace CodedThought.Core.Exceptions {
 
 		/// <summary>Gets or sets the exception code.</summary>
 		/// <value>The exception code.</value>
-		public HPExceptionExtensions.ExceptionCodes ExceptionCode {
+		public CodedThoughtExceptionExtensions.ExceptionCodes ExceptionCode {
 			get { return _code; }
 			set { _code = value; }
 		}
@@ -66,20 +66,20 @@ namespace CodedThought.Core.Exceptions {
 		#region Constructors
 
 		/// <summary>Default Constructor</summary>
-		public HPSystemException()
+		public SystemException()
 			: base() {
 		}
 
 		/// <summary>Constructor that takes a message</summary>
 		/// <param name="message">The message.</param>
-		public HPSystemException(string message)
+		public SystemException(string message)
 			: base(message) {
 		}
 
 		/// <summary>Constructor that takes a message and an inner exception</summary>
 		/// <param name="message">       The message.</param>
 		/// <param name="innerException">The inner exception.</param>
-		public HPSystemException(string message, Exception innerException)
+		public SystemException(string message, Exception innerException)
 			: base(message, innerException) {
 		}
 
@@ -88,23 +88,23 @@ namespace CodedThought.Core.Exceptions {
 		/// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext" /> that contains contextual information about the source or destination.</param>
 		/// <exception cref="T:System.ArgumentNullException">The <paramref name="info" /> parameter is null.</exception>
 		/// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult" /> is zero (0).</exception>
-		protected HPSystemException(SerializationInfo info, StreamingContext context)
+		protected SystemException(SerializationInfo info, StreamingContext context)
 			: base(info, context) {
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="HPApplicationException" /> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="CodedThoughtApplicationException" /> class.</summary>
 		/// <param name="message">The message.</param>
 		/// <param name="code">   The code.</param>
-		public HPSystemException(string message, HPExceptionExtensions.ExceptionCodes code)
+		public SystemException(string message, CodedThoughtExceptionExtensions.ExceptionCodes code)
 			: base(message) {
 			this._code = code;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="HPApplicationException" /> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="CodedThoughtApplicationException" /> class.</summary>
 		/// <param name="message">       The message.</param>
 		/// <param name="innerException">The inner exception.</param>
 		/// <param name="code">          The code.</param>
-		public HPSystemException(String message, Exception innerException, HPExceptionExtensions.ExceptionCodes code)
+		public SystemException(String message, Exception innerException, CodedThoughtExceptionExtensions.ExceptionCodes code)
 			: base(message, innerException) {
 			this._code = code;
 		}

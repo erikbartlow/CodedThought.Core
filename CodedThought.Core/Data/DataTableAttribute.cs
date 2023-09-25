@@ -16,7 +16,7 @@ namespace CodedThought.Core.Data {
 		public string TableName {
 			get {
 				if (String.IsNullOrEmpty(_tableName) && (!UseView && String.IsNullOrEmpty(_viewName))) {
-					throw new HPMissingArguementException("The table name is not set for this object.");
+					throw new MissingArguementException("The table name is not set for this object.");
 				} else {
 					string tblName = _tableName;
 					return SchemaName != string.Empty ? $"[{SchemaName}].[{tblName}]" : $"[{tblName}]";
@@ -36,7 +36,7 @@ namespace CodedThought.Core.Data {
 		public string ViewName {
 			get {
 				if (String.IsNullOrEmpty(TableName) && String.IsNullOrEmpty(_viewName)) {
-					throw new HPMissingArguementException("The view name is not set.  If the table name is not set then a view name must be set.");
+					throw new MissingArguementException("The view name is not set.  If the table name is not set then a view name must be set.");
 				} else {
 					string tblName = _viewName;
 					return String.IsNullOrEmpty(tblName) ? string.Empty : SchemaName != string.Empty ? $"[{SchemaName}].[{tblName}]" : $"[{tblName}]";
@@ -52,12 +52,12 @@ namespace CodedThought.Core.Data {
 
 		/// <summary>Gets the name of the source based on the <see cref="UseView" /> property and availability of the table and view name properties.</summary>
 		/// <value>The name of the source.</value>
-		/// <exception cref="HPMissingArguementException">An exception will be thrown if both the table and view name are empty. At least one is required.</exception>
+		/// <exception cref="MissingArguementException">An exception will be thrown if both the table and view name are empty. At least one is required.</exception>
 		public string SourceName {
 			get {
 				string source = (UseView ? ViewName : TableName);
 				return String.IsNullOrEmpty(source)
-					? throw new HPMissingArguementException("The source name for the data object is not set in either the table or view names.")
+					? throw new MissingArguementException("The source name for the data object is not set in either the table or view names.")
 					: source;
 			}
 		}

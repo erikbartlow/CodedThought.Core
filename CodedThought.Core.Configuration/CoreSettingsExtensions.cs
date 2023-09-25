@@ -3,14 +3,14 @@ using Microsoft.Extensions.Hosting;
 
 namespace CodedThought.Core.Configuration {
 
-	public static class HPCoreSettingsExtensions {
+	public static class CoreSettingsExtensions {
 
 		/// <summary>
 		/// Loads the default hpsettings.json file to the builder.
 		/// </summary>
 		/// <param name="builder"></param>
 		/// <returns></returns>
-		public static IConfigurationBuilder AddHPCoreSettingsConfiguration(this IConfigurationBuilder builder) {
+		public static IConfigurationBuilder AddCoreSettingsConfiguration(this IConfigurationBuilder builder) {
 			builder.AddJsonFile("hpsettings.json", optional: false, reloadOnChange: true);
 			return builder;
 		}
@@ -21,8 +21,8 @@ namespace CodedThought.Core.Configuration {
         /// <param name="env"></param>
         /// <returns></returns>
         /// <remarks>The naming of the settings json file is case sensitive and should be match the environment name in the ASPNETCORE_ENVIRONMENT variable.</remarks>
-        public static IConfigurationBuilder AddHPCoreSettingsConfiguration(this IConfigurationBuilder builder, IHostEnvironment env) {
-			AddHPCoreSettingsConfiguration(builder);
+        public static IConfigurationBuilder AddCoreSettingsConfiguration(this IConfigurationBuilder builder, IHostEnvironment env) {
+			AddCoreSettingsConfiguration(builder);
             builder.AddJsonFile($"hpsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
             return builder;
         }
@@ -47,15 +47,15 @@ namespace CodedThought.Core.Configuration {
             builder.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
             return builder;
         }
-        public static HPConnectionSetting GetHPCorePrimaryConnectionString(this IConfiguration configuration) {
-			HPCoreSettings options = new();
-			configuration.GetSection(nameof(HPCoreSettings)).Bind(options);
+        public static ConnectionSetting GetHPCorePrimaryConnectionString(this IConfiguration configuration) {
+			CoreSettings options = new();
+			configuration.GetSection(nameof(CoreSettings)).Bind(options);
 			return options.Connections.FirstOrDefault(x => x.Primary == true);
 		}
 
-		public static HPConnectionSetting GetDatabaseConnection(this IConfiguration configuration, string name) {
-			HPCoreSettings options = new();
-			configuration.GetSection(nameof(HPCoreSettings)).Bind(options);
+		public static ConnectionSetting GetDatabaseConnection(this IConfiguration configuration, string name) {
+			CoreSettings options = new();
+			configuration.GetSection(nameof(CoreSettings)).Bind(options);
 			return options.Connections.FirstOrDefault(x => x.Name.ToUpper() == name.ToUpper());
 		}
 	}

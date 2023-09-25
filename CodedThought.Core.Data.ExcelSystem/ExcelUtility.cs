@@ -198,7 +198,7 @@ namespace CodedThought.Core.Data.ExcelSystem {
 		/// <summary>Opens the excel file as DataSet.</summary>
 		/// <param name="fullFileName">Full name of the file.</param>
 		/// <returns></returns>
-		/// <exception cref="HPException"></exception>
+		/// <exception cref="CodedThoughtException"></exception>
 		public static DataSet OpenExcelFileAsDataSet(string fullFileName, bool hasHeaders = false) {
 			try {
 				Stream excelStream;
@@ -209,11 +209,11 @@ namespace CodedThought.Core.Data.ExcelSystem {
 					return OpenExcelFileAsDataSet(sr, System.IO.Path.GetExtension(fullFileName), hasHeaders);
 				}
 			} catch (IOException ioEx) {
-				throw new HPException("There was an error accessing the file.", ioEx);
-			} catch (HPException hpEx) {
-				throw new HPException(hpEx.Message, hpEx);
+				throw new CodedThoughtException("There was an error accessing the file.", ioEx);
+			} catch (CodedThoughtException hpEx) {
+				throw new CodedThoughtException(hpEx.Message, hpEx);
 			} catch (Exception ex) {
-				throw new HPException(ex.Message, ex);
+				throw new CodedThoughtException(ex.Message, ex);
 			}
 		}
 
@@ -221,11 +221,11 @@ namespace CodedThought.Core.Data.ExcelSystem {
 			try {
 				return OpenExcelFileAsDataSet(uploadStream, fileExtension, hasHeaders);
 			} catch (IOException ioEx) {
-				throw new HPException("There was an error accessing the file.", ioEx);
-			} catch (HPException hpEx) {
-				throw new HPException(hpEx.Message, hpEx);
+				throw new CodedThoughtException("There was an error accessing the file.", ioEx);
+			} catch (CodedThoughtException hpEx) {
+				throw new CodedThoughtException(hpEx.Message, hpEx);
 			} catch (Exception ex) {
-				throw new HPException(ex.Message, ex);
+				throw new CodedThoughtException(ex.Message, ex);
 			}
 		}
 
@@ -233,16 +233,16 @@ namespace CodedThought.Core.Data.ExcelSystem {
 		/// <param name="uploadStream"> The upload stream.</param>
 		/// <param name="fileExtension">The file extension.</param>
 		/// <returns></returns>
-		/// <exception cref="HPException"></exception>
+		/// <exception cref="CodedThoughtException"></exception>
 		public static DataSet OpenExcelFileAsDataSet(FileStream uploadStream, string fileExtension, bool hasHeaders = false) {
 			try {
 				return OpenExcelFileAsDataSet((Stream)uploadStream, fileExtension, hasHeaders);
 			} catch (IOException ioEx) {
-				throw new HPException("There was an error accessing the file.", ioEx);
-			} catch (HPException hpEx) {
-				throw new HPException(hpEx.Message, hpEx);
+				throw new CodedThoughtException("There was an error accessing the file.", ioEx);
+			} catch (CodedThoughtException hpEx) {
+				throw new CodedThoughtException(hpEx.Message, hpEx);
 			} catch (Exception ex) {
-				throw new HPException(ex.Message, ex);
+				throw new CodedThoughtException(ex.Message, ex);
 			}
 		}
 
@@ -251,7 +251,7 @@ namespace CodedThought.Core.Data.ExcelSystem {
 		/// <param name="fileExtension">The file extension including the period.</param>
 		/// <returns></returns>
 		/// <remarks>The file extension should contain the leading period.</remarks>
-		/// <exception cref="HPException"></exception>
+		/// <exception cref="CodedThoughtException"></exception>
 		public static DataSet OpenExcelFileAsDataSet(Stream uploadStream, string fileExtension, bool hasHeaders = false) {
 			try {
 				DataSet dsExcel = new();
@@ -265,11 +265,11 @@ namespace CodedThought.Core.Data.ExcelSystem {
 				reader.Close();
 				return dsExcel;
 			} catch (IOException ioEx) {
-				throw new HPException("There was an error accessing the file.", ioEx);
-			} catch (HPException hpEx) {
-				throw new HPException(hpEx.Message, hpEx);
+				throw new CodedThoughtException("There was an error accessing the file.", ioEx);
+			} catch (CodedThoughtException hpEx) {
+				throw new CodedThoughtException(hpEx.Message, hpEx);
 			} catch (Exception ex) {
-				throw new HPException(ex.Message, ex);
+				throw new CodedThoughtException(ex.Message, ex);
 			}
 		}
 

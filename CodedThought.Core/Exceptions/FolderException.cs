@@ -2,32 +2,32 @@ using System.Runtime.Serialization;
 
 namespace CodedThought.Core.Exceptions {
 
-	/// <summary>Summary description for HPDuplicateException.</summary>
+	/// <summary>Summary description for HPFolderException.</summary>
 	[Serializable]
-	public class HPDuplicateException : HPApplicationException, IHPBaseException {
+	public class FolderException : CodedThoughtApplicationException, IBaseException {
 
 		#region Constructors
 
 		/// <summary>Default Constructor</summary>
-		public HPDuplicateException()
+		public FolderException()
 			: base() {
 		}
 
 		/// <summary>Constructor that takes a message</summary>
 		/// <param name="message"></param>
-		public HPDuplicateException(string message)
+		public FolderException(string message)
 			: base(message) {
 		}
 
 		/// <summary>Constructor that takes a message and an inner exception</summary>
 		/// <param name="message">       </param>
 		/// <param name="innerException"></param>
-		public HPDuplicateException(string message, Exception innerException)
+		public FolderException(string message, Exception innerException)
 			: base(message, innerException) {
 		}
 
 		/// <summary>Protected constructor to de-serialize data</summary>
-		protected HPDuplicateException(SerializationInfo info, StreamingContext context)
+		protected FolderException(SerializationInfo info, StreamingContext context)
 			: base(info, context) {
 		}
 

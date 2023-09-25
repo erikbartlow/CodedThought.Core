@@ -24,7 +24,7 @@ namespace CodedThought.Core.Data {
         /// <summary>IDbConnection for the object</summary>
         private IDbConnection? _connection = null;
 
-        protected readonly HPConnectionSetting HPConnection;
+        protected readonly ConnectionSetting HPConnection;
 
         private CommandBehavior dataReaderBehavior = CommandBehavior.Default;
 
@@ -39,7 +39,7 @@ namespace CodedThought.Core.Data {
 
         #region Static Properties
 
-        public static HPCoreSettings? CurrentConfiguration { get; set; }
+        public static CoreSettings? CurrentConfiguration { get; set; }
 
         /// <summary>Gets or sets the current database connection.</summary>
         /// <value>The current database connection.</value>
@@ -115,10 +115,10 @@ namespace CodedThought.Core.Data {
             this.ConnectionString = connectionString;
         }
 
-        /// <summary>Initializes a new instance of the <see cref="DatabaseObject" /> class with a passed <see cref="HPConnectionSetting" />.</summary>
+        /// <summary>Initializes a new instance of the <see cref="DatabaseObject" /> class with a passed <see cref="ConnectionSetting" />.</summary>
         /// <param name="dbType">           </param>
         /// <param name="connectionSetting"></param>
-        public DatabaseObject(DBSupported dbType, HPConnectionSetting connectionSetting) : this(dbType, connectionSetting.ConnectionString) {
+        public DatabaseObject(DBSupported dbType, ConnectionSetting connectionSetting) : this(dbType, connectionSetting.ConnectionString) {
             this.HPConnection = connectionSetting;
         }
 
@@ -126,12 +126,12 @@ namespace CodedThought.Core.Data {
 
         #region Static Factories
 
-        /// <summary>Gets a default DatabaseObject with the passed <see cref="HPConnectionSetting" /> and <see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache" />..</summary>
+        /// <summary>Gets a default DatabaseObject with the passed <see cref="ConnectionSetting" /> and <see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache" />..</summary>
         /// <param name="databaseToUse"></param>
         /// <param name="cache"></param>
         /// <remarks>Uses the runtime caching method, <see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache" /></remarks>
         /// <returns></returns>
-        public static DatabaseObject DatabaseObjectFactory(HPConnectionSetting databaseToUse, Microsoft.Extensions.Caching.Memory.IMemoryCache cache) {
+        public static DatabaseObject DatabaseObjectFactory(ConnectionSetting databaseToUse, Microsoft.Extensions.Caching.Memory.IMemoryCache cache) {
             PopulateCurrentConnection(databaseToUse);
             return DatabaseObjectFactory(databaseToUse.DefaultSchema, databaseToUse, cache);
         }
@@ -186,7 +186,7 @@ namespace CodedThought.Core.Data {
         /// <param name="cache"></param>
         /// <remarks>Uses the runtime caching method, <see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache" /></remarks>
         /// <returns></returns>
-        public static DatabaseObject DatabaseObjectFactory(string defaultSchema, HPConnectionSetting databaseToUse, Microsoft.Extensions.Caching.Memory.IMemoryCache cache) {
+        public static DatabaseObject DatabaseObjectFactory(string defaultSchema, ConnectionSetting databaseToUse, Microsoft.Extensions.Caching.Memory.IMemoryCache cache) {
             return DatabaseObjectFactory(CurrentDatabaseConnection.DatabaseType, databaseToUse, databaseToUse.DefaultSchema, cache);
         }
 
@@ -197,7 +197,7 @@ namespace CodedThought.Core.Data {
         /// <param name="cache"></param>
         /// <remarks>Uses the runtime caching method, <see cref="runtime.MemoryCache" /></remarks>
         /// <returns></returns>
-        public static DatabaseObject DatabaseObjectFactory(DBSupported dbType, HPConnectionSetting connectionString, string databaseSchema, runtime.MemoryCache cache) {
+        public static DatabaseObject DatabaseObjectFactory(DBSupported dbType, ConnectionSetting connectionString, string databaseSchema, runtime.MemoryCache cache) {
             return DatabaseObjectFactory(dbType, connectionString.ConnectionString, databaseSchema, cache);
         }
 
@@ -208,7 +208,7 @@ namespace CodedThought.Core.Data {
         /// <param name="cache"></param>
         /// <remarks>Uses the HTTP Caching method, <see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache" /></remarks>
         /// <returns></returns>
-        public static DatabaseObject DatabaseObjectFactory(DBSupported dbType, HPConnectionSetting connectionSetting, string databaseSchema, Microsoft.Extensions.Caching.Memory.IMemoryCache cache) {
+        public static DatabaseObject DatabaseObjectFactory(DBSupported dbType, ConnectionSetting connectionSetting, string databaseSchema, Microsoft.Extensions.Caching.Memory.IMemoryCache cache) {
             return DatabaseObjectFactory(dbType, connectionSetting.ConnectionString, databaseSchema, cache);
         }
 
@@ -219,14 +219,14 @@ namespace CodedThought.Core.Data {
         /// <param name="cache"></param>
         /// <remarks>Uses the runtime caching method, <see cref="runtime.MemoryCache" /></remarks>
         /// <returns></returns>
-        /// <exception cref="HPApplicationException"></exception>
+        /// <exception cref="CodedThoughtApplicationException"></exception>
         public static DatabaseObject DatabaseObjectFactory(DBSupported dbType, string connectionString, string databaseSchema, runtime.MemoryCache cache) {
             bool bWinformApp = CurrentConfiguration.IsWinForm;
             string dbObjectCacheName = String.Format("DATABASE_ASSEMBLY_{0}", dbType);
             DatabaseObject retVal;
             try {
                 if (string.IsNullOrEmpty(connectionString)) {
-                    throw new HPApplicationException("Cannot obtain ConnectionString from setting file while running in non remoting mode.");
+                    throw new Exceptions.CodedThoughtApplicationException("Cannot obtain ConnectionString from setting file while running in non remoting mode.");
                 }
                 object[] arguments = new object[] { connectionString };
                 // reflection to create the DatabaseObject based on the Database Type
@@ -244,16 +244,16 @@ namespace CodedThought.Core.Data {
                 Type dbObjType = assembly.GetType(dbTypeName);
 
                 if (dbObjType == null) {
-                    throw new HPApplicationException($"The Object type {dbTypeName} was not found in the HP Core {dbType} library file.");
+                    throw new Exceptions.CodedThoughtApplicationException($"The Object type {dbTypeName} was not found in the HP Core {dbType} library file.");
                 }
 
                 // create a database object
                 object obj = Activator.CreateInstance(dbObjType, arguments, null);
                 DatabaseObject databaseObject = (DatabaseObject)obj;
                 databaseObject.DefaultSchemaName = databaseSchema;
-                retVal = databaseObject ?? throw new HPApplicationException("Cannot obtain DB Object from Factory.");
+                retVal = databaseObject ?? throw new Exceptions.CodedThoughtApplicationException("Cannot obtain DB Object from Factory.");
             } catch (Exception ex) {
-                throw new HPApplicationException($"Cannot obtain DB Connection [{connectionString}]", ex);
+                throw new Exceptions.CodedThoughtApplicationException($"Cannot obtain DB Connection [{connectionString}]", ex);
             }
 
             return retVal;
@@ -266,13 +266,13 @@ namespace CodedThought.Core.Data {
         /// <param name="cache"></param>
         /// <remarks>Uses the HTTP Caching method, <see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache" /></remarks>
         /// <returns></returns>
-        /// <exception cref="HPApplicationException"></exception>
+        /// <exception cref="CodedThoughtApplicationException"></exception>
         public static DatabaseObject DatabaseObjectFactory(DBSupported dbType, string connectionString, string databaseSchema, Microsoft.Extensions.Caching.Memory.IMemoryCache cache) {
             string dbObjectCacheName = String.Format("DATABASE_ASSEMBLY_{0}", dbType);
             DatabaseObject retVal;
             try {
                 if (string.IsNullOrEmpty(connectionString)) {
-                    throw new HPApplicationException("Cannot obtain ConnectionString from setting file while running in non remoting mode.");
+                    throw new Exceptions.CodedThoughtApplicationException("Cannot obtain ConnectionString from setting file while running in non remoting mode.");
                 }
 
                 object[] arguments = new object[] { connectionString };
@@ -291,7 +291,7 @@ namespace CodedThought.Core.Data {
                 Type dbObjType = assembly.GetType(dbTypeName);
 
                 if (dbObjType == null) {
-                    throw new HPApplicationException($"The Object type {dbTypeName} was not found in the HP Core {dbType} library file.");
+                    throw new Exceptions.CodedThoughtApplicationException($"The Object type {dbTypeName} was not found in the HP Core {dbType} library file.");
                 }
 
                 // create a database object
@@ -299,9 +299,9 @@ namespace CodedThought.Core.Data {
                 DatabaseObject databaseObject = (DatabaseObject)obj;
                 databaseObject.DefaultSchemaName = databaseSchema;
 
-                retVal = databaseObject ?? throw new HPApplicationException("Cannot obtain DB Object from Factory.");
+                retVal = databaseObject ?? throw new Exceptions.CodedThoughtApplicationException("Cannot obtain DB Object from Factory.");
             } catch (Exception ex) {
-                throw new HPApplicationException($"Cannot obtain DB Connection [{connectionString}]", ex);
+                throw new Exceptions.CodedThoughtApplicationException($"Cannot obtain DB Connection [{connectionString}]", ex);
             }
 
             return retVal;
@@ -311,7 +311,7 @@ namespace CodedThought.Core.Data {
                 List<Assembly> dataAwareAssemblies = new();
                 List<Assembly> allAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
                 foreach (Assembly assembly in allAssemblies) {
-                    var isDataAware = Attribute.GetCustomAttribute(assembly, typeof(HPDataAwareAssemblyAttribute)) as HPDataAwareAssemblyAttribute;
+                    var isDataAware = Attribute.GetCustomAttribute(assembly, typeof(DataAwareAssemblyAttribute)) as DataAwareAssemblyAttribute;
                     if (isDataAware != null) { dataAwareAssemblies.Add(assembly); }
                 }
                 return dataAwareAssemblies;
@@ -863,7 +863,7 @@ namespace CodedThought.Core.Data {
                 sql.Append(GenerateOrderByClause(orderByColumns));
                 reader = ExecuteReader(sql.ToString(), parameters);
             } catch (Exception ex) {
-                throw new HPApplicationException("Failed to add retrieve data from: " + tableName, ex);
+                throw new Exceptions.CodedThoughtApplicationException("Failed to add retrieve data from: " + tableName, ex);
             } finally {
                 CommitTransaction();
             }
@@ -881,7 +881,7 @@ namespace CodedThought.Core.Data {
             try {
                 reader = ExecuteReader(sql, commandType, parameters);
             } catch (Exception ex) {
-                throw new HPApplicationException("Failed to add retrieve data from: " + sql, ex);
+                throw new Exceptions.CodedThoughtApplicationException("Failed to add retrieve data from: " + sql, ex);
             }
 
             return reader;
@@ -900,7 +900,7 @@ namespace CodedThought.Core.Data {
                 reader = await ExecuteReader(controller, action, parameters);
                 return reader;
             } catch (Exception ex) {
-                throw new HPApplicationException($"Failed to add retrieve data from: {GetApiSourceUrl()}", ex);
+                throw new Exceptions.CodedThoughtApplicationException($"Failed to add retrieve data from: {GetApiSourceUrl()}", ex);
             }
         }
         /// <summary>Returns an ApiDataReader object based on the action and parameters passed.</summary>
@@ -916,7 +916,7 @@ namespace CodedThought.Core.Data {
                 reader = await ExecuteReader(string.Empty, action, parameters);
                 return reader;
             } catch (Exception ex) {
-                throw new HPApplicationException($"Failed to add retrieve data from: {GetApiSourceUrl()}", ex);
+                throw new Exceptions.CodedThoughtApplicationException($"Failed to add retrieve data from: {GetApiSourceUrl()}", ex);
             }
         }
         /// <summary>Gets an DataSet this creates a simple query where all parameters are joined by 'AND'</summary>
@@ -943,7 +943,7 @@ namespace CodedThought.Core.Data {
 
                 dataSet = ExecuteDataSet(sql.ToString(), parameters);
             } catch (Exception ex) {
-                throw new HPApplicationException("Failed to retrieve data from: " + tableName, ex);
+                throw new Exceptions.CodedThoughtApplicationException("Failed to retrieve data from: " + tableName, ex);
             }
 
             return dataSet;
@@ -969,7 +969,7 @@ namespace CodedThought.Core.Data {
         /// <param name="tableName"></param>
         /// <param name="schemaName"></param>
         /// <param name="parameters"></param>
-        /// <exception cref="HPApplicationException"></exception>
+        /// <exception cref="CodedThoughtApplicationException"></exception>
         public virtual void Remove(string tableName, string schemaName, ParameterCollection parameters) {
             try {
                 BeginTransaction();
@@ -988,7 +988,7 @@ namespace CodedThought.Core.Data {
                 ExecuteNonQuery(sql.ToString(), parameters);
             } catch (Exception ex) {
                 RollbackTransaction();
-                throw new HPApplicationException("Failed to delete record from: " + tableName, ex);
+                throw new Exceptions.CodedThoughtApplicationException("Failed to delete record from: " + tableName, ex);
             } finally {
                 CommitTransaction();
             }
@@ -1013,7 +1013,7 @@ namespace CodedThought.Core.Data {
         /// <param name="schemaName"></param>
         /// <param name="parameters"></param>
         /// <param name="whereParamCollection"></param>
-        /// <exception cref="HPApplicationException"></exception>
+        /// <exception cref="CodedThoughtApplicationException"></exception>
         public virtual void Update(string tableName, string schemaName, ParameterCollection parameters, ParameterCollection whereParamCollection) {
             try {
                 BeginTransaction();
@@ -1038,7 +1038,7 @@ namespace CodedThought.Core.Data {
                 ExecuteNonQuery(sql.ToString(), parameters);
             } catch (Exception ex) {
                 RollbackTransaction();
-                throw new HPApplicationException("Failed to update record to: " + tableName, ex);
+                throw new Exceptions.CodedThoughtApplicationException("Failed to update record to: " + tableName, ex);
             } finally {
                 CommitTransaction();
             }
@@ -1103,7 +1103,7 @@ namespace CodedThought.Core.Data {
                 return affected;
             } catch (Exception ex) {
                 RollbackTransaction();
-                throw new HPApplicationException(ex.Message + "[" + commandText + "]", ex);
+                throw new Exceptions.CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
             } finally {
                 CommitTransaction();
             }
@@ -1175,7 +1175,7 @@ namespace CodedThought.Core.Data {
 
                 return returnValue;
             } catch (Exception ex) {
-                throw new HPApplicationException(ex.Message + "[" + commandText + "]", ex);
+                throw new Exceptions.CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
             }
         }
 
@@ -1257,7 +1257,7 @@ namespace CodedThought.Core.Data {
 
                 return dataSet;
             } catch (Exception ex) {
-                throw new HPApplicationException(ex.Message + "[" + commandText + "]", ex);
+                throw new Exceptions.CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
             }
         }
 
@@ -1286,7 +1286,7 @@ namespace CodedThought.Core.Data {
 
                 return returnValue is null ? null : returnValue;
             } catch (Exception ex) {
-                throw new HPApplicationException(ex.Message + "[" + commandText + "]", ex);
+                throw new Exceptions.CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
             }
         }
 
@@ -1537,9 +1537,9 @@ namespace CodedThought.Core.Data {
             }
         }
 
-        /// <summary>Populates the CurrentDatabaseConnection object with the passed <see cref="HPConnectionSetting" /></summary>
+        /// <summary>Populates the CurrentDatabaseConnection object with the passed <see cref="ConnectionSetting" /></summary>
         /// <param name="connectionSetting"></param>
-        private static void PopulateCurrentConnection(HPConnectionSetting connectionSetting) {
+        private static void PopulateCurrentConnection(ConnectionSetting connectionSetting) {
             CurrentDatabaseConnection = new() {
                 ConnectionName = connectionSetting.Name,
                 ConnectionString = connectionSetting.ConnectionString,

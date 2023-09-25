@@ -1,7 +1,7 @@
 ﻿namespace CodedThought.Core.Configuration {
-	public class HPApiConnectionSetting : HPConnectionSetting {
+	public class ApiConnectionSetting : ConnectionSetting {
 
-		public HPApiConnectionSetting(HPConnectionSetting hpConnectionSetting) : base() {
+		public ApiConnectionSetting(ConnectionSetting hpConnectionSetting) : base() {
 			PopulateCurrentConnection(hpConnectionSetting);
 		}
 
@@ -26,7 +26,7 @@
 		/// </summary>
 		/// <param name="connectionString"></param>
 		/// <returns></returns>
-		private void PopulateCurrentConnection(HPConnectionSetting connectionSetting) {
+		private void PopulateCurrentConnection(ConnectionSetting connectionSetting) {
 
 			this.Name = connectionSetting.Name;
 

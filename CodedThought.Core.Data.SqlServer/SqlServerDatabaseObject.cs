@@ -38,7 +38,7 @@ namespace CodedThought.Core.Data.SqlServer {
 				sqlCn.Open();
 				return sqlCn;
 			} catch (SqlException ex) {
-				throw new HPApplicationException("Could not open Connection.  Check connection string" + "/r/n" + ex.Message + "/r/n" + ex.StackTrace, ex);
+				throw new Exceptions.CodedThoughtApplicationException("Could not open Connection.  Check connection string" + "/r/n" + ex.Message + "/r/n" + ex.StackTrace, ex);
 			}
 		}
 
@@ -54,7 +54,7 @@ namespace CodedThought.Core.Data.SqlServer {
 			try {
 				this.OpenConnection();
 				return this.Connection.State == ConnectionState.Open;
-			} catch (HPException ex) {
+			} catch (CodedThoughtException ex) {
 				throw ex;
 			}
 		}
@@ -228,10 +228,10 @@ namespace CodedThought.Core.Data.SqlServer {
 						break;
 
 					default:
-						throw new HPApplicationException("Data type not supported.  DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar");
+						throw new Exceptions.CodedThoughtApplicationException("Data type not supported.  DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar");
 				}
 			} catch (Exception ex) {
-				throw new HPApplicationException("Error creating Parameter", ex);
+				throw new Exceptions.CodedThoughtApplicationException("Error creating Parameter", ex);
 			}
 
 			SqlParameter parameter = CreateSqlServerParam(col.name, (SqlDbType)sqlDataType);
@@ -251,14 +251,14 @@ namespace CodedThought.Core.Data.SqlServer {
 			return returnValue;
 		}
 
-		/// <summary>Creates the output parameter.</summary>
-		/// <param name="parameterName">Name of the parameter.</param>
-		/// <param name="returnType">   Type of the return.</param>
-		/// <returns></returns>
-		/// <exception cref="HPApplicationException">
-		/// Data type not supported. DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar
-		/// </exception>
-		public override IDataParameter CreateOutputParameter(string parameterName, DbTypeSupported returnType) {
+        /// <summary>Creates the output parameter.</summary>
+        /// <param name="parameterName">Name of the parameter.</param>
+        /// <param name="returnType">   Type of the return.</param>
+        /// <returns></returns>
+        /// <exception cref="Exceptions.CodedThoughtApplicationException">
+        /// Data type not supported. DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar
+        /// </exception>
+        public override IDataParameter CreateOutputParameter(string parameterName, DbTypeSupported returnType) {
 			IDataParameter returnParam = null;
 			SqlDbType sqlType;
 			switch (returnType) {
@@ -315,7 +315,7 @@ namespace CodedThought.Core.Data.SqlServer {
 					break;
 
 				default:
-					throw new HPApplicationException("Data type not supported.  DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar");
+					throw new Exceptions.CodedThoughtApplicationException("Data type not supported.  DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar");
 			}
 
 			returnParam = CreateSqlServerParam(parameterName, sqlType);
@@ -323,14 +323,14 @@ namespace CodedThought.Core.Data.SqlServer {
 			return returnParam;
 		}
 
-		/// <summary>Creates and returns a return parameter for the supported database.</summary>
-		/// <param name="parameterName"></param>
-		/// <param name="returnType">   </param>
-		/// <returns></returns>
-		/// <exception cref="HPApplicationException">
-		/// Data type not supported. DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar
-		/// </exception>
-		public override IDataParameter CreateReturnParameter(string parameterName, DbTypeSupported returnType) {
+        /// <summary>Creates and returns a return parameter for the supported database.</summary>
+        /// <param name="parameterName"></param>
+        /// <param name="returnType">   </param>
+        /// <returns></returns>
+        /// <exception cref="Exceptions.CodedThoughtApplicationException">
+        /// Data type not supported. DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar
+        /// </exception>
+        public override IDataParameter CreateReturnParameter(string parameterName, DbTypeSupported returnType) {
 			IDataParameter returnParam = null;
 			SqlDbType sqlType;
 			switch (returnType) {
@@ -387,7 +387,7 @@ namespace CodedThought.Core.Data.SqlServer {
 					break;
 
 				default:
-					throw new HPApplicationException("Data type not supported.  DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar");
+					throw new Exceptions.CodedThoughtApplicationException("Data type not supported.  DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar");
 			}
 
 			returnParam = CreateSqlServerParam(parameterName, sqlType);
@@ -505,34 +505,34 @@ namespace CodedThought.Core.Data.SqlServer {
 
 		public override void Add(string tableName, object obj, List<TableColumn> columns, IDBStore store) {
 			try {
-				ParameterCollection parameters = new();
-				StringBuilder sbColumns = new();
-				StringBuilder sbValues = new();
+                ParameterCollection parameters = new();
+                StringBuilder sbColumns = new();
+                StringBuilder sbValues = new();
 
 				for (int i = 0; i < columns.Count; i++) {
-					TableColumn col = columns[i];
+                    TableColumn col = columns[i];
 
 					if (col.isInsertable) {
-						//we do not insert columns such as identity columns
-						IDataParameter parameter = CreateParameter(obj, col, store);
+                        //we do not insert columns such as identity columns
+                        IDataParameter parameter = CreateParameter(obj, col, store);
 						sbColumns.Append(__comma).Append(col.name);
 						sbValues.Append(__comma).Append(this.ParameterConnector).Append(parameter.ParameterName);
 						parameters.Add(parameter);
 					}
 				}
 
-				StringBuilder sql = new("INSERT INTO " + tableName + " (");
+                StringBuilder sql = new("INSERT INTO " + tableName + " (");
 				sql.Append(sbColumns.Remove(0, 2));
 				sql.Append(") VALUES (");
 				sql.Append(sbValues.Remove(0, 2));
 				sql.Append(") ");
 
-				// ================================================================ print sql to output window to debugging purpose
+                // ================================================================ print sql to output window to debugging purpose
 #if DEBUG
-				DebugParameters(sql, tableName, parameters);
+                DebugParameters(sql, tableName, parameters);
 #endif
-				// ================================================================
-				BeginTransaction();
+                // ================================================================
+                BeginTransaction();
 				if (store.HasKeyColumn(obj)) {
 					//Check if we have an identity Column
 					sql.Append("SELECT SCOPE_IDENTITY() ");
@@ -545,19 +545,19 @@ namespace CodedThought.Core.Data.SqlServer {
 
 				// this is the way to get the CONTEXT_INFO of a SQL connection session string contextInfo = System.Convert.ToString( this.ExecuteScalar( "SELECT dbo.AUDIT_LOG_GET_USER_NAME() ",
 				// System.Data.CommandType.Text, null ) );
-			} catch (HPApplicationException irEx) {
-				RollbackTransaction();
+			} catch (Exceptions.CodedThoughtApplicationException irEx) {
+                RollbackTransaction();
 				// this is not a good method to catch DUPLICATE
 				if (irEx.Message.IndexOf("duplicate key") >= 0) {
-					throw new HPFolderException(irEx.Message, irEx);
+					throw new FolderException(irEx.Message, (Exception)irEx);
 				} else {
-					throw new HPApplicationException("Failed to add record to: " + tableName + "<BR>" + irEx.Message + "<BR>" + irEx.Source, irEx);
+					throw new Exceptions.CodedThoughtApplicationException((string)("Failed to add record to: " + tableName + "<BR>" + irEx.Message + "<BR>" + irEx.Source), (Exception)irEx);
 				}
 			} catch (Exception ex) {
-				RollbackTransaction();
-				throw new HPApplicationException("Failed to add record to: " + tableName + "<BR>" + ex.Message + "<BR>" + ex.Source, ex);
+                RollbackTransaction();
+				throw new Exceptions.CodedThoughtApplicationException("Failed to add record to: " + tableName + "<BR>" + ex.Message + "<BR>" + ex.Source, ex);
 			} finally {
-				CommitTransaction();
+                CommitTransaction();
 			}
 		}
 
@@ -590,7 +590,7 @@ namespace CodedThought.Core.Data.SqlServer {
 
 			// The DataReader's CommandBehavior must be CommandBehavior.SequentialAccess.
 			if (this.DataReaderBehavior != CommandBehavior.SequentialAccess) {
-				throw new HPApplicationException("Please set the DataReaderBehavior to SequentialAccess to call this method.");
+				throw new Exceptions.CodedThoughtApplicationException("Please set the DataReaderBehavior to SequentialAccess to call this method.");
 			}
 			SqlDataReader sqlReader = (SqlDataReader)reader;
 			int bufferSize = 100;                   // Size of the BLOB buffer.

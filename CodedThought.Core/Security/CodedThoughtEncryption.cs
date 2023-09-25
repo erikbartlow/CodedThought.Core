@@ -2,7 +2,7 @@
 
 namespace CodedThought.Core.Security {
 
-	public class HPEncryption {
+	public class CodedThoughtEncryption {
 		private static string clearkey = "mmdjkmhoppoldkimjhlghyhejufincxp";//key size 256bit (aes requires min 128bit max 256bit)
 
 		/// <summary>Encrypts the password.</summary>

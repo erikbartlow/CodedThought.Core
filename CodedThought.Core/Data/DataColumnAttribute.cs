@@ -184,13 +184,13 @@ namespace CodedThought.Core.Data {
 					return DbTypeSupported.dbGUID;
 
 				default:
-					throw new HPApplicationException(string.Format("Can not convert DbType.{0} to an equivalent type in DbTypeSupported", ColumnType.ToString()));
+					throw new Exceptions.CodedThoughtApplicationException(string.Format("Can not convert DbType.{0} to an equivalent type in DbTypeSupported", ColumnType.ToString()));
 			}
 		}
 
 		/// <summary>Converts the db type to system type.</summary>
 		/// <returns></returns>
-		/// <exception cref="HPApplicationException"></exception>
+		/// <exception cref="CodedThoughtApplicationException"></exception>
 		public Type ConvertDbTypeToSystem() {
 			switch (ColumnType) {
 				case DbType.UInt64:
@@ -232,7 +232,7 @@ namespace CodedThought.Core.Data {
 					return typeof(Guid);
 
 				default:
-					throw new HPApplicationException(string.Format("Can not convert DBType.{0} to an equivalent type in System Type", ColumnType.ToString()));
+					throw new Exceptions.CodedThoughtApplicationException(string.Format("Can not convert DBType.{0} to an equivalent type in System Type", ColumnType.ToString()));
 			}
 		}
 
