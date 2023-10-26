@@ -21,11 +21,8 @@
 
 
 	<ItemGroup>
+		<PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\CodedThought.Core\CodedThought.Core.csproj" />
 	</ItemGroup>
 
 </Project>

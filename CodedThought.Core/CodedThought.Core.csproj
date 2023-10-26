@@ -25,6 +25,7 @@
 	<ItemGroup>
 		<PackageReference Include="BouncyCastle.NetCore" Version="1.9.0" />
 		<PackageReference Include="ChoPGP.Core" Version="1.0.1.2" />
+		<PackageReference Include="CodedThought.Core.Configuration" Version="6.0.0.7" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
@@ -35,7 +36,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\CodedThought.Core.Configuration\CodedThought.Core.Configuration.csproj" />
+	  <None Update="LICENSE.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

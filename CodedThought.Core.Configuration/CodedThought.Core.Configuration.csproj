@@ -1,33 +1,40 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageId>$(AssemblyName)</PackageId>
-		<Title>CodedThought Core Configuration Dotnet 6</Title>
-		<AssemblyVersion>6.0.0.7</AssemblyVersion>
-		<FileVersion>6.0.0.7</FileVersion>
-		<Description>The CodedThought.Core.Configuration library is a custom settings provider for the CodedThought.Core library.</Description>
-		<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-		<Version>6.0.0.7</Version>
-		<Authors>Erik Bartlow</Authors>
-		<Company>Erik Bartlow</Company>
-		<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
-		<RepositoryType>git</RepositoryType>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	</PropertyGroup>
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<Nullable>enable</Nullable>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageId>$(AssemblyName)</PackageId>
+	<Title>CodedThought Core Configuration Dotnet 6</Title>
+	<AssemblyVersion>6.0.0.7</AssemblyVersion>
+	<FileVersion>6.0.0.7</FileVersion>
+	<Description>The CodedThought.Core.Configuration library is a custom settings provider for the CodedThought.Core library.</Description>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
+	<Version>6.0.0.7</Version>
+	<Authors>Erik Bartlow</Authors>
+	<Company>CodedThought</Company>
+	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
+	<RepositoryType>git</RepositoryType>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-	</ItemGroup>
+  <ItemGroup>
+	<PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Licenses\LICENSE" pack="true" PackagePath="">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>
