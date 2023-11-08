@@ -1,36 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageId>$(AssemblyName)</PackageId>
-		<Title>CodedThought Core Transport</Title>
-		<VersionPrefix>6.0.0.8</VersionPrefix>
-		<AssemblyVersion>6.0.0.8</AssemblyVersion>
-		<FileVersion>6.0.0.8</FileVersion>
-		<Description>The CodedThought.Core.Transport library is a custom wrapper for various file transport methods like WinSCP.  Currently this version only support WinSCP.</Description>
-		<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-		<Version>$(AssemblyPrefix)</Version>
-		<Authors>Erik Bartlow</Authors>
-		<Company>Erik Bartlow</Company>
-		<PackageProjectUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_artifacts/feed/CodedThought.Core/NuGet/CodedThought.Core.Transport/overview/$(AssemblyVersion)</PackageProjectUrl>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	</PropertyGroup>
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageId>$(AssemblyName)</PackageId>
+	<Title>CodedThought Core Transport</Title>
+	<VersionPrefix>6.0.0.8</VersionPrefix>
+	<AssemblyVersion>6.0.0.8</AssemblyVersion>
+	<FileVersion>6.0.0.8</FileVersion>
+	<Description>The CodedThought.Core.Transport library is a custom wrapper for various file transport methods like WinSCP.  Currently this version only support WinSCP.</Description>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
+	<Version>$(AssemblyPrefix)</Version>
+	<Authors>Erik Bartlow</Authors>
+	<Company>Erik Bartlow</Company>
+	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
+	<RepositoryType>git</RepositoryType>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core</RepositoryUrl>
+	<IncludeContentInPack>true</IncludeContentInPack>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<IncludeReferencedProjects>true</IncludeReferencedProjects>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="WinSCP" Version="6.1.1" />
-	</ItemGroup>
+  <ItemGroup>
+	<PackageReference Include="WinSCP" Version="6.1.1" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <None Update="Licenses\LICENSE.txt">
-	    <Pack>true</Pack>
-	  </None>
-	</ItemGroup>
+  <ItemGroup>
+	<None Update="Licenses\LICENSE.txt">
+	  <Pack>true</Pack>
+	  <PackagePath></PackagePath>
+	</None>
+	<None Update="README.md">
+	  <PackagePath></PackagePath>
+	  <Pack>true</Pack>
+	</None>
+  </ItemGroup>
 
 </Project>
