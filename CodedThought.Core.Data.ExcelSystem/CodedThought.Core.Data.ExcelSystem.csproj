@@ -1,44 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<AssemblyVersion>6.0.0.12</AssemblyVersion>
-		<FileVersion>6.0.0.12</FileVersion>
-		<VersionPrefix>6.0.0.12</VersionPrefix>
-		<Title>CodedThought.Core.Data.ExcelSystem</Title>
-		<Authors>Erik Bartlow</Authors>
-		<Company>Erik Bartlow</Company>
-		<Description>The CodedThought.Core.Data.ExcelSystem package is a custom provider for use Microsoft Excel and CSV files.</Description>
-		<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	</PropertyGroup>
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<AssemblyVersion>6.0.0.12</AssemblyVersion>
+	<FileVersion>6.0.0.12</FileVersion>
+	<VersionPrefix>6.0.0.12</VersionPrefix>
+	<Title>CodedThought.Core.Data.ExcelSystem</Title>
+	<Authors>Erik Bartlow</Authors>
+	<Company>Erik Bartlow</Company>
+	<Description>The CodedThought.Core.Data.ExcelSystem package is a custom provider for use Microsoft Excel and CSV files.</Description>
+	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
+	<RepositoryType>git</RepositoryType>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core</RepositoryUrl>
+	<IncludeContentInPack>true</IncludeContentInPack>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<IncludeReferencedProjects>true</IncludeReferencedProjects>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
-		<PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-		<PackageReference Include="System.Collections" Version="4.3.0" />
-		<PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
-		<PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
-		<PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
-		<PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
-		<PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-	</ItemGroup>
+  <ItemGroup>
+	<PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
+	<PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
+	<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+	<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+	<PackageReference Include="System.Collections" Version="4.3.0" />
+	<PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
+	<PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
+	<PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
+	<PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
+	<PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <None Update="Licenses\LICENSE.txt">
-	    <Pack>true</Pack>
-	  </None>
-	  <None Update="README.md">
-	    <Pack>true</Pack>
-	  </None>
-	</ItemGroup>
+  <ItemGroup>
+	<None Update="Licenses\LICENSE.txt" Pack="true" PackagePath="" />
+	<None Update="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
 
 </Project>
