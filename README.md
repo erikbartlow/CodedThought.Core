@@ -17,7 +17,7 @@ The CodedThought.Core library is a custom entity framework used to primarily abs
 
 CodedThought.Core requires several package dependencies, but these are easly done using the existing NuGet packages referenced.Installation is simply done by referencing the CodedThought.Core and Configuraion libraries and any of the source specific Core Provider libraries like CodedThought.Core.Data.SqlServer.
 
-A recommended approach to installation is by using the nuget package manager.
+A recommended approach to installation is by using the nuget package manager.  The path to all the packages is https://nuget.pkg.github.com/erikbartlow/index.json.
 ## Usage
 
 Application Settings are accessed via .NET Core appsettings.json while database and/or API connection details are stored in a custom json settings file named ctSettings.json.  CodedThought.Core supports environment based settings.json implementations.
