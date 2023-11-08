@@ -1,26 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<AssemblyVersion>6.0.0.3</AssemblyVersion>
-		<FileVersion>6.0.0.3</FileVersion>
-		<VersionPrefix>6.0.0.3</VersionPrefix>
-		<Title>CodedThought.Core.Validation</Title>
-		<Authors>Erik Bartlow</Authors>
-		<Company>Erik Bartlow</Company>
-		<Description>The CodedThought.Core.Validation package is a custom validation provider to use with imported files or data sets.</Description>
-		<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-		<PackageProjectUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_artifacts/feed/CodedThought.Core/NuGet/CodedThought.Core.Validation/overview/$(AssemblyVersion)</PackageProjectUrl>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	</PropertyGroup>
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<AssemblyVersion>6.0.0.3</AssemblyVersion>
+	<FileVersion>6.0.0.3</FileVersion>
+	<VersionPrefix>6.0.0.3</VersionPrefix>
+	<Title>CodedThought.Core.Validation</Title>
+	<Copyright>2023 CodedThought</Copyright>
+	<Authors>Erik Bartlow</Authors>
+	<Description>The CodedThought.Core.Validation package is a custom validation provider to use with imported files or data sets.</Description>
+	<Authors>Erik Bartlow</Authors>
+	<Company>CodedThought</Company>
+	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	<IncludeContentInPack>true</IncludeContentInPack>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<IncludeReferencedProjects>true</IncludeReferencedProjects>
+  </PropertyGroup>
 
-	<ItemGroup>
-	  <PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
-	</ItemGroup>
+  <ItemGroup>
+	<PackageReference Include="CodedThought.Core" Version="7.0.1.35" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<None Update="Licenses\LICENSE.txt" Pack="true" PackagePath="" />
+	<None Update="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
 </Project>

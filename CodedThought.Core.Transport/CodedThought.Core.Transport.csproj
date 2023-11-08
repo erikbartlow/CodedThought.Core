@@ -27,4 +27,10 @@
 		<PackageReference Include="WinSCP" Version="6.1.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="Licenses\LICENSE.txt">
+	    <Pack>true</Pack>
+	  </None>
+	</ItemGroup>
+
 </Project>

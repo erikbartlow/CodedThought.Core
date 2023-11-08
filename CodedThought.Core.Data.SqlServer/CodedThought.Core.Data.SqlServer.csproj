@@ -24,4 +24,10 @@
 	  <PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="Licenses\LICENSE.txt">
+	    <Pack>true</Pack>
+	  </None>
+	</ItemGroup>
+
 </Project>

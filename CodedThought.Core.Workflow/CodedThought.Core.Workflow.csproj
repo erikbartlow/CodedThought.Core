@@ -25,5 +25,11 @@
 		<PackageReference Include="CodedThought.Core.Validation" Version="6.0.0.3" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Update="Licenses\LICENSE.txt">
+	    <Pack>true</Pack>
+	  </None>
+	</ItemGroup>
 
 </Project>
