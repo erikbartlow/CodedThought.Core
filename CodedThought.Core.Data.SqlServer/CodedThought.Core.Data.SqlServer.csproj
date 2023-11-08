@@ -1,33 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<AssemblyVersion>6.0.0.6</AssemblyVersion>
-		<FileVersion>6.0.0.6</FileVersion>
-		<VersionPrefix>6.0.0.6</VersionPrefix>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Title>CodedThought.Core.Data.SqlServer</Title>
-		<Authors>Erik Bartlow</Authors>
-		<Company>Erik Bartlow</Company>
-		<Description>The CodedThought.Core.Data.SqlServer package is a custom database provider for use with Sql Server.</Description>
-		<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	</PropertyGroup>
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<AssemblyVersion>6.0.0.6</AssemblyVersion>
+	<FileVersion>6.0.0.6</FileVersion>
+	<VersionPrefix>6.0.0.6</VersionPrefix>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Title>CodedThought.Core.Data.SqlServer</Title>
+	<Authors>Erik Bartlow</Authors>
+	<Company>Erik Bartlow</Company>
+	<Description>The CodedThought.Core.Data.SqlServer package is a custom database provider for use with Sql Server.</Description>
+	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
+	<RepositoryType>git</RepositoryType>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core</RepositoryUrl>
+	<IncludeContentInPack>true</IncludeContentInPack>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<IncludeReferencedProjects>true</IncludeReferencedProjects>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
 
-	<ItemGroup>
-	  <PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
-	</ItemGroup>
+  <ItemGroup>
+	<PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <None Update="Licenses\LICENSE.txt">
-	    <Pack>true</Pack>
-	  </None>
-	</ItemGroup>
+  <ItemGroup>
+	<None Update="Licenses\LICENSE.txt" Pack="true" PackagePath="" />
+	<None Update="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
 
 </Project>
