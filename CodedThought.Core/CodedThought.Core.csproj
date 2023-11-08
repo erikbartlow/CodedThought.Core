@@ -1,44 +1,48 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageId>$(AssemblyName)</PackageId>
-		<Title>HP Core Dotnet 6</Title>
-		<AssemblyVersion>7.0.1.34</AssemblyVersion>
-		<FileVersion>7.0.1.34</FileVersion>
-		<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-		<RepositoryUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_git/CodedThought.Core</RepositoryUrl>
-		<Version>7.0.1.34</Version>
-		<Authors>Erik Bartlow</Authors>
-		<Company>Erik Bartlow</Company>
-		<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
-		<RepositoryType>git</RepositoryType>
-	</PropertyGroup>
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<Nullable>enable</Nullable>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageId>$(AssemblyName)</PackageId>
+	<Title>HP Core Dotnet 6</Title>
+	<AssemblyVersion>7.0.1.35</AssemblyVersion>
+	<FileVersion>7.0.1.35</FileVersion>
+	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
+	<Version>7.0.1.35</Version>
+	<Authors>Erik Bartlow</Authors>
+	<Company>Erik Bartlow</Company>
+	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
+	<RepositoryType>git</RepositoryType>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core</RepositoryUrl>
+	<IncludeContentInPack>true</IncludeContentInPack>
+	<IncludeReferencedProjects>true</IncludeReferencedProjects>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
 
-	<ItemGroup>
-	  <Compile Remove="CacheHelper.cs" />
-	</ItemGroup>
+  <ItemGroup>
+	<Compile Remove="CacheHelper.cs" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="BouncyCastle.NetCore" Version="1.9.0" />
-		<PackageReference Include="ChoPGP.Core" Version="1.0.1.2" />
-		<PackageReference Include="CodedThought.Core.Configuration" Version="6.0.0.7" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Net.Http.Headers" Version="2.2.8" />
-		<PackageReference Include="System.DirectoryServices" Version="6.0.0" />
-		<PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
-		<PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
-	</ItemGroup>
+  <ItemGroup>
+	<PackageReference Include="BouncyCastle.NetCore" Version="1.9.0" />
+	<PackageReference Include="ChoPGP.Core" Version="1.0.1.2" />
+	<PackageReference Include="CodedThought.Core.Configuration" Version="6.0.0.7" />
+	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
+	<PackageReference Include="Microsoft.Net.Http.Headers" Version="2.2.8" />
+	<PackageReference Include="System.DirectoryServices" Version="6.0.0" />
+	<PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
+	<PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <None Update="LICENSE.txt">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
+  <ItemGroup>
+	<None Update="Licenses\LICENSE.txt" Pack="true" PackagePath="" />
+	<None Update="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
 
 </Project>

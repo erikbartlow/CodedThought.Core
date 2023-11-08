@@ -19,8 +19,10 @@
 	<IncludeSymbols>true</IncludeSymbols>
 	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	<IncludeContentInPack>true</IncludeContentInPack>
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,9 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Licenses\LICENSE" pack="true" PackagePath="">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Update="Licenses\LICENSE.txt" Pack="true" PackagePath="" />
+	<None Update="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

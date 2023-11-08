@@ -1,14 +1,20 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
+
 using System.Text.Json;
 
-namespace CodedThought.Core.Configuration.Validation {
+namespace CodedThought.Core.Configuration.Validation
+{
 
-	public enum ValidationMessageKeys {
+	public enum ValidationMessageKeys
+	{
 		Required, Equals, GreaterThan, GreaterThanEqTo, LessThan, LessThanEqTo, NotEqual, InvalidEmail, NotInList, NotBetween, NotUpper, NotLower, ExceedsMax, MinimumNotReached
 	}
 
-	public class ValidationConfigurationProvider : IConfigurationProvider {
+	public class ValidationConfigurationProvider : IConfigurationProvider
+	{
+		private readonly IConfiguration _configuration;
+		private const string VALIDATION_MESSAGE_CONFIG_KEY = "AppSettings:CodedThoughtValidationMessages";
 		private const string REQUIRED_MESSAGE = "This value is required.";
 		private const string EQUALS_MESSAGE = "The target value does not equal comparison value.";
 		private const string GREATERTHAN_MESSAGE = "The value provided is not greater than the expected value.";
@@ -24,54 +30,67 @@ namespace CodedThought.Core.Configuration.Validation {
 		private const string MAXEXCEEDED_MESSAGE = "The value provided has exceeded the set maximum value.";
 		private const string MINIMUMNOTREACHED_MESSAGE = "The value provided is not at or above the minimum value set.";
 
-		public ValidationConfigurationProvider() {
+		public ValidationConfigurationProvider()
+		{
 			ValidationMessages = new();
 		}
 
 		private List<ValidationMessageElement> ValidationMessages { get; set; }
 
-		public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath) {
+		public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath)
+		{
 			throw new NotImplementedException();
 		}
 
-		public IChangeToken GetReloadToken() {
+		public IChangeToken GetReloadToken()
+		{
 			throw new NotImplementedException();
 		}
 
-		public void Load() {
-			string binPath = AppDomain.CurrentDomain.BaseDirectory != String.Empty
-				? AppDomain.CurrentDomain.BaseDirectory
-				: Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
-			// Get the path to the bin folder.
-			var jsonConfig = File.ReadAllText($"{binPath}\\validationSettings.json");
-			var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-			ValidationMessages = JsonSerializer.Deserialize<List<ValidationMessageElement>>(jsonConfig, options);
+		public void Load()
+		{
+			IConfigurationSection messagesSection = _configuration.GetSection(VALIDATION_MESSAGE_CONFIG_KEY);
+			IEnumerable<IConfigurationSection> msgArray = messagesSection.GetChildren();
+			foreach (var msg in msgArray)
+			{
+				if (Enum.TryParse<ValidationMessageKeys>(msg.Key, out ValidationMessageKeys currentKey))
+				{
+					ValidationMessages.Add(new(msg.Key, String.IsNullOrEmpty(msg.Value) ? GetDefaultValidationMessage(currentKey) : msg.Value));
+				}
+			}
 		}
 
-		public void Set(string key, string value) {
+		public void Set(string key, string value)
+		{
 			throw new NotImplementedException();
 		}
 
-		public bool TryGet(string key, out string value) {
+		public bool TryGet(string key, out string value)
+		{
 			ValidationMessageElement val = ValidationMessages.FirstOrDefault<ValidationMessageElement>(v => v.Key == key);
-			if (val == null) {
+			if (val == null)
+			{
 				string defaultMsg = GetDefaultValidationMessage(Enum.Parse<ValidationMessageKeys>(key));
 				value = defaultMsg;
-			} else {
+			} else
+			{
 				value = val.Value;
 			}
 			// We always return true here since the default message will be returned if a custom one isn't found in the configuration file.
 			return true;
 		}
 
-		public string GetMessage(ValidationMessageKeys key) {
+		public string GetMessage(ValidationMessageKeys key)
+		{
 			string msg;
 			TryGet(key.ToString(), out msg);
 			return msg;
 		}
 
-		private string GetDefaultValidationMessage(ValidationMessageKeys messageKey) {
-			switch (messageKey) {
+		private string GetDefaultValidationMessage(ValidationMessageKeys messageKey)
+		{
+			switch (messageKey)
+			{
 				case ValidationMessageKeys.Equals:
 					return EQUALS_MESSAGE;
 

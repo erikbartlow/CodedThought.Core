@@ -1,28 +1,43 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageId>$(AssemblyName)</PackageId>
-		<Title>CodedThought Core REST API</Title>
-		<VersionPrefix>1.0.0.4</VersionPrefix>
-		<AssemblyVersion>1.0.0.4</AssemblyVersion>
-		<FileVersion>1.0.0.4</FileVersion>
-		<Description>The CodedThought.Core.Data.Api library is a custom REST Api Data provider for the CodedThought.Core Data Entity library.</Description>
-		<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-		<Version>$(VersionPrefix)</Version>
-		<Authors>Erik Bartlow</Authors>
-		<Company>Erik Bartlow</Company>
-		<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
-		<AssemblyProductAttribute>CodedThought.Core.Data</AssemblyProductAttribute>
-	</PropertyGroup>
+  <PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageId>$(AssemblyName)</PackageId>
+	<Title>CodedThought.Core.Data.ApiServer </Title>
+	<VersionPrefix>1.0.0.4</VersionPrefix>
+	<AssemblyVersion>1.0.0.4</AssemblyVersion>
+	<AssemblyProductAttribute>CodedThought.Core.Data/ApiServer</AssemblyProductAttribute>
+	<FileVersion>1.0.0.4</FileVersion>
+	<Description>The CodedThought.Core.Data.ApiServer library is a custom REST Api Data provider for the CodedThought.Core Data Entity library.</Description>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
+	<Version>$(VersionPrefix)</Version>
+	<Authors>Erik Bartlow</Authors>
+	<Company>Erik Bartlow</Company>
+	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
+	<RepositoryType>git</RepositoryType>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core</RepositoryUrl>
+	<IncludeContentInPack>true</IncludeContentInPack>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<IncludeReferencedProjects>true</IncludeReferencedProjects>
+
+  </PropertyGroup>
 
 
-	<ItemGroup>
-		<PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-	</ItemGroup>
+  <ItemGroup>
+	<PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+	<None Update="Licenses\LICENSE.txt" Pack="true" PackagePath="" />
+	<None Update="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
 
 </Project>
