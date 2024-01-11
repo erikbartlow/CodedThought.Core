@@ -1,7 +1,6 @@
 # CodedThough.Core
 ## _A Custom Entity Framework and .NET Utility Codebase_
 
-![Build Status](https://github.com/erikbartlow/CodedThought.Core/actions/workflows/dotnet-desktop.yml/badge.svg?branch=main)
 The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.  It has many other useful aspects:
 * Sql Server, Oracle, and REST Api Data Providers
 * Email and Address Parsing
