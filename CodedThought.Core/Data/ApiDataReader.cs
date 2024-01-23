@@ -14,7 +14,7 @@ namespace CodedThought.Core.Data {
         int IDataReader.Depth => 1;
         int IDataReader.RecordsAffected => -1;
         int IDataRecord.FieldCount => throw new NotImplementedException();
-        public dynamic Data;
+        public dynamic? Data;
         private bool disposedValue;
         public string Raw { get; set; }
         public HttpStatusCode StatusCode { get; set; }
@@ -100,17 +100,15 @@ namespace CodedThought.Core.Data {
             }
         }
 
-        /// <summary>Encodes the basic authentication to pass in HttpClient web calls.</summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        private string EncodeBasicAuthCredentials(string username, string password) {
-            return Convert.ToBase64String(System.Text.ASCIIEncoding.UTF8.GetBytes($"Basic {username}:{password}"));
-        }
+		/// <summary>Encodes the basic authentication to pass in HttpClient web calls.</summary>
+		/// <param name="username"></param>
+		/// <param name="password"></param>
+		/// <returns></returns>
+		private string EncodeBasicAuthCredentials(string username, string password) => Convert.ToBase64String(System.Text.ASCIIEncoding.UTF8.GetBytes($"Basic {username}:{password}"));
 
-        #region Unimplemented Methods
+		#region Unimplemented Methods
 
-        bool IDataReader.IsClosed => throw new NotImplementedException();
+		bool IDataReader.IsClosed => throw new NotImplementedException();
 
         bool IDataReader.Read() => throw new NotImplementedException();
 

@@ -127,8 +127,8 @@ namespace CodedThought.Core {
 			try {
 				stream.Write(imageBytes, 0, imageBytes.Length);
 				return stream != null ? System.Drawing.Image.FromStream(stream) : null;
-			} catch (Exception ex) {
-				throw ex;
+			} catch {
+				throw;
 			}
 		}
 

@@ -24,7 +24,7 @@ namespace CodedThought.Core.Data {
         /// <summary>IDbConnection for the object</summary>
         private IDbConnection? _connection = null;
 
-        protected readonly ConnectionSetting HPConnection;
+        protected readonly ConnectionSetting CoreConnection;
 
         private CommandBehavior dataReaderBehavior = CommandBehavior.Default;
 
@@ -100,7 +100,7 @@ namespace CodedThought.Core.Data {
             // Default to Sql Server.
             SupportedDatabase = dbType;
             ConnectionString = string.Empty;
-            HPConnection = new();
+            CoreConnection = new();
             BulkCopySqlRowsCopied += DatabaseObject_BulkCopySqlRowsCopied;
             DefaultSchemaName = string.Empty;
         }
@@ -119,7 +119,7 @@ namespace CodedThought.Core.Data {
         /// <param name="dbType">           </param>
         /// <param name="connectionSetting"></param>
         public DatabaseObject(DBSupported dbType, ConnectionSetting connectionSetting) : this(dbType, connectionSetting.ConnectionString) {
-            this.HPConnection = connectionSetting;
+            this.CoreConnection = connectionSetting;
         }
 
         #endregion Constructors
@@ -1552,7 +1552,7 @@ namespace CodedThought.Core.Data {
         protected string GetApiSourceUrl() {
             string url = string.Empty;
             string sourceUrl = string.Empty, controller = string.Empty;
-            string[] urlParts = HPConnection.ConnectionString.Split(";".ToCharArray());
+            string[] urlParts = CoreConnection.ConnectionString.Split(";".ToCharArray());
             for (int i = 0; i <= urlParts.Length - 1; i++) {
                 string[] connectionParameter = urlParts[i].Split("=".ToCharArray());
                 switch (connectionParameter[0]) {
