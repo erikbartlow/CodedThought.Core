@@ -6,12 +6,12 @@
 	<ImplicitUsings>enable</ImplicitUsings>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<PackageId>$(AssemblyName)</PackageId>
-	<Title>CodedThought Core Configuration Dotnet 6</Title>
-	<AssemblyVersion>6.0.0.7</AssemblyVersion>
-	<FileVersion>6.0.0.7</FileVersion>
+	<Title>CodedThought Core Configuration</Title>
+	<AssemblyVersion>8.0.0.0</AssemblyVersion>
+	<FileVersion>8.0.0.0</FileVersion>
 	<Description>The CodedThought.Core.Configuration library is a custom settings provider for the CodedThought.Core library.</Description>
 	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-	<Version>6.0.0.7</Version>
+	<Version>8.0.0-alpha</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>CodedThought</Company>
 	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>

@@ -4,9 +4,10 @@
 	<TargetFramework>net8.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
-	<AssemblyVersion>7.0.0.0</AssemblyVersion>
-	<FileVersion>7.0.0.0</FileVersion>
-	<VersionPrefix>7.0.0.0</VersionPrefix>
+	<AssemblyVersion>8.0.0.0</AssemblyVersion>
+	<FileVersion>8.0.0.0</FileVersion>
+	<VersionPrefix>8.0.0.0</VersionPrefix>
+	<Version>8.0.0-alpha</Version>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<Title>CodedThought.Core.Data.SqlServer</Title>
 	<Authors>Erik Bartlow</Authors>
