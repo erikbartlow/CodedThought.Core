@@ -16,28 +16,18 @@ namespace CodedThought.Core.Extensions {
 			DateTimeFormat = DateTimeFormatInfo.InvariantInfo;
 		}
 
-		public static bool IsIntegerType(object value) {
-			return value != null &&
+		public static bool IsIntegerType(object value) => value != null &&
 			   (value is Int32 ||
 				value is Int64 ||
 				value is Int16);
-		}
 
-		public static string ToInvariant(this int value) {
-			return value.ToString(Invariants.NumberFormat);
-		}
+		public static string ToInvariant(this int value) => value.ToString(Invariants.NumberFormat);
 
-		public static string ToInvariant(this Int64 value) {
-			return value.ToString(Invariants.NumberFormat);
-		}
+		public static string ToInvariant(this Int64 value) => value.ToString(Invariants.NumberFormat);
 
-		public static string ToInvariant(this Double value) {
-			return value.ToString(Invariants.NumberFormat);
-		}
+		public static string ToInvariant(this Double value) => value.ToString(Invariants.NumberFormat);
 
-		public static string ToInvariant(this Decimal value) {
-			return value.ToString(Invariants.NumberFormat);
-		}
+		public static string ToInvariant(this Decimal value) => value.ToString(Invariants.NumberFormat);
 
 		/// <summary>
 		/// <p>Tries to converts an ID's string representation to its numerical ID value (Int64).</p>
@@ -68,8 +58,6 @@ namespace CodedThought.Core.Extensions {
 		/// <summary>Converts an ID value, to its string representation.</summary>
 		/// <param name="id">ID value.</param>
 		/// <returns>If <paramref name="id" /> has <see cref="Int64" /> value, <c>String.Empty</c>, otherwise its string representation</returns>
-		public static string IDString(this Int64? id) {
-			return id == null ? String.Empty : id.ToString();
-		}
+		public static string IDString(this Int64? id) => id == null ? String.Empty : id.ToString();
 	}
 }

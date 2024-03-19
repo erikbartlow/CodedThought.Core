@@ -21,24 +21,18 @@ namespace CodedThought.Core {
 		/// <summary>Gets the type of the database.</summary>
 		/// <param name="providerType">Type of the provider.</param>
 		/// <returns></returns>
-		public static DBSupported GetDatabaseType(string providerType) {
-			return (DBSupported)Enum.Parse(typeof(DBSupported), providerType);
-		}
+		public static DBSupported GetDatabaseType(string providerType) => (DBSupported)Enum.Parse(typeof(DBSupported), providerType);
 
 		/// <summary>Gets the bin path.</summary>
 		/// <returns></returns>
-		public static string GetBinPath() {
-			return AppDomain.CurrentDomain.BaseDirectory != String.Empty
+		public static string GetBinPath() => AppDomain.CurrentDomain.BaseDirectory != String.Empty
 				? AppDomain.CurrentDomain.BaseDirectory
 				: Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
-		}
 
 		/// <summary>Converts the passed string into proper names in a string. For example: FirstNameLastName passed would return "First Name Last Name".</summary>
 		/// <param name="input">The input.</param>
 		/// <returns></returns>
-		public static string ToProperName(string input) {
-			return System.Text.RegularExpressions.Regex.Replace(input, @"([a-z])([A-Z])", @"$1 $2", System.Text.RegularExpressions.RegexOptions.None);
-		}
+		public static string ToProperName(string input) => System.Text.RegularExpressions.Regex.Replace(input, @"([a-z])([A-Z])", @"$1 $2", System.Text.RegularExpressions.RegexOptions.None);
 
 		/// <summary>Capitalizes the text.</summary>
 		/// <param name="input">The input.</param>
@@ -114,9 +108,7 @@ namespace CodedThought.Core {
 		/// <summary>Converts the SQL bit to boolean.</summary>
 		/// <param name="value">The value.</param>
 		/// <returns>Boolean</returns>
-		public static Boolean ConvertSqlBitToBoolean(int value) {
-			return value <= 0;
-		}
+		public static Boolean ConvertSqlBitToBoolean(int value) => value <= 0;
 
 		/// <summary>Renders the image to stream.</summary>
 		/// <param name="imageBytes">The image bytes.</param>

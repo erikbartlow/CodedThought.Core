@@ -1,9 +1,11 @@
 ﻿using System.Xml.Serialization;
+using CodedThought.Core.Data.Interfaces;
 
-namespace CodedThought.Core {
+namespace CodedThought.Core
+{
 
-	/// <summary>ObjectEntityBase provides the base for all object entities used in this project.</summary>
-	[Serializable]
+    /// <summary>ObjectEntityBase provides the base for all object entities used in this project.</summary>
+    [Serializable]
 	public class ObjectEntityBase : IObjectBase {
 
 		#region Constructors
@@ -28,18 +30,14 @@ namespace CodedThought.Core {
 		/// <param name="id">         The id.</param>
 		/// <param name="name">       The name.</param>
 		/// <param name="description">The description.</param>
-		public ObjectEntityBase(int id, string name, string description) : this(id, name) {
-			Description = description;
-		}
+		public ObjectEntityBase(int id, string name, string description) : this(id, name) => Description = description;
 
 		/// <summary>Initializes a new instance of the <see cref="ObjectEntityBase" /> class.</summary>
 		/// <param name="id">         </param>
 		/// <param name="name">       </param>
 		/// <param name="description"></param>
 		/// <param name="createdDate"></param>
-		public ObjectEntityBase(int id, string name, string description, DateTime createdDate) : this(id, name, description) {
-			CreatedDate = createdDate;
-		}
+		public ObjectEntityBase(int id, string name, string description, DateTime createdDate) : this(id, name, description) => CreatedDate = createdDate;
 
 		#endregion Constructors
 

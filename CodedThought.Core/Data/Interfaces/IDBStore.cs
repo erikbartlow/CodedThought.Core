@@ -1,4 +1,4 @@
-namespace CodedThought.Core.Data {
+namespace CodedThought.Core.Data.Interfaces {
 
 	/// <summary></summary>
 	public interface IDBStore {

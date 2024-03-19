@@ -24,7 +24,7 @@ namespace CodedThought.Core.Security {
 			uint xcludeRndBase = (uint.MaxValue - (uint.MaxValue % (uint)(uBound - lBound)));
 
 			do {
-				using var generator = RandomNumberGenerator.Create();
+				using RandomNumberGenerator generator = RandomNumberGenerator.Create();
 				byte[] rndnum = new Byte[4];
 				generator.GetBytes(rndnum);
 				urndnum = BitConverter.ToUInt32(rndnum, 0);
@@ -92,10 +92,7 @@ namespace CodedThought.Core.Security {
 			return null != pwdBuffer ? pwdBuffer.ToString() : String.Empty;
 		}
 
-		public string? Exclusions {
-			get { return this.exclusionSet; }
-			set { this.exclusionSet = value; }
-		}
+		public string? Exclusions { get; set; }
 
 		public int Minimum {
 			get {
@@ -121,20 +118,11 @@ namespace CodedThought.Core.Security {
 			}
 		}
 
-		public Boolean ExcludeSymbols {
-			get { return this.hasSymbols; }
-			set { this.hasSymbols = value; }
-		}
+		public Boolean ExcludeSymbols { get; set; }
 
-		public Boolean RepeatCharacters {
-			get { return this.hasRepeating; }
-			set { this.hasRepeating = value; }
-		}
+		public Boolean RepeatCharacters { get; set; }
 
-		public Boolean ConsecutiveCharacters {
-			get { return this.hasConsecutive; }
-			set { this.hasConsecutive = value; }
-		}
+		public Boolean ConsecutiveCharacters { get; set; }
 
 		private const int DefaultMinimum = 6;
 		private const int DefaultMaximum = 10;
@@ -142,10 +130,6 @@ namespace CodedThought.Core.Security {
 
 		private int minSize;
 		private int maxSize;
-		private Boolean hasRepeating;
-		private Boolean hasConsecutive;
-		private Boolean hasSymbols;
-		private string? exclusionSet;
 		private char[] pwdCharArray = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[]{}\\|;:'\",<.>/?".ToCharArray();
 	}
 }

@@ -1,4 +1,4 @@
-﻿namespace CodedThought.Core.Data {
+﻿namespace CodedThought.Core.Data.Interfaces {
 
 	public interface IParameter {
 		IDataParameter BaseParameter { get; set; }

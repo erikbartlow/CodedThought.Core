@@ -1,3 +1,5 @@
+using CodedThought.Core.Data.Interfaces;
+
 namespace CodedThought.Core.Data {
 
 	/// <summary>Parameter provides a base parameter class that can be used to create parameters for any DB.</summary>
@@ -15,22 +17,16 @@ namespace CodedThought.Core.Data {
 		#region Constructors
 
 		/// <summary>Default Constructor</summary>
-		public Parameter() {
-			_whereType = WhereType.AND;
-		}
+		public Parameter() => _whereType = WhereType.AND;
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter" /> class.</summary>
 		/// <param name="param">The parameter.</param>
-		public Parameter(IDataParameter param) : this() {
-			_dbParam = param;
-		}
+		public Parameter(IDataParameter param) : this() => _dbParam = param;
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter" /> class.</summary>
 		/// <param name="param">    The parameter.</param>
 		/// <param name="whereType">Type of the where.</param>
-		public Parameter(IDataParameter param, WhereType whereType) : this(param) {
-			_whereType = whereType;
-		}
+		public Parameter(IDataParameter param, WhereType whereType) : this(param) => _whereType = whereType;
 
 		#endregion Constructors
 
@@ -97,9 +93,7 @@ namespace CodedThought.Core.Data {
 		/// <summary>Toes the parameter string.</summary>
 		/// <param name="ParameterConnector">The parameter connector.</param>
 		/// <returns></returns>
-		public virtual string ToParameterString(string ParameterConnector, bool firstInGroup = true) {
-			return $" {(!firstInGroup ? _whereType.ToString() : "")} {_dbParam.SourceColumn} = {ParameterConnector}{_dbParam.ParameterName}";
-		}
+		public virtual string ToParameterString(string ParameterConnector, bool firstInGroup = true) => $" {(!firstInGroup ? _whereType.ToString() : "")} {_dbParam.SourceColumn} = {ParameterConnector}{_dbParam.ParameterName}";
 
 		#endregion Public Methods
 	}

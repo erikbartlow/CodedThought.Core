@@ -27,8 +27,6 @@
 		/// <summary>Gets the exception message recursively including any inner exceptions.</summary>
 		/// <param name="ex">The ex.</param>
 		/// <returns></returns>
-		public static string GetAllMessages(this Exception ex, string separator = "\r\nInnerException: ") {
-			return ex.InnerException == null ? ex.Message : ex.Message + separator + GetAllMessages(ex.InnerException, separator);
-		}
+		public static string GetAllMessages(this Exception ex, string separator = "\r\nInnerException: ") => ex.InnerException == null ? ex.Message : ex.Message + separator + GetAllMessages(ex.InnerException, separator);
 	}
 }

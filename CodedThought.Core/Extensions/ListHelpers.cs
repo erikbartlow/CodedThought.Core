@@ -12,8 +12,8 @@ namespace CodedThought.Core.Extensions {
 			IList<PropertyInfo> properties = typeof(T).GetProperties().ToList();
 			IList<T> result = new List<T>();
 
-			foreach (var row in table.Rows) {
-				var item = Data.CreateItemFromRow<T>((DataRow)row, properties);
+			foreach (object? row in table.Rows) {
+				T? item = Data.CreateItemFromRow<T>((DataRow)row, properties);
 				result.Add(item);
 			}
 

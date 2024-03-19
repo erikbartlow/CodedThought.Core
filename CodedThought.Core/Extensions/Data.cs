@@ -29,24 +29,18 @@ namespace CodedThought.Core.Extensions {
 			return totalRows <= 0 || !(rowIndex < totalRows);
 		}
 
-		public static DataTableAttribute GetDataTableAttribute(this Type obj, bool inherit = false) {
-			return obj.GetCustomAttributes(inherit).OfType<DataTableAttribute>().Distinct().FirstOrDefault();
-		}
+		public static DataTableAttribute GetDataTableAttribute(this Type obj, bool inherit = false) => obj.GetCustomAttributes(inherit).OfType<DataTableAttribute>().Distinct().FirstOrDefault();
 
-		public static ApiDataControllerAttribute GetApiDataControllerAttribute(this Type obj, bool inherit = false) {
-			return obj.GetCustomAttributes(inherit).OfType<ApiDataControllerAttribute>().Distinct().FirstOrDefault();
-		}
+		public static ApiDataControllerAttribute GetApiDataControllerAttribute(this Type obj, bool inherit = false) => obj.GetCustomAttributes(inherit).OfType<ApiDataControllerAttribute>().Distinct().FirstOrDefault();
 
-		public static DataTableUsageAttribute GetDataTableUsageAttribute(this Type obj, bool inherit = false) {
-			return obj.GetCustomAttributes(inherit).OfType<DataTableUsageAttribute>().Distinct().FirstOrDefault();
-		}
+		public static DataTableUsageAttribute GetDataTableUsageAttribute(this Type obj, bool inherit = false) => obj.GetCustomAttributes(inherit).OfType<DataTableUsageAttribute>().Distinct().FirstOrDefault();
 
 		public static List<DataColumnAttribute> GetDataColumnAttributes(this Type obj, bool inherit = false) {
 			List<DataColumnAttribute> list = obj.GetCustomAttributes(inherit).OfType<DataColumnAttribute>().Distinct().ToList();
 
 			// Look at the type interface declarations and extract from that type.
-			var interfaces = obj.GetInterfaces();
-			foreach (var intr in interfaces) {
+			Type[] interfaces = obj.GetInterfaces();
+			foreach (Type intr in interfaces) {
 				list.AddRange(intr.GetCustomAttributes(inherit).OfType<DataColumnAttribute>().Distinct().ToList());
 			}
 			return list;
@@ -54,22 +48,24 @@ namespace CodedThought.Core.Extensions {
 
 		public static DataColumnAttribute GetDataColumnAttributes(this PropertyInfo prop, bool inherit = false) {
 			DataColumnAttribute attr = prop.GetCustomAttributes(inherit).OfType<DataColumnAttribute>().Distinct().FirstOrDefault();
-			if (attr == null) return null;
-            attr.PropertyName = prop.Name;
-            attr.PropertyType = prop.PropertyType;
-            return attr;
-        }
+			if (attr == null)
+				return null;
+			attr.PropertyName = prop.Name;
+			attr.PropertyType = prop.PropertyType;
+			return attr;
+		}
 
-        public static ApiDataParameterAttribute GetApiDataParametersAttributes(this PropertyInfo prop, bool inherit = false) {
+		public static ApiDataParameterAttribute GetApiDataParametersAttributes(this PropertyInfo prop, bool inherit = false) {
 			ApiDataParameterAttribute attr = prop.GetCustomAttributes(inherit).OfType<ApiDataParameterAttribute>().Distinct().FirstOrDefault();
-            if (attr == null) return null;
-            attr.PropertyName = prop.Name;
+			if (attr == null)
+				return null;
+			attr.PropertyName = prop.Name;
 			attr.PropertyType = prop.PropertyType;
 			return attr;
 		}
 
 		public static IEnumerable<T> GetCustomAttributesIncludingBaseInterfaces<T>(this Type type, bool inherit = false) {
-			var attributeType = typeof(T);
+			Type attributeType = typeof(T);
 			return type.GetCustomAttributes(attributeType, inherit).
 			  Union(type.GetInterfaces().
 			  SelectMany(interfaceType => interfaceType.GetCustomAttributes(attributeType, inherit))).
@@ -80,23 +76,24 @@ namespace CodedThought.Core.Extensions {
 		public static List<TAttributeType> GetCustomAttributesFromType<TAttributeType>(this Type typeToReflect, bool inherit = false)
 		where TAttributeType : Attribute {
 			List<TAttributeType> list = new();
-			var attributeType = typeof(TAttributeType);
+			Type attributeType = typeof(TAttributeType);
 
 			// Get any class level attributes of this attribute type.
 			list.AddRange(typeToReflect.GetCustomAttributes(inherit).Distinct().Cast<TAttributeType>().ToList());
 
 			// Loop over the direct property members
-			var properties = typeToReflect.GetProperties();
-			foreach (var propertyInfo in properties) {
+			PropertyInfo[] properties = typeToReflect.GetProperties();
+			foreach (PropertyInfo propertyInfo in properties) {
 				// Get the attributes as well as from the inherited classes (true)
 				List<TAttributeType> attributes = propertyInfo.GetCustomAttributes(attributeType, inherit).Distinct().Cast<TAttributeType>().ToList();
-				if (!attributes.Any()) continue;
+				if (!attributes.Any())
+					continue;
 				list.AddRange(attributes);
 			}
 
 			// Look at the type interface declarations and extract from that type.
-			var interfaces = typeToReflect.GetInterfaces();
-			foreach (var intr in interfaces) {
+			Type[] interfaces = typeToReflect.GetInterfaces();
+			foreach (Type intr in interfaces) {
 				list.AddRange(intr.GetCustomAttributes(typeof(TAttributeType), inherit).Distinct().Cast<TAttributeType>().ToList());
 			}
 
@@ -143,8 +140,8 @@ namespace CodedThought.Core.Extensions {
 			IList<PropertyInfo> properties = typeof(T).GetProperties().ToList();
 			IList<T> result = new List<T>();
 
-			foreach (var row in table.Rows) {
-				var item = CreateItemFromRow<T>((DataRow)row, properties);
+			foreach (object? row in table.Rows) {
+				T? item = CreateItemFromRow<T>((DataRow)row, properties);
 				result.Add(item);
 			}
 
@@ -158,19 +155,15 @@ namespace CodedThought.Core.Extensions {
 		/// <returns></returns>
 		public static T CreateItemFromRow<T>(DataRow row, IList<PropertyInfo> properties) where T : new() {
 			T item = new();
-			foreach (var property in properties) {
+			foreach (PropertyInfo property in properties) {
 				property.SetValue(item, row[property.Name], null);
 			}
 			return item;
 		}
 
-		private static void ColumnHeaderName(DataColumn col, string value) {
-			col.Caption = value;
-		}
+		private static void ColumnHeaderName(DataColumn col, string value) => col.Caption = value;
 
-		private static string ColumnHeaderName(DataColumn col) {
-			return col.Caption;
-		}
+		private static string ColumnHeaderName(DataColumn col) => col.Caption;
 
 		/// <summary>Sets the property value.</summary>
 		/// <param name="prop">         The property.</param>

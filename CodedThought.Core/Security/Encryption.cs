@@ -187,7 +187,7 @@ namespace CodedThought.Core.Security {
 		/// <returns></returns>
 		public static string GenerateKey(int keySize) {
 			byte[] randomBytes = new byte[keySize];
-			using (var rng = RandomNumberGenerator.Create()) {
+			using (RandomNumberGenerator rng = RandomNumberGenerator.Create()) {
 				rng.GetBytes(randomBytes);
 				return Convert.ToBase64String(randomBytes);
 			}

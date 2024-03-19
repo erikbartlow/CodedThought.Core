@@ -96,27 +96,21 @@ namespace CodedThought.Core.Exceptions {
 		/// <param name="message">The message.</param>
 		/// <param name="code">   The code.</param>
 		public SystemException(string message, CodedThoughtExceptionExtensions.ExceptionCodes code)
-			: base(message) {
-			this._code = code;
-		}
+			: base(message) => this._code = code;
 
 		/// <summary>Initializes a new instance of the <see cref="CodedThoughtApplicationException" /> class.</summary>
 		/// <param name="message">       The message.</param>
 		/// <param name="innerException">The inner exception.</param>
 		/// <param name="code">          The code.</param>
 		public SystemException(String message, Exception innerException, CodedThoughtExceptionExtensions.ExceptionCodes code)
-			: base(message, innerException) {
-			this._code = code;
-		}
+			: base(message, innerException) => this._code = code;
 
 		/// <summary>Returns a <see cref="System.String" /> that represents this instance and any inner exceptions thay may exist.</summary>
 		/// <returns>A <see cref="System.String" /> that represents this instance and any inner exceptions thay may exist.</returns>
 		/// <PermissionSet>
 		/// <IPermission class="System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" PathDiscovery="*AllFiles*" />
 		/// </PermissionSet>
-		public override string ToString() {
-			return GetExceptionMessage(this);
-		}
+		public override string ToString() => GetExceptionMessage(this);
 
 		#endregion Constructors
 	}

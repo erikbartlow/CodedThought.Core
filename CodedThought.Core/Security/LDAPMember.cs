@@ -5,9 +5,7 @@ namespace CodedThought.Core.Security {
 	[Obsolete("Please use these components from the CodedThought.Core.Security.EnterpriseDirectory library.")]
 	public class LDAPMember : ILDAPMember {
 
-		public LDAPMember() {
-			ExtraProperties = new List<LDAPExtraProperty>();
-		}
+		public LDAPMember() => ExtraProperties = new List<LDAPExtraProperty>();
 
 		public UserPrincipal DirectoryUser { get; set; }
 

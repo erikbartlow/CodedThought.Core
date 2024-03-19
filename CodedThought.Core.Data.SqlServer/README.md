@@ -1,5 +1,5 @@
-# CodedThought.Core.Data.SqlServer
-## _A .NET Core Data Entity Provider for Microsoft Sql Server._
+# CodedThought.Core.Data.MyServer
+## _A .NET Core Data Entity Provider for MySql Server._
 
 ### Requirements
 

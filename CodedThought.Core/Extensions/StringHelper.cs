@@ -15,9 +15,7 @@ namespace CodedThought.Core.Extensions {
 		/// </remarks>
 		/// <param name="str">String.</param>
 		/// <returns>If <paramref name="str" /> is <c>null</c> or empty, <c>true</c></returns>
-		public static bool IsEmptyOrNull(this string str) {
-			return string.IsNullOrEmpty(str);
-		}
+		public static bool IsEmptyOrNull(this string str) => string.IsNullOrEmpty(str);
 
 		/// <summary>
 		/// <p>Returns true if <see cref="String" /> is <c>null</c> or empty (zero length)</p>
@@ -28,9 +26,7 @@ namespace CodedThought.Core.Extensions {
 		/// </remarks>
 		/// <param name="str">String.</param>
 		/// <returns>If <paramref name="str" /> is <c>null</c> or empty, <c>true</c></returns>
-		public static bool IsNullOrEmpty(this string str) {
-			return string.IsNullOrEmpty(str);
-		}
+		public static bool IsNullOrEmpty(this string str) => string.IsNullOrEmpty(str);
 
 		/// <summary>Checks if a string <see cref="String" /> is <c>null</c>, empty or just contains whitespace characters.</summary>
 		/// <remarks>
@@ -39,9 +35,7 @@ namespace CodedThought.Core.Extensions {
 		/// </remarks>
 		/// <param name="str">String.</param>
 		/// <returns>If string is null, empty or contains only white space, <c>true</c></returns>
-		public static bool IsTrimmedEmpty(this string str) {
-			return TrimToNull(str) == null;
-		}
+		public static bool IsTrimmedEmpty(this string str) => TrimToNull(str) == null;
 
 		/// <summary>
 		/// <p>Removes whitespace characters in the left or right of the <see cref="String" /> string, and if resulting string is empty or null, returns null.</p>
@@ -78,9 +72,7 @@ namespace CodedThought.Core.Extensions {
 		/// </remarks>
 		/// <param name="str">String to be trimmed.</param>
 		/// <returns>Trimmed string (result won't be null).</returns>
-		public static string TrimToEmpty(this string str) {
-			return str.IsNullOrEmpty() ? String.Empty : str.Trim();
-		}
+		public static string TrimToEmpty(this string str) => str.IsNullOrEmpty() ? String.Empty : str.Trim();
 
 		/// <summary>Compares two strings ignoring whitespace at the left or right.</summary>
 		/// <remarks>
@@ -91,11 +83,9 @@ namespace CodedThought.Core.Extensions {
 		/// <param name="string1">String 1.</param>
 		/// <param name="string2">String 2.</param>
 		/// <returns>If two strings are same trimmed, true</returns>
-		public static bool IsTrimmedSame(this string string1, string string2) {
-			return (string1 == null || string1.Length == 0) &&
+		public static bool IsTrimmedSame(this string string1, string string2) => (string1 == null || string1.Length == 0) &&
 			   (string2 == null || string2.Length == 0)
 || TrimToNull(string1) == TrimToNull(string2);
-		}
 
 		/// <summary>If the string's length is over a specified limit, trims its right and adds three points ("...").</summary>
 		/// <remarks>This is an extension method, so it can be called directly as <c>str.ThreeDots()</c>.</remarks>
@@ -121,9 +111,7 @@ namespace CodedThought.Core.Extensions {
 			return str.Substring(0, maxLength) + "...";
 		}
 
-		public static string ToSingleLine(this string str) {
-			return str.TrimToEmpty().Replace("\r\n", " ").Replace("\n", " ").Trim();
-		}
+		public static string ToSingleLine(this string str) => str.TrimToEmpty().Replace("\r\n", " ").Replace("\n", " ").Trim();
 
 		public static string ToSingleQuoted(this string str) {
 			if (String.IsNullOrEmpty(str))
@@ -209,9 +197,7 @@ namespace CodedThought.Core.Extensions {
 			sb.Append(quoteChar);
 		}
 
-		public static bool IsEmptyOrNull(this ICollection collection) {
-			return collection == null || collection.Count == 0;
-		}
+		public static bool IsEmptyOrNull(this ICollection collection) => collection == null || collection.Count == 0;
 
 		public static string SafeSubstring(this string value, int startIndex, int maxLength) {
 			if (value.IsNullOrEmpty())
@@ -261,9 +247,7 @@ namespace CodedThought.Core.Extensions {
 		/// <param name="empty">   The empty.</param>
 		/// <returns>The formatted string or the default value if the source is <c>null</c></returns>
 		public static string ToStringDefault<T>(this T? source, string format = null, IFormatProvider provider = null, string empty = null)
-		   where T : struct, IFormattable {
-			return source.HasValue ? source.Value.ToString(format, provider) : empty ?? "";
-		}
+		   where T : struct, IFormattable => source.HasValue ? source.Value.ToString(format, provider) : empty ?? "";
 
 		/// <summary>Formats a nullable object</summary>
 		/// <typeparam name="T"></typeparam>
@@ -273,9 +257,7 @@ namespace CodedThought.Core.Extensions {
 		/// <param name="empty">   The empty.</param>
 		/// <returns>The formatted string or the default value if the source is <c>null</c></returns>
 		public static string ToStringDefault<T>(this T source, string format = null, IFormatProvider provider = null, string empty = null)
-		   where T : class, IFormattable {
-			return source != null ? source.ToString(format, provider) : empty ?? "";
-		}
+		   where T : class, IFormattable => source != null ? source.ToString(format, provider) : empty ?? "";
 
 		/// <summary>Joins two strings conditionally, by putting separator between if both are non empty</summary>
 		public static string Join(string a, string separator, string b) {
@@ -309,7 +291,7 @@ namespace CodedThought.Core.Extensions {
 		}
 
 		public static string ToQueryString(this Dictionary<string, string> values) {
-			var qString = string.Join("&", values.Select(kvp => string.Format("{0}={1}", kvp.Key, HttpUtility.UrlEncode(kvp.Value))));
+			string qString = string.Join("&", values.Select(kvp => string.Format("{0}={1}", kvp.Key, HttpUtility.UrlEncode(kvp.Value))));
 			return values.Count > 0 ? "?" + qString : string.Empty;
 		}
 	}

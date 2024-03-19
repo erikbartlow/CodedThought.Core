@@ -41,6 +41,17 @@ namespace CodedThought.Core.Data {
 		/// <summary>Decrypts the encryption string.</summary>
 		/// <param name="encryptedString">The encrypted string.</param>
 		/// <returns></returns>
+		public static String DecryptString(string encryptedString) {
+			try {
+				return CodedThought.Core.Security.CodedThoughtEncryption.DecryptPassword(encryptedString);
+			} catch {
+				return string.Empty;
+			}
+		}
+		[Obsolete("This method is obsolete as the key is no longer utilized.")]
+		/// <summary>Decrypts the encryption string.</summary>
+		/// <param name="encryptedString">The encrypted string.</param>
+		/// <returns></returns>
 		public String DecryptString(string encryptedString, string encryptionKey) {
 			try {
 				return CodedThought.Core.Security.CodedThoughtEncryption.DecryptPassword(encryptedString);
@@ -54,9 +65,7 @@ namespace CodedThought.Core.Data {
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
-		public DatabaseConnection() {
-			CommandTimeout = 0;
-		}
+		public DatabaseConnection() => CommandTimeout = 0;
 
 		/// <summary>Initial constructor for DatabaseConnection</summary>
 		public DatabaseConnection(ConnectionSetting connection) {
@@ -71,9 +80,7 @@ namespace CodedThought.Core.Data {
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
 		/// <param name="connectionName">Name of the connection.</param>
 		/// <param name="timeout">       The timeout.</param>
-		public DatabaseConnection(ConnectionSetting connection, Int32 timeout) : this(connection) {
-			CommandTimeout = timeout;
-		}
+		public DatabaseConnection(ConnectionSetting connection, Int32 timeout) : this(connection) => CommandTimeout = timeout;
 
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
 		/// <param name="connectionName">Name of the connection.</param>
@@ -86,9 +93,7 @@ namespace CodedThought.Core.Data {
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
 		/// <param name="connectionName">Name of the connection.</param>
 		/// <param name="decryptionKey"> The decryption key.</param>
-		public DatabaseConnection(ConnectionSetting connection, string decryptionKey) : this(connection) {
-			ConnectionString = DecryptString(connection.ConnectionString, decryptionKey);
-		}
+		public DatabaseConnection(ConnectionSetting connection, string decryptionKey) : this(connection) => ConnectionString = DecryptString(connection.ConnectionString, decryptionKey);
 
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
 		/// <param name="connectionName">  Name of the connection.</param>
@@ -108,9 +113,7 @@ namespace CodedThought.Core.Data {
 		/// <param name="dbType">          Type of the db.</param>
 		/// <param name="schemaName">      Name of the schema.</param>
 		/// <param name="decryptKey">      The decrypt key.</param>
-		public DatabaseConnection(string connectionName, string connectionString, DBSupported dbType, string schemaName, string decryptKey) : this(connectionName, connectionString, dbType, schemaName) {
-			ConnectionString = DecryptString(connectionString, decryptKey);
-		}
+		public DatabaseConnection(string connectionName, string connectionString, DBSupported dbType, string schemaName, string decryptKey) : this(connectionName, connectionString, dbType, schemaName) => ConnectionString = DecryptString(connectionString, decryptKey);
 
 		#endregion Constructors
 	}

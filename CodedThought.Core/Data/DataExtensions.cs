@@ -9,9 +9,7 @@
 		/// <param name="table">    The table.</param>
 		/// <param name="refColumn">The reference column.</param>
 		/// <returns></returns>
-		public static List<T> ToList<T>(this DataTable table, DataColumn refColumn) {
-			return table.ToList<T>(refColumn.ColumnName);
-		}
+		public static List<T> ToList<T>(this DataTable table, DataColumn refColumn) => table.ToList<T>(refColumn.ColumnName);
 
 		/// <summary>To the list.</summary>
 		/// <typeparam name="T"></typeparam>
@@ -36,8 +34,8 @@
 			IList<PropertyInfo> properties = typeof(T).GetProperties().ToList();
 			IList<T> result = new List<T>();
 
-			foreach (var row in table.Rows) {
-				var item = CreateItemFromRow<T>((DataRow)row, properties);
+			foreach (object? row in table.Rows) {
+				T? item = CreateItemFromRow<T>((DataRow)row, properties);
 				result.Add(item);
 			}
 
@@ -51,7 +49,7 @@
 		/// <returns></returns>
 		private static T CreateItemFromRow<T>(this DataRow row, IList<PropertyInfo> properties) where T : new() {
 			T item = new();
-			foreach (var property in properties) {
+			foreach (PropertyInfo property in properties) {
 				property.SetValue(item, row[property.Name], null);
 			}
 			return item;

@@ -1,25 +1,35 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace CodedThought.Core.Data {
+namespace CodedThought.Core.Data.Interfaces {
 
 	public interface IDatabaseObject {
-		string ColumnDelimiter { get; }
+
+
+		#region Properties
+		ServiceLifetime ServiceLifetime { get; }
+
+		string ColumnDelimiter { get; set; }
 
 		int CommandTimeout { get; set; }
 
 		IDbConnection Connection { get; }
 
-		string ConnectionString { get; }
+		string ConnectionString { get; set; }
 
 		string DefaultSchemaName { get; set; }
 
 		CommandBehavior DataReaderBehavior { get; set; }
 
-		string ParameterConnector { get; }
+		string ParameterConnector { get; set; }
 
 		DBSupported SupportedDatabase { get; }
 
-		string WildCardCharacter { get; }
+		string WildCardCharacter { get; set; }
+
+		#endregion Properties
+
+		#region Methods and Events
 
 		event SqlRowsCopiedEventHandler BulkCopySqlRowsCopied;
 
@@ -34,6 +44,7 @@ namespace CodedThought.Core.Data {
 		void CommitTransaction();
 
 		string ConvertToChar(string columnName);
+
 
 		IDataParameter CreateBooleanParameter(string srcTableColumnName, bool parameterValue);
 
@@ -113,6 +124,8 @@ namespace CodedThought.Core.Data {
 
 		bool GetBitValue(IDataReader reader, string columnName);
 
+		string GetTableName(string defaultSchema, string tableName);
+
 		IDataReader Get(string sourceName, List<string> selectColumns, ParameterCollection parameters);
 
 		IDataReader Get(string sql, CommandType commandType, ParameterCollection parameters);
@@ -174,5 +187,7 @@ namespace CodedThought.Core.Data {
 		Type ToSystemType(string dbTypeName);
 
 		void Update(string tableName, ParameterCollection parameters, ParameterCollection whereParamCollection);
+
+		#endregion Methods and Events
 	}
 }

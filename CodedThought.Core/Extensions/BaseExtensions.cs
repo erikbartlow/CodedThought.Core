@@ -2,9 +2,7 @@
 
 	public static class BaseExtensions {
 
-		public static IEnumerable<T> Flatten<T>(this IEnumerable<T> items, Func<T, IEnumerable<T>> childSelector) {
-			return items == null ? Enumerable.Empty<T>() : items.Concat(items.SelectMany(i => childSelector(i).Flatten(childSelector)));
-		}
+		public static IEnumerable<T> Flatten<T>(this IEnumerable<T> items, Func<T, IEnumerable<T>> childSelector) => items == null ? Enumerable.Empty<T>() : items.Concat(items.SelectMany(i => childSelector(i).Flatten(childSelector)));
 
 		public static bool IsNumericType(this object o) {
 			try {
@@ -42,7 +40,8 @@
 			const double decimalMax = (double)decimal.MaxValue;
 			try {
 				double test = Convert<Double>(o.ToString());
-				if (test < decimalMin) return true;
+				if (test < decimalMin)
+					return true;
 				return test > decimalMax && false;
 			} catch { return false; }
 		}
@@ -84,13 +83,11 @@
 			}
 		}
 
-		public static TypeCode GetNumericType(this object o) {
-			return o.IsNumericType() ? Type.GetTypeCode(o.GetType()) : TypeCode.Object;
-		}
+		public static TypeCode GetNumericType(this object o) => o.IsNumericType() ? Type.GetTypeCode(o.GetType()) : TypeCode.Object;
 
 		public static T Convert<T>(this string input) {
 			try {
-				var converter = TypeDescriptor.GetConverter(typeof(T));
+				TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
 				if (converter != null) {
 					// Cast ConvertFromString(string text) : object to (T)
 					return (T)converter.ConvertFromString(input);
@@ -115,7 +112,8 @@
 						if (targetPI.PropertyType == sourcePI.PropertyType) {
 							object val = sourcePI.GetValue(baseObj, null);
 							try {
-								if (val != null) targetPI.SetValue(obj, val);
+								if (val != null)
+									targetPI.SetValue(obj, val);
 								continue;
 							} catch { }
 						}
@@ -129,15 +127,11 @@
 		/// <summary>Splits the on capitals.</summary>
 		/// <param name="input">The input.</param>
 		/// <returns></returns>
-		public static string SplitOnCapitals(this string input) {
-			return System.Text.RegularExpressions.Regex.Replace(input, "([A-Z])(?![A-Z])", " $1").Trim();
-		}
+		public static string SplitOnCapitals(this string input) => System.Text.RegularExpressions.Regex.Replace(input, "([A-Z])(?![A-Z])", " $1").Trim();
 
 		/// <summary>Gets the exception message recursively including any inner exceptions.</summary>
 		/// <param name="ex">The ex.</param>
 		/// <returns></returns>
-		public static string GetAllMessages(this Exception ex, string separator = "\r\nInnerException: ") {
-			return ex.InnerException == null ? ex.Message : ex.Message + separator + GetAllMessages(ex.InnerException, separator);
-		}
+		public static string GetAllMessages(this Exception ex, string separator = "\r\nInnerException: ") => ex.InnerException == null ? ex.Message : ex.Message + separator + GetAllMessages(ex.InnerException, separator);
 	}
 }

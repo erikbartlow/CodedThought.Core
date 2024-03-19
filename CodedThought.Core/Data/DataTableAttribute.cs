@@ -55,7 +55,7 @@ namespace CodedThought.Core.Data {
 		/// <exception cref="MissingArguementException">An exception will be thrown if both the table and view name are empty. At least one is required.</exception>
 		public string SourceName {
 			get {
-				string source = (UseView ? ViewName : TableName);
+				string source = UseView ? ViewName : TableName;
 				return String.IsNullOrEmpty(source)
 					? throw new MissingArguementException("The source name for the data object is not set in either the table or view names.")
 					: source;
@@ -110,9 +110,7 @@ namespace CodedThought.Core.Data {
 		/// <summary>Initializes a new instance of the <see cref="DataTableAttribute" /> class.</summary>
 		/// <param name="containerName">Name of the container.</param>
 		public DataTableAttribute(string containerName)
-			: this() {
-			TableName = containerName;
-		}
+			: this() => TableName = containerName;
 
 		/// <summary>Initializes a new instance of the <see cref="DataTableAttribute" /> class.</summary>
 		/// <param name="containerName">Name of the container.</param>
@@ -142,17 +140,13 @@ namespace CodedThought.Core.Data {
 		/// <param name="containerName">Name of the container.</param>
 		/// <param name="viewName">     Name of the view.</param>
 		/// <param name="useView">      if set to <c>true</c> then container will be set as a view.</param>
-		public DataTableAttribute(string containerName, string viewName, bool useView = false) : this(containerName, useView) {
-			_viewName = viewName;
-		}
+		public DataTableAttribute(string containerName, string viewName, bool useView = false) : this(containerName, useView) => _viewName = viewName;
 
 		/// <summary>Initializes a new instance of the <see cref="DataTableAttribute" /> class with a specific schema name.</summary>
 		/// <param name="containerName"></param>
 		/// <param name="viewName">     </param>
 		/// <param name="schemaName">   </param>
-		public DataTableAttribute(string containerName, string viewName, string schemaName) : this(containerName, viewName) {
-			SchemaName = schemaName;
-		}
+		public DataTableAttribute(string containerName, string viewName, string schemaName) : this(containerName, viewName) => SchemaName = schemaName;
 
 		#endregion Constructors
 

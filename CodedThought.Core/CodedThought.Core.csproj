@@ -1,16 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net6.0</TargetFramework>
+	<TargetFramework>net8.0</TargetFramework>
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<PackageId>$(AssemblyName)</PackageId>
-	<Title>HP Core Dotnet 6</Title>
-	<AssemblyVersion>7.0.1.35</AssemblyVersion>
-	<FileVersion>7.0.1.35</FileVersion>
+	<Title>CodedThought Core</Title>
+	<ProjectName>CodedThought Core</ProjectName>
+	<AssemblyVersion>8.0.0.01</AssemblyVersion>
+	<FileVersion>8.0.0.0.</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>7.0.1.35</Version>
+	<Version>8.0.0.0</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>Erik Bartlow</Company>
 	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
@@ -24,20 +25,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<Compile Remove="CacheHelper.cs" />
+    <Compile Remove="Security\LDAPMembershipServices.cs" />
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="BouncyCastle.NetCore" Version="1.9.0" />
+	<PackageReference Include="BouncyCastle.NetCore" Version="2.2.1" />
 	<PackageReference Include="ChoPGP.Core" Version="1.0.1.2" />
-	<PackageReference Include="CodedThought.Core.Configuration" Version="6.0.0.7" />
-	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
-	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
-	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-	<PackageReference Include="Microsoft.Net.Http.Headers" Version="2.2.8" />
-	<PackageReference Include="System.DirectoryServices" Version="6.0.0" />
-	<PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
-	<PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.5" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+	<PackageReference Include="Microsoft.Net.Http.Headers" Version="[2.1.14]" />
+	<PackageReference Include="System.DirectoryServices" Version="8.0.0" />
+	<PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
+	<PackageReference Include="System.Drawing.Common" Version="8.0.2" />
+	<PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodedThought.Core.Configuration\CodedThought.Core.Configuration.csproj" />
   </ItemGroup>
 
   <ItemGroup>

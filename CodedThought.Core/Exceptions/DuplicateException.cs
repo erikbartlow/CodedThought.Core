@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace CodedThought.Core.Exceptions {
 
-	/// <summary>Summary description for HPDuplicateException.</summary>
+	/// <summary>Summary description for DuplicateException.</summary>
 	[Serializable]
 	public class DuplicateException : CodedThoughtApplicationException, IBaseException {
 

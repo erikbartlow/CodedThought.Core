@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace CodedThought.Core.Exceptions {
 
-	/// <summary>Summary description for HPFolderException.</summary>
+	/// <summary>Summary description for FolderException.</summary>
 	[Serializable]
 	public class FolderException : CodedThoughtApplicationException, IBaseException {
 

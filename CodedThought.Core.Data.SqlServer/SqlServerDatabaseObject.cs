@@ -1,22 +1,28 @@
+using CodedThought.Core.Data.Interfaces;
 using CodedThought.Core.Exceptions;
+
 using Microsoft.Data.SqlClient;
+
 using System.Data;
 using System.Text;
 
-namespace CodedThought.Core.Data.SqlServer {
+namespace CodedThought.Core.Data.SqlServer
+{
 
 	/// <summary>SqlServerDatabaseObject provides all SQLServer specific functionality needed by DBStore and its family of classes..</summary>
-	public class SqlServerDatabaseObject : DatabaseObject, IDatabaseObject {
+	public class SqlServerDatabaseObject : DatabaseObject, IDatabaseObject
+	{
+		#region Declarations
+
+		private SqlConnection _connection;
+
+		#endregion
 
 		#region Constructor
 
-		/// <summary>Constructor</summary>
-		/// <param name="connectionString"></param>
-		/// Connection string to the database
-		/// <param name="auditUserName">   </param>
-		/// Name of the user so an audit log can be made
-		public SqlServerDatabaseObject(string connectionString)
-		   : base(DBSupported.SqlServer, connectionString) {
+		public SqlServerDatabaseObject()
+		{
+			_connection = new();
 		}
 
 		#endregion Constructor
@@ -24,20 +30,22 @@ namespace CodedThought.Core.Data.SqlServer {
 		#region Transaction and Connection Methods
 
 		/// <summary>Commits updates and inserts. This is only for Oracle database operations.</summary>
-		public override void Commit() {
-			CommitTransaction();
-		}
+		public override void Commit() => CommitTransaction();
 
 
 		/// <summary>Opens an SqlServer Connection</summary>
 		/// <returns></returns>
-		protected override IDbConnection OpenConnection() {
+		protected override IDbConnection OpenConnection()
+		{
 			SqlConnection? sqlCn;
-			try {
-				sqlCn = new SqlConnection(this.ConnectionString);
-				sqlCn.Open();
-				return sqlCn;
-			} catch (SqlException ex) {
+			try
+			{
+				_connection = new(ConnectionString);
+				_connection.Open();
+				return _connection;
+			}
+			catch (SqlException ex)
+			{
 				throw new Exceptions.CodedThoughtApplicationException("Could not open Connection.  Check connection string" + "/r/n" + ex.Message + "/r/n" + ex.StackTrace, ex);
 			}
 		}
@@ -50,12 +58,16 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// Tests the connection to the database.
 		/// </summary>
 		/// <returns></returns>
-		public override bool TestConnection() {
-			try {
-				this.OpenConnection();
-				return this.Connection.State == ConnectionState.Open;
-			} catch (CodedThoughtException ex) {
-				throw ex;
+		public override bool TestConnection()
+		{
+			try
+			{
+				OpenConnection();
+				return Connection.State == ConnectionState.Open;
+			}
+			catch (CodedThoughtException ex)
+			{
+				throw;
 			}
 		}
 		/// <summary>
@@ -63,52 +75,37 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// </summary>
 		/// <param name="cmd"></param>
 		/// <returns></returns>
-		protected override IDataAdapter CreateDataAdapter(IDbCommand cmd) {
-			return new SqlDataAdapter(cmd as SqlCommand);
-		}
+		protected override IDataAdapter CreateDataAdapter(IDbCommand cmd) => new SqlDataAdapter(cmd as SqlCommand);
 
 		/// <summary>Convert any data type to Char</summary>
 		/// <param name="columnName"></param>
 		/// <returns></returns>
-		public override string ConvertToChar(string columnName) {
-			return "CONVERT(varchar, " + columnName + ")";
-		}
+		public override string ConvertToChar(string columnName) => "CONVERT(varchar, " + columnName + ")";
 		/// <summary>Creates the parameter collection.</summary>
 		/// <returns></returns>
-		public override ParameterCollection CreateParameterCollection() {
-			return new ParameterCollection(this);
-		}
+		public override ParameterCollection CreateParameterCollection() => new(this);
 
-		public override IDataParameter CreateApiParameter(string paraemterName, string parameterValue) {
-			throw new NotImplementedException();
-		}
+		public override IDataParameter CreateApiParameter(string paraemterName, string parameterValue) => throw new NotImplementedException();
 
 		#region Parameters
 
 		/// <summary>Returns the param connector for SQLServer, @</summary>
 		/// <returns></returns>
-		public override string ParameterConnector {
-			get {
-				return "@";
-			}
-		}
+		public override string ParameterConnector => "@";
 
 		/// <summary>Gets the wild card character.</summary>
 		/// <value>The wild card character.</value>
-		public override string WildCardCharacter {
-			get { return "%"; }
-		}
+		public override string WildCardCharacter => "%";
 
 		/// <summary>Gets the column delimiter character.</summary>
-		public override string ColumnDelimiter {
-			get { throw new NotImplementedException(); }
-		}
+		public override string ColumnDelimiter => throw new NotImplementedException();
 
 		/// <summary>Creates the SQL server param.</summary>
 		/// <param name="srcTableColumnName">Name of the SRC table column.</param>
 		/// <param name="paramType">         Type of the param.</param>
 		/// <returns></returns>
-		private SqlParameter CreateSqlServerParam(string srcTableColumnName, SqlDbType paramType) {
+		private SqlParameter CreatDbServerParam(string srcTableColumnName, SqlDbType paramType)
+		{
 			SqlParameter param = new(ToSafeParamName(srcTableColumnName), paramType);
 			param.SourceColumn = srcTableColumnName;
 			return param;
@@ -119,7 +116,8 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="paramType">         Type of the param.</param>
 		/// <param name="size">              The size.</param>
 		/// <returns></returns>
-		private SqlParameter CreateSqlServerParam(string srcTableColumnName, SqlDbType paramType, int size) {
+		private SqlParameter CreatDbServerParam(string srcTableColumnName, SqlDbType paramType, int size)
+		{
 			SqlParameter param = new(ToSafeParamName(srcTableColumnName), paramType, size);
 			param.SourceColumn = srcTableColumnName;
 			return param;
@@ -129,10 +127,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="srcTaleColumnName">Name of the SRC tale column.</param>
 		/// <param name="parameterValue">   The parameter value.</param>
 		/// <returns></returns>
-		public override IDataParameter CreateXMLParameter(string srcTaleColumnName, string parameterValue) {
+		public override IDataParameter CreateXMLParameter(string srcTaleColumnName, string parameterValue)
+		{
 			IDataParameter returnValue = null;
 
-			returnValue = CreateSqlServerParam(srcTaleColumnName, SqlDbType.Xml);
+			returnValue = CreatDbServerParam(srcTaleColumnName, SqlDbType.Xml);
 			returnValue.Value = parameterValue != string.Empty ? parameterValue : DBNull.Value;
 			return returnValue;
 		}
@@ -141,10 +140,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="srcTaleColumnName">Name of the SRC tale column.</param>
 		/// <param name="parameterValue">   The parameter value.</param>
 		/// <returns></returns>
-		public override IDataParameter CreateBooleanParameter(string srcTableColumnName, bool parameterValue) {
+		public override IDataParameter CreateBooleanParameter(string srcTableColumnName, bool parameterValue)
+		{
 			IDataParameter returnValue = null;
 
-			returnValue = CreateSqlServerParam(srcTableColumnName, SqlDbType.Bit);
+			returnValue = CreatDbServerParam(srcTableColumnName, SqlDbType.Bit);
 			returnValue.Value = parameterValue;
 			return returnValue;
 		}
@@ -154,87 +154,92 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="col">  The column for which the data must be extracted from the business entity</param>
 		/// <param name="store">The store that handles the IO</param>
 		/// <returns></returns>
-		public override IDataParameter CreateParameter(object obj, TableColumn col, IDBStore store) {
+		public override IDataParameter CreateParameter(object obj, TableColumn col, IDBStore store)
+		{
 			Boolean isNull = false;
 			int sqlDataType = 0;
 
 			object extractedData = store.Extract(obj, col.name);
-			try {
-				switch (col.type) {
+			try
+			{
+				switch (col.type)
+				{
 					case DbTypeSupported.dbNVarChar:
-						isNull = (extractedData == null || (string)extractedData == "");
-						sqlDataType = (int)SqlDbType.NVarChar;
+						isNull = (extractedData == null || (string) extractedData == "");
+						sqlDataType = (int) SqlDbType.NVarChar;
 						break;
 
 					case DbTypeSupported.dbVarChar:
-						isNull = (extractedData == null || (string)extractedData == "");
-						sqlDataType = (int)SqlDbType.VarChar;
+						isNull = (extractedData == null || (string) extractedData == "");
+						sqlDataType = (int) SqlDbType.VarChar;
 						break;
 
 					case DbTypeSupported.dbInt64:
-						isNull = ((Int64)extractedData == Int64.MinValue);
-						sqlDataType = (int)SqlDbType.BigInt;
+						isNull = ((Int64) extractedData == Int64.MinValue);
+						sqlDataType = (int) SqlDbType.BigInt;
 						break;
 
 					case DbTypeSupported.dbInt32:
-						isNull = ((Int32)extractedData == int.MinValue);
-						sqlDataType = (int)SqlDbType.Int;
+						isNull = ((Int32) extractedData == int.MinValue);
+						sqlDataType = (int) SqlDbType.Int;
 						break;
 
 					case DbTypeSupported.dbInt16:
-						isNull = ((Int16)extractedData == Int16.MinValue);
-						sqlDataType = (int)SqlDbType.SmallInt;
+						isNull = ((Int16) extractedData == Int16.MinValue);
+						sqlDataType = (int) SqlDbType.SmallInt;
 						break;
 
 					case DbTypeSupported.dbDouble:
-						isNull = ((double)extractedData == double.MinValue);
-						sqlDataType = (int)SqlDbType.Float;
+						isNull = ((double) extractedData == double.MinValue);
+						sqlDataType = (int) SqlDbType.Float;
 						break;
 
 					case DbTypeSupported.dbDateTime:
-						isNull = ((DateTime)extractedData == DateTime.MinValue);
-						sqlDataType = (int)SqlDbType.DateTime;
+						isNull = ((DateTime) extractedData == DateTime.MinValue);
+						sqlDataType = (int) SqlDbType.DateTime;
 						break;
 
 					case DbTypeSupported.dbChar:
 						isNull = (extractedData == null || System.Convert.ToString(extractedData) == "");
-						sqlDataType = (int)SqlDbType.Char;
+						sqlDataType = (int) SqlDbType.Char;
 						break;
 
 					case DbTypeSupported.dbBlob:    // Text, not Image
 						isNull = (extractedData == null);
-						sqlDataType = (int)SqlDbType.Binary;
+						sqlDataType = (int) SqlDbType.Binary;
 						break;
 
 					case DbTypeSupported.dbBit:
 						isNull = (extractedData == null);
-						sqlDataType = (int)SqlDbType.Bit;
+						sqlDataType = (int) SqlDbType.Bit;
 						break;
 
 					case DbTypeSupported.dbDecimal:
-						isNull = ((decimal)extractedData == decimal.MinValue);
-						sqlDataType = (int)SqlDbType.Decimal;
+						isNull = ((decimal) extractedData == decimal.MinValue);
+						sqlDataType = (int) SqlDbType.Decimal;
 						break;
 
 					case DbTypeSupported.dbImage:
 					case DbTypeSupported.dbVarBinary:
 						isNull = (extractedData == null);
-						sqlDataType = (int)SqlDbType.VarBinary;
+						sqlDataType = (int) SqlDbType.VarBinary;
 						break;
 
 					case DbTypeSupported.dbGUID:
-						isNull = ((Guid)extractedData == Guid.Empty);
-						sqlDataType = (int)SqlDbType.UniqueIdentifier;
+						isNull = ((Guid) extractedData == Guid.Empty);
+						sqlDataType = (int) SqlDbType.UniqueIdentifier;
 						break;
 
 					default:
 						throw new Exceptions.CodedThoughtApplicationException("Data type not supported.  DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar");
 				}
-			} catch (Exception ex) {
+			}
+			catch (Exception ex)
+			{
 				throw new Exceptions.CodedThoughtApplicationException("Error creating Parameter", ex);
 			}
 
-			SqlParameter parameter = CreateSqlServerParam(col.name, (SqlDbType)sqlDataType);
+			SqlParameter parameter = CreatDbServerParam(col.name, (SqlDbType) sqlDataType);
 
 			parameter.Value = isNull ? DBNull.Value : extractedData;
 
@@ -243,7 +248,8 @@ namespace CodedThought.Core.Data.SqlServer {
 
 		/// <summary>Create an empty parameter for SQLServer</summary>
 		/// <returns></returns>
-		public override IDataParameter CreateEmptyParameter() {
+		public override IDataParameter CreateEmptyParameter()
+		{
 			IDataParameter returnValue = null;
 
 			returnValue = new SqlParameter();
@@ -251,17 +257,19 @@ namespace CodedThought.Core.Data.SqlServer {
 			return returnValue;
 		}
 
-        /// <summary>Creates the output parameter.</summary>
-        /// <param name="parameterName">Name of the parameter.</param>
-        /// <param name="returnType">   Type of the return.</param>
-        /// <returns></returns>
-        /// <exception cref="Exceptions.CodedThoughtApplicationException">
-        /// Data type not supported. DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar
-        /// </exception>
-        public override IDataParameter CreateOutputParameter(string parameterName, DbTypeSupported returnType) {
+		/// <summary>Creates the output parameter.</summary>
+		/// <param name="parameterName">Name of the parameter.</param>
+		/// <param name="returnType">   Type of the return.</param>
+		/// <returns></returns>
+		/// <exception cref="Exceptions.CodedThoughtApplicationException">
+		/// Data type not supported. DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar
+		/// </exception>
+		public override IDataParameter CreateOutputParameter(string parameterName, DbTypeSupported returnType)
+		{
 			IDataParameter returnParam = null;
 			SqlDbType sqlType;
-			switch (returnType) {
+			switch (returnType)
+			{
 				case DbTypeSupported.dbNVarChar:
 					sqlType = SqlDbType.NVarChar;
 					break;
@@ -318,22 +326,24 @@ namespace CodedThought.Core.Data.SqlServer {
 					throw new Exceptions.CodedThoughtApplicationException("Data type not supported.  DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar");
 			}
 
-			returnParam = CreateSqlServerParam(parameterName, sqlType);
+			returnParam = CreatDbServerParam(parameterName, sqlType);
 			returnParam.Direction = ParameterDirection.Output;
 			return returnParam;
 		}
 
-        /// <summary>Creates and returns a return parameter for the supported database.</summary>
-        /// <param name="parameterName"></param>
-        /// <param name="returnType">   </param>
-        /// <returns></returns>
-        /// <exception cref="Exceptions.CodedThoughtApplicationException">
-        /// Data type not supported. DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar
-        /// </exception>
-        public override IDataParameter CreateReturnParameter(string parameterName, DbTypeSupported returnType) {
+		/// <summary>Creates and returns a return parameter for the supported database.</summary>
+		/// <param name="parameterName"></param>
+		/// <param name="returnType">   </param>
+		/// <returns></returns>
+		/// <exception cref="Exceptions.CodedThoughtApplicationException">
+		/// Data type not supported. DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar
+		/// </exception>
+		public override IDataParameter CreateReturnParameter(string parameterName, DbTypeSupported returnType)
+		{
 			IDataParameter returnParam = null;
 			SqlDbType sqlType;
-			switch (returnType) {
+			switch (returnType)
+			{
 				case DbTypeSupported.dbNVarChar:
 					sqlType = SqlDbType.NVarChar;
 					break;
@@ -390,7 +400,7 @@ namespace CodedThought.Core.Data.SqlServer {
 					throw new Exceptions.CodedThoughtApplicationException("Data type not supported.  DataTypes currently supported are: DbTypeSupported.dbString, DbTypeSupported.dbInt32, DbTypeSupported.dbDouble, DbTypeSupported.dbDateTime, DbTypeSupported.dbChar");
 			}
 
-			returnParam = CreateSqlServerParam(parameterName, sqlType);
+			returnParam = CreatDbServerParam(parameterName, sqlType);
 			returnParam.Direction = ParameterDirection.ReturnValue;
 			return returnParam;
 		}
@@ -399,10 +409,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="srcTableColumnName"></param>
 		/// <param name="parameterValue">    </param>
 		/// <returns></returns>
-		public override IDataParameter CreateStringParameter(string srcTableColumnName, string parameterValue) {
+		public override IDataParameter CreateStringParameter(string srcTableColumnName, string parameterValue)
+		{
 			IDataParameter returnValue = null;
 
-			returnValue = CreateSqlServerParam(srcTableColumnName, SqlDbType.NVarChar);
+			returnValue = CreatDbServerParam(srcTableColumnName, SqlDbType.NVarChar);
 			returnValue.Value = parameterValue != string.Empty ? parameterValue : DBNull.Value;
 
 			return returnValue;
@@ -412,10 +423,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="srcTableColumnName"></param>
 		/// <param name="parameterValue">    </param>
 		/// <returns></returns>
-		public override IDataParameter CreateInt32Parameter(string srcTableColumnName, int parameterValue) {
+		public override IDataParameter CreateInt32Parameter(string srcTableColumnName, int parameterValue)
+		{
 			IDataParameter returnValue = null;
 
-			returnValue = CreateSqlServerParam(srcTableColumnName, SqlDbType.Int);
+			returnValue = CreatDbServerParam(srcTableColumnName, SqlDbType.Int);
 			returnValue.Value = parameterValue != int.MinValue ? parameterValue : DBNull.Value;
 
 			return returnValue;
@@ -425,10 +437,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="srcTableColumnName"></param>
 		/// <param name="parameterValue">    </param>
 		/// <returns></returns>
-		public override IDataParameter CreateDoubleParameter(string srcTableColumnName, double parameterValue) {
+		public override IDataParameter CreateDoubleParameter(string srcTableColumnName, double parameterValue)
+		{
 			IDataParameter returnValue = null;
 
-			returnValue = CreateSqlServerParam(srcTableColumnName, SqlDbType.Float);
+			returnValue = CreatDbServerParam(srcTableColumnName, SqlDbType.Float);
 			returnValue.Value = parameterValue != double.MinValue ? parameterValue : DBNull.Value;
 
 			return returnValue;
@@ -438,10 +451,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="srcTableColumnName"></param>
 		/// <param name="parameterValue">    </param>
 		/// <returns></returns>
-		public override IDataParameter CreateDateTimeParameter(string srcTableColumnName, DateTime parameterValue) {
+		public override IDataParameter CreateDateTimeParameter(string srcTableColumnName, DateTime parameterValue)
+		{
 			IDataParameter returnValue = null;
 
-			returnValue = CreateSqlServerParam(srcTableColumnName, SqlDbType.DateTime);
+			returnValue = CreatDbServerParam(srcTableColumnName, SqlDbType.DateTime);
 			returnValue.Value = parameterValue != DateTime.MinValue ? parameterValue : DBNull.Value;
 
 			return returnValue;
@@ -452,10 +466,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="parameterValue">    </param>
 		/// <param name="size">              </param>
 		/// <returns></returns>
-		public override IDataParameter CreateCharParameter(string srcTableColumnName, string parameterValue, int size) {
+		public override IDataParameter CreateCharParameter(string srcTableColumnName, string parameterValue, int size)
+		{
 			IDataParameter returnValue = null;
 
-			returnValue = CreateSqlServerParam(srcTableColumnName, SqlDbType.VarChar);
+			returnValue = CreatDbServerParam(srcTableColumnName, SqlDbType.VarChar);
 			returnValue.Value = parameterValue != string.Empty ? parameterValue : DBNull.Value;
 
 			return returnValue;
@@ -466,10 +481,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="parameterValue">    </param>
 		/// <param name="size">              </param>
 		/// <returns></returns>
-		public IDataParameter CreateBlobParameter(string srcTableColumnName, byte[] parameterValue, int size) {
+		public IDataParameter CreateBlobParameter(string srcTableColumnName, byte[] parameterValue, int size)
+		{
 			IDataParameter returnValue = null;
 
-			returnValue = CreateSqlServerParam(srcTableColumnName, SqlDbType.Text, size);
+			returnValue = CreatDbServerParam(srcTableColumnName, SqlDbType.Text, size);
 			returnValue.Value = parameterValue;
 
 			return returnValue;
@@ -479,18 +495,17 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="srcTableColumnName">Name of the SRC table column.</param>
 		/// <param name="parameterValue">    The parameter value.</param>
 		/// <returns></returns>
-		public override IDataParameter CreateGuidParameter(string srcTableColumnName, Guid parameterValue) {
+		public override IDataParameter CreateGuidParameter(string srcTableColumnName, Guid parameterValue)
+		{
 			IDataParameter returnValue = null;
 
-			returnValue = CreateSqlServerParam(srcTableColumnName, SqlDbType.UniqueIdentifier);
+			returnValue = CreatDbServerParam(srcTableColumnName, SqlDbType.UniqueIdentifier);
 			returnValue.Value = parameterValue;
 
 			return returnValue;
 		}
 
-		public override IDataParameter CreateBetweenParameter(string srcTableColumnName, BetweenParameter betweenParam) {
-			throw new NotImplementedException();
-		}
+		public override IDataParameter CreateBetweenParameter(string srcTableColumnName, BetweenParameter betweenParam) => throw new NotImplementedException();
 
 		#endregion Parameters
 
@@ -503,61 +518,77 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="store">    </param>
 		/// <returns></returns>
 
-		public override void Add(string tableName, object obj, List<TableColumn> columns, IDBStore store) {
-			try {
-                ParameterCollection parameters = new();
-                StringBuilder sbColumns = new();
-                StringBuilder sbValues = new();
+		public override void Add(string tableName, object obj, List<TableColumn> columns, IDBStore store)
+		{
+			try
+			{
+				ParameterCollection parameters = new();
+				StringBuilder sbColumns = new();
+				StringBuilder sbValues = new();
 
-				for (int i = 0; i < columns.Count; i++) {
-                    TableColumn col = columns[i];
+				for (int i = 0; i < columns.Count; i++)
+				{
+					TableColumn col = columns[i];
 
-					if (col.isInsertable) {
-                        //we do not insert columns such as identity columns
-                        IDataParameter parameter = CreateParameter(obj, col, store);
+					if (col.isInsertable)
+					{
+						//we do not insert columns such as identity columns
+						IDataParameter parameter = CreateParameter(obj, col, store);
 						sbColumns.Append(__comma).Append(col.name);
-						sbValues.Append(__comma).Append(this.ParameterConnector).Append(parameter.ParameterName);
+						sbValues.Append(__comma).Append(ParameterConnector).Append(parameter.ParameterName);
 						parameters.Add(parameter);
 					}
 				}
 
-                StringBuilder sql = new("INSERT INTO " + tableName + " (");
+				StringBuilder sql = new("INSERT INTO " + tableName + " (");
 				sql.Append(sbColumns.Remove(0, 2));
 				sql.Append(") VALUES (");
 				sql.Append(sbValues.Remove(0, 2));
 				sql.Append(") ");
 
-                // ================================================================ print sql to output window to debugging purpose
+				// ================================================================ print sql to output window to debugging purpose
 #if DEBUG
-                DebugParameters(sql, tableName, parameters);
+				DebugParameters(sql, tableName, parameters);
 #endif
-                // ================================================================
-                BeginTransaction();
-				if (store.HasKeyColumn(obj)) {
+				// ================================================================
+				BeginTransaction();
+				if (store.HasKeyColumn(obj))
+				{
 					//Check if we have an identity Column
 					sql.Append("SELECT SCOPE_IDENTITY() ");
 					// ExecuteScalar will execute both the INSERT statement and the SELECT statement.
-					int retval = System.Convert.ToInt32(this.ExecuteScalar(sql.ToString(), System.Data.CommandType.Text, parameters));
+					int retval = System.Convert.ToInt32(ExecuteScalar(sql.ToString(), System.Data.CommandType.Text, parameters));
 					store.SetPrimaryKey(obj, retval);
-				} else {
-					this.ExecuteNonQuery(sql.ToString(), System.Data.CommandType.Text, parameters);
+				}
+				else
+				{
+					ExecuteNonQuery(sql.ToString(), System.Data.CommandType.Text, parameters);
 				}
 
-				// this is the way to get the CONTEXT_INFO of a SQL connection session string contextInfo = System.Convert.ToString( this.ExecuteScalar( "SELECT dbo.AUDIT_LOG_GET_USER_NAME() ",
+				// this is the way to get the CONTEXT_INFO of a SQL connection session string contextInfo = System.Convert.ToString( ExecuteScalar( "SELECT dbo.AUDIT_LOG_GET_USER_NAME() ",
 				// System.Data.CommandType.Text, null ) );
-			} catch (Exceptions.CodedThoughtApplicationException irEx) {
-                RollbackTransaction();
+			}
+			catch (Exceptions.CodedThoughtApplicationException irEx)
+			{
+				RollbackTransaction();
 				// this is not a good method to catch DUPLICATE
-				if (irEx.Message.IndexOf("duplicate key") >= 0) {
-					throw new FolderException(irEx.Message, (Exception)irEx);
-				} else {
-					throw new Exceptions.CodedThoughtApplicationException((string)("Failed to add record to: " + tableName + "<BR>" + irEx.Message + "<BR>" + irEx.Source), (Exception)irEx);
+				if (irEx.Message.IndexOf("duplicate key") >= 0)
+				{
+					throw new FolderException(irEx.Message, (Exception) irEx);
 				}
-			} catch (Exception ex) {
-                RollbackTransaction();
+				else
+				{
+					throw new Exceptions.CodedThoughtApplicationException((string) ("Failed to add record to: " + tableName + "<BR>" + irEx.Message + "<BR>" + irEx.Source), (Exception) irEx);
+				}
+			}
+			catch (Exception ex)
+			{
+				RollbackTransaction();
 				throw new Exceptions.CodedThoughtApplicationException("Failed to add record to: " + tableName + "<BR>" + ex.Message + "<BR>" + ex.Source, ex);
-			} finally {
-                CommitTransaction();
+			}
+			finally
+			{
+				CommitTransaction();
 			}
 		}
 
@@ -571,28 +602,30 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// That also means to Get columns in sequence is extremely important.
 		/// Otherwise the GetBlobValue method won't return correct data.
 		/// [EXAMPLE]
-		/// this.DataReaderBehavior = CommandBehavior.SequentialAccess;
-		///	using(IDataReader reader = this.ExecuteReader("select BigName, ID, BigBlob from BigTable", CommandType.Text))
+		/// DataReaderBehavior = CommandBehavior.SequentialAccess;
+		///	using(IDataReader reader = ExecuteReader("select BigName, ID, BigBlob from BigTable", CommandType.Text))
 		///	{
 		///		while (reader.Read())
 		///		{
 		///			string bigName = reader.GetString(0);
-		///			int id = this.GetInt32Value( reader, 1);
-		///			byte[] bigText = this.GetBlobValue( reader, 2 );
+		///			int id = GetInt32Value( reader, 1);
+		///			byte[] bigText = GetBlobValue( reader, 2 );
 		///		}
 		///	}
 		/// </summary>
 		/// <param name="reader"></param>
 		///<param name="columnName"></param>
 		/// <returns></returns>
-		protected override byte[] GetBlobValue(IDataReader reader, string columnName) {
+		protected override byte[] GetBlobValue(IDataReader reader, string columnName)
+		{
 			int position = reader.GetOrdinal(columnName);
 
 			// The DataReader's CommandBehavior must be CommandBehavior.SequentialAccess.
-			if (this.DataReaderBehavior != CommandBehavior.SequentialAccess) {
+			if (DataReaderBehavior != CommandBehavior.SequentialAccess)
+			{
 				throw new Exceptions.CodedThoughtApplicationException("Please set the DataReaderBehavior to SequentialAccess to call this method.");
 			}
-			SqlDataReader sqlReader = (SqlDataReader)reader;
+			SqlDataReader sqlReader = (SqlDataReader) reader;
 			int bufferSize = 100;                   // Size of the BLOB buffer.
 			byte[] outBuff = new byte[bufferSize];  // a buffer for every read in "bufferSize" bytes
 			long totalBytes;                        // The total chars returned from GetBytes.
@@ -608,7 +641,8 @@ namespace CodedThought.Core.Data.SqlServer {
 			retval = sqlReader.GetBytes(position, startIndex, outBytes, 0, bufferSize);
 
 			// Continue reading and writing while there are bytes beyond the size of the buffer.
-			while (retval == bufferSize) {
+			while (retval == bufferSize)
+			{
 				// Reposition the start index to the end of the last buffer and fill the buffer.
 				startIndex += bufferSize;
 				retval = sqlReader.GetBytes(position, startIndex, outBytes, System.Convert.ToInt32(startIndex), bufferSize);
@@ -624,7 +658,8 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="reader"></param>
 		///<param name="columnName"></param>
 		/// <returns></returns>
-		public override string GetStringFromBlob(IDataReader reader, string columnName) {
+		public override string GetStringFromBlob(IDataReader reader, string columnName)
+		{
 			int position = reader.GetOrdinal(columnName);
 			string returnValue = string.Empty;
 
@@ -637,17 +672,49 @@ namespace CodedThought.Core.Data.SqlServer {
 
 		#region Database Specific
 
+		public override string GetTableName(string defaultSchema, string tableName)
+		{
+			string? schemaName = defaultSchema;
+			if (String.IsNullOrEmpty(schemaName))
+			{
+				if (String.IsNullOrEmpty(DefaultSchemaName))
+				{
+					schemaName = "dbo";
+				}
+			}
+			return $"[{schemaName}].[{tableName}]";
+
+		}
+		/// <summary>
+		/// Gets the current session default schema name.
+		/// </summary>
+		/// <returns></returns>
+		protected override String GetDefaultSessionSchemaNameQuery()
+		{
+			try
+			{
+				return "SELECT SCHEMA_NAME()";
+			}
+			catch (Exception)
+			{
+
+				throw;
+			}
+		}
 		/// <summary>Gets the table definition.</summary>
 		/// <param name="tableName">Name of the table.</param>
 		/// <returns></returns>
-		protected override String GetTableDefinitionQuery(string tableName) {
-			try {
+		protected override String GetTableDefinitionQuery(string tableName)
+		{
+			try
+			{
 				StringBuilder sql = new();
 				List<TableColumn> tableDefinition = new();
 				// Remove any brackets since the definitiion query doesn't support that.
 				string tName = tableName.Replace("[", "").Replace("]", "");
 				string schemaName = DefaultSchemaName.Replace("[", "").Replace("]", "");
-				if (tName.Split(".".ToCharArray()).Length > 0) {
+				if (tName.Split(".".ToCharArray()).Length > 0)
+				{
 					// The schema name appears to have been passed along with the table name. So parse them out and use them instead of the default values.
 					string[] tableNameData = tName.Split(".".ToCharArray());
 					schemaName = tableNameData[0].Replace("[", "").Replace("]", "");
@@ -662,7 +729,9 @@ namespace CodedThought.Core.Data.SqlServer {
 				sql.AppendFormat("WHERE C.TABLE_NAME = '{0}' AND C.TABLE_SCHEMA = '{1}' ORDER BY C.ORDINAL_POSITION", tName, schemaName);
 
 				return sql.ToString();
-			} catch (Exception ex) {
+			}
+			catch (Exception ex)
+			{
 				throw ex;
 			}
 		}
@@ -670,16 +739,16 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <summary>Gets SQL syntax of Year</summary>
 		/// <param name="dateString"></param>
 		/// <returns></returns>
-		public override string GetYearSQLSyntax(string dateString) {
-			return "YEAR(" + dateString + ")";
-		}
+		public override string GetYearSQLSyntax(string dateString) => "YEAR(" + dateString + ")";
 
 		/// <summary>Gets database function name</summary>
 		/// <param name="functionName"></param>
 		/// <returns></returns>
-		public override string GetFunctionName(FunctionName functionName) {
+		public override string GetFunctionName(FunctionName functionName)
+		{
 			string retStr = string.Empty;
-			switch (functionName) {
+			switch (functionName)
+			{
 				case FunctionName.SUBSTRING:
 					retStr = "SUBSTRING";
 					break;
@@ -703,9 +772,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="columnName">Name of the column.</param>
 		/// <param name="dateFormat">The date format.</param>
 		/// <returns></returns>
-		public override string GetDateToStringForColumn(string columnName, DateFormat dateFormat) {
+		public override string GetDateToStringForColumn(string columnName, DateFormat dateFormat)
+		{
 			StringBuilder sb = new();
-			switch (dateFormat) {
+			switch (dateFormat)
+			{
 				case DateFormat.MMDDYYYY:
 					sb.Append(" CONVERT(VARCHAR, ").Append(columnName).Append(", 101) ");
 					break;
@@ -729,9 +800,11 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="value">     The value.</param>
 		/// <param name="dateFormat">The date format.</param>
 		/// <returns></returns>
-		public override string GetDateToStringForValue(string value, DateFormat dateFormat) {
+		public override string GetDateToStringForValue(string value, DateFormat dateFormat)
+		{
 			StringBuilder sb = new();
-			switch (dateFormat) {
+			switch (dateFormat)
+			{
 				case DateFormat.MMDDYYYY:
 					sb.Append(" CONVERT(VARCHAR, \"").Append(value).Append("\", 101) ");
 					break;
@@ -758,7 +831,8 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="falseValue"></param>
 		/// <param name="alias">     </param>
 		/// <returns></returns>
-		public override string GetCaseDecode(string columnName, string equalValue, string trueValue, string falseValue, string alias) {
+		public override string GetCaseDecode(string columnName, string equalValue, string trueValue, string falseValue, string alias)
+		{
 			StringBuilder sb = new();
 
 			sb.Append(" (CASE ").Append(columnName);
@@ -773,51 +847,41 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="validateColumnName"></param>
 		/// <param name="optionColumnName">  </param>
 		/// <returns></returns>
-		public override string GetIfNullFunction(string validateColumnName, string optionColumnName) {
-			return " IsNULL(" + validateColumnName + ", " + optionColumnName + ") ";
-		}
+		public override string GetIfNullFunction(string validateColumnName, string optionColumnName) => " IsNULL(" + validateColumnName + ", " + optionColumnName + ") ";
 
 		/// <summary>Get a function name for NULL validation</summary>
 		/// <returns></returns>
-		public override string GetIfNullFunction() {
-			return "IsNULL";
-		}
+		public override string GetIfNullFunction() => "IsNULL";
 
 		/// <summary>Get a function name that return current date</summary>
 		/// <returns></returns>
-		public override string GetCurrentDateFunction() {
-			return "GETDATE()";
-		}
+		public override string GetCurrentDateFunction() => "GETDATE()";
 
 		/// <summary>Get a database specific date only SQL syntax.</summary>
 		/// <param name="dateColumn"></param>
 		/// <returns></returns>
-		public override string GetDateOnlySqlSyntax(string dateColumn) {
-			return "CONVERT(VARCHAR, " + dateColumn + ", 107)";
-		}
+		public override string GetDateOnlySqlSyntax(string dateColumn) => "CONVERT(VARCHAR, " + dateColumn + ", 107)";
 
 		/// <summary>Get a database specific syntax that converts string to date. Oracle does not convert date string to date implicitly like SQL Server does when there is a date comparison.</summary>
 		/// <param name="dateString"></param>
 		/// <returns></returns>
-		public override string GetStringToDateSqlSyntax(string dateString) {
-			return __singleQuote + dateString + __singleQuote + " ";
-		}
+		public override string GetStringToDateSqlSyntax(string dateString) => __singleQuote + dateString + __singleQuote + " ";
 
 		/// <summary>Get a database specific syntax that converts string to date. Oracle does not convert date string to date implicitly like SQL Server does when there is a date comparison.</summary>
 		/// <param name="dateSQL"></param>
 		/// <returns></returns>
-		public override string GetStringToDateSqlSyntax(DateTime dateSQL) {
-			return __singleQuote + dateSQL.ToString("G", System.Globalization.DateTimeFormatInfo.InvariantInfo) + __singleQuote + " ";
-		}
+		public override string GetStringToDateSqlSyntax(DateTime dateSQL) => __singleQuote + dateSQL.ToString("G", System.Globalization.DateTimeFormatInfo.InvariantInfo) + __singleQuote + " ";
 
 		/// <summary>Gets date part(Day, month or year) of date</summary>
 		/// <param name="datestring"></param>
 		/// <param name="dateFormat"></param>
 		/// <param name="datePart">  </param>
 		/// <returns></returns>
-		public override string GetDatePart(string datestring, DateFormat dateFormat, DatePart datePart) {
+		public override string GetDatePart(string datestring, DateFormat dateFormat, DatePart datePart)
+		{
 			string datePartstring = string.Empty;
-			switch (datePart) {
+			switch (datePart)
+			{
 				case DatePart.DAY:
 					datePartstring = "day";
 					break;
@@ -838,15 +902,15 @@ namespace CodedThought.Core.Data.SqlServer {
 		/// <param name="datestring">string</param>
 		/// <param name="dateFormat">DateFormat</param>
 		/// <returns></returns>
-		public override string ToDate(string datestring, DateFormat dateFormat) {
-			return __singleQuote + datestring + __singleQuote;
-		}
+		public override string ToDate(string datestring, DateFormat dateFormat) => __singleQuote + datestring + __singleQuote;
 
 		/// <summary>Converts a database type name to a system type.</summary>
 		/// <param name="dbTypeName">Name of the db type.</param>
 		/// <returns>System.Type</returns>
-		public override System.Type ToSystemType(string dbTypeName) {
-			switch (dbTypeName.ToLower()) {
+		public override System.Type ToSystemType(string dbTypeName)
+		{
+			switch (dbTypeName.ToLower())
+			{
 				case "bigint":
 					return typeof(System.Int64);
 

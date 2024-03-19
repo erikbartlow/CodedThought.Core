@@ -85,9 +85,7 @@ namespace CodedThought.Core {
 			}
 		}
 
-		protected override void ApplySortCore(PropertyDescriptor prop, ListSortDirection direction) {
-			SortCore(prop.Name, direction);
-		}
+		protected override void ApplySortCore(PropertyDescriptor prop, ListSortDirection direction) => SortCore(prop.Name, direction);
 
 		protected void SortCore(string name, ListSortDirection direction) {
 			pi = typeof(T).GetProperty(name);
@@ -112,35 +110,24 @@ namespace CodedThought.Core {
 		#region SortIndex
 
 		private class SortIndex : IComparable {
-			private int _index = -1;
-			private Object _item = null;
-
 			public SortIndex() {
 			}
 
 			public SortIndex(int index, Object item) {
-				_index = index;
-				_item = item;
+				Index = index;
+				Item = item;
 			}
 
-			public int Index {
-				get { return _index; }
-				set { _index = value; }
-			}
+			public int Index { get; set; } = -1;
 
-			public Object Item {
-				get { return _item; }
-				set { _item = value; }
-			}
+			public Object Item { get; set; } = null;
 
 			public int CompareTo(object obj) {
 				SortIndex si = (SortIndex)obj;
-				return ((IComparable)this._item).CompareTo(si.Item);
+				return ((IComparable)this.Item).CompareTo(si.Item);
 			}
 
-			public override string ToString() {
-				return _item.ToString();
-			}
+			public override string ToString() => Item.ToString();
 		}
 
 		#endregion SortIndex
@@ -388,9 +375,7 @@ namespace CodedThought.Core {
 
 		#region QuickSort
 
-		private IComparable Target(int index) {
-			return (IComparable)pi.GetValue(this[index], null);
-		}
+		private IComparable Target(int index) => (IComparable)pi.GetValue(this[index], null);
 
 		private void Swap(int index1, int index2) {
 			T temp = this[index1];

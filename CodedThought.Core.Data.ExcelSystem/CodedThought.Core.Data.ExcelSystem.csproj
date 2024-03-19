@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net6.0</TargetFramework>
+	<TargetFramework>net8.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
 	<AssemblyVersion>6.0.0.12</AssemblyVersion>
@@ -26,7 +26,7 @@
 
   <ItemGroup>
 	<PackageReference Include="CodedThought.Core" Version="7.0.1.35" />
-	<PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
+	<PackageReference Include="DocumentFormat.OpenXml" Version="3.0.1" />
 	<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
 	<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
 	<PackageReference Include="System.Collections" Version="4.3.0" />
