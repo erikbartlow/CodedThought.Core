@@ -15,7 +15,9 @@
 			ProviderType = "SqlServer";
 			Timeout = 0;
 		}
-
+		/// <summary>
+		/// The name is used when retrieving the provider object from cache.
+		/// </summary>
 		/// <summary>Gets or sets the connection name.</summary>
 		public string Name { get; set; }
 

@@ -15,12 +15,9 @@ namespace CodedThought.Core.Data {
 
 		public string TableName {
 			get {
-				if (String.IsNullOrEmpty(_tableName) && (!UseView && String.IsNullOrEmpty(_viewName))) {
-					throw new MissingArguementException("The table name is not set for this object.");
-				} else {
-					string tblName = _tableName;
-					return SchemaName != string.Empty ? $"[{SchemaName}].[{tblName}]" : $"[{tblName}]";
-				}
+				return String.IsNullOrEmpty(_tableName) && (!UseView && String.IsNullOrEmpty(_viewName))
+					?                  throw new MissingArguementException("The table name is not set for this object.")
+					: _tableName;
 			}
 			set {
 				_tableName = value;

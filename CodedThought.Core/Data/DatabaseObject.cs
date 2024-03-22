@@ -27,7 +27,7 @@ namespace CodedThought.Core.Data
 		#region Declarations
 
 		/// <summary>IDbConnection for the object</summary>
-		private IDbConnection? _connection = null;
+		protected IDbConnection? _connection = null;
 
 
 		public event SqlRowsCopiedEventHandler BulkCopySqlRowsCopied;
@@ -36,6 +36,8 @@ namespace CodedThought.Core.Data
 		private int _nextParamNumber = 0;
 
 		private object _syncLock = new();
+
+		private delegate IServiceCollection ServiceResolver(string key);
 
 		#endregion Declarations
 
@@ -66,9 +68,9 @@ namespace CodedThought.Core.Data
 		/// <returns></returns>
 		/// <exception cref="Exceptions.MissingArguementException"></exception>
 		/// <exception cref="Exceptions.CodedThoughtApplicationException"></exception>
-		public static DatabaseObject DatabaseObjectFactory(IServiceProvider serviceProvider, IMemoryCache cache, ConnectionSetting connection, string? serviceKey = null)
+		public static DatabaseObject DatabaseObjectFactory(IServiceProvider serviceProvider, IMemoryCache cache, ConnectionSetting connection)
 		{
-			string objectCacheName = $"DATABASE_ASSEMBLY_{connection.ProviderType.ToUpper()}";
+			string objectCacheName = $"DATABASE_ASSEMBLY_{connection.ProviderType.ToUpper()}_{connection.Name.ToUpper()}";
 			DatabaseObject retVal;
 			try
 			{
@@ -76,15 +78,11 @@ namespace CodedThought.Core.Data
 				{
 					throw new Exceptions.MissingArguementException("Connection is missing the connection string property.  Please check the CodedThought Settings json file.");
 				}
+				// Try to get the database object from the cache.
 				DatabaseObject dbo = (DatabaseObject) cache.GetFromHttpCache<IDatabaseObject>(objectCacheName);
-				if (!String.IsNullOrEmpty(serviceKey))
-				{
-					dbo ??= (DatabaseObject) serviceProvider.GetKeyedService<IDatabaseObject>(serviceKey);
-				}
-				else
-				{
-					dbo ??= (DatabaseObject) serviceProvider.GetService<IDatabaseObject>();
-				}
+				// If it isn't in the cache yet or has timed out then get it from dependency injection.
+				dbo ??= (DatabaseObject) GetDatabaseObjectFromService(serviceProvider, connection);
+
 				if (dbo != null)
 				{
 					dbo.SetDatabaseObjectProperties(connection, connection.ConnectionString, connection.DefaultSchema);
@@ -111,9 +109,9 @@ namespace CodedThought.Core.Data
 		/// <returns></returns>
 		/// <exception cref="Exceptions.MissingArguementException"></exception>
 		/// <exception cref="Exceptions.CodedThoughtApplicationException"></exception>
-		public static DatabaseObject DatabaseObjectFactory(IServiceProvider serviceProvider, runtime.MemoryCache cache, ConnectionSetting connection, string? serviceKey = null)
+		public static DatabaseObject DatabaseObjectFactory(IServiceProvider serviceProvider, runtime.MemoryCache cache, ConnectionSetting connection)
 		{
-			string objectCacheName = $"DATABASE_ASSEMBLY_{connection.ProviderType.ToUpper()}";
+			string objectCacheName = $"DATABASE_ASSEMBLY_{connection.ProviderType.ToUpper()}_{connection.Name.ToUpper()}";
 			DatabaseObject retVal;
 			try
 			{
@@ -121,15 +119,10 @@ namespace CodedThought.Core.Data
 				{
 					throw new Exceptions.MissingArguementException("Connection is missing the connection string property.  Please check the CodedThought Settings json file.");
 				}
+				// Try to get the database object from the cache.
 				DatabaseObject dbo = (DatabaseObject) cache.GetFromLocalCache<IDatabaseObject>(objectCacheName);
-				if (!String.IsNullOrEmpty(serviceKey))
-				{
-					dbo ??= (DatabaseObject) serviceProvider.GetKeyedService<IDatabaseObject>(serviceKey);
-				}
-				else
-				{
-					dbo ??= (DatabaseObject) serviceProvider.GetService<IDatabaseObject>();
-				}
+				// If it isn't in the cache yet or has timed out then get it from dependency injection.
+				dbo ??= (DatabaseObject) GetDatabaseObjectFromService(serviceProvider, connection);
 				if (dbo != null)
 				{
 					dbo.SetDatabaseObjectProperties(connection, connection.ConnectionString, connection.DefaultSchema);
@@ -146,6 +139,31 @@ namespace CodedThought.Core.Data
 				throw new CodedThoughtApplicationException($"Cannot obtain DB Connection [{connection.ConnectionString}]", ex);
 			}
 			return retVal;
+		}
+		/// <summary>
+		/// Gets the <see cref="IDatabaseObject"/> from the dependency injection services based on the connection key and provider type.
+		/// </summary>
+		/// <param name="serviceProvider"></param>
+		/// <param name="connection"></param>
+		/// <returns></returns>
+		private static IDatabaseObject GetDatabaseObjectFromService(IServiceProvider serviceProvider, ConnectionSetting connection)
+		{
+			try
+			{
+				foreach (IDatabaseObject dbo in serviceProvider.GetServices<IDatabaseObject>())
+				{
+					if (dbo.SupportedDatabase == (DBSupported) Enum.Parse(typeof(DBSupported), connection.ProviderType))
+					{
+						return dbo;
+					}
+				}
+				return null;
+			}
+			catch (Exception)
+			{
+
+				throw;
+			}
 		}
 		private void DatabaseObject_BulkCopySqlRowsCopied1(object sender, SqlRowsCopiedEventArgs e) => throw new NotImplementedException();
 
@@ -187,6 +205,7 @@ namespace CodedThought.Core.Data
 		#region Properties
 
 		public ConnectionSetting CoreConnection { get; set; }
+		public virtual string ConnectionName => CoreConnection.Name;
 		public string ConnectionString { get; set; }
 
 		/// <summary>Gets or sets the name of the database schema to use in query generation.  If a data object has the schema name .</summary>
@@ -201,10 +220,16 @@ namespace CodedThought.Core.Data
 		{
 			get
 			{
-				_connection ??= OpenConnection(); //open connection if current pair has none
-				if (_connection.State == ConnectionState.Closed)
+				if (_connection != null)
 				{
-					_connection.Open();
+					if (_connection.State == ConnectionState.Closed)
+					{
+						OpenConnection(); //open connection if current pair has none
+					}
+				}
+				else
+				{
+					OpenConnection();
 				}
 				return _connection;
 			}
@@ -218,8 +243,8 @@ namespace CodedThought.Core.Data
 		public Int32 CommandTimeout { get; set; }
 
 		/// <summary>Gets the supported database.</summary>
-		/// <value>The supported database.</value>
-		public DBSupported SupportedDatabase { get; set; }
+		/// <value>The supported database for this instance. See the <see cref="DBSupported"/> enum.</value>
+		public virtual DBSupported SupportedDatabase { get; set; }
 
 		/// <summary>Gets or sets the transaction.</summary>
 		/// <value>The transaction.</value>
@@ -228,14 +253,22 @@ namespace CodedThought.Core.Data
 		#endregion Properties
 
 		#region Methods
+		private bool CheckForDuplicateConnectionTypes(IServiceProvider services)
+		{
+			try
+			{
+				return false;
+			}
+			catch (Exception)
+			{
 
+				throw;
+			}
+		}
 		/// <summary>Begins a transaction for the connection</summary>
 		public IDbTransaction BeginTransaction()
 		{
-			if (Transaction == null)
-			{
-				Transaction = Connection.BeginTransaction(IsolationLevel.ReadCommitted);
-			}
+			Transaction ??= Connection.BeginTransaction(IsolationLevel.ReadCommitted);
 			return Transaction;
 		}
 
@@ -411,7 +444,7 @@ namespace CodedThought.Core.Data
 		/// <exception cref="NotImplementedException"></exception>
 		public virtual string GetTableName(string defaultSchema, string tableName) => $"[{defaultSchema}].[{tableName}]";
 
-
+		public virtual string GetSchemaName() => DefaultSchemaName;
 		/// <summary>
 		/// Gets an int32 from the reader based on the database supported from the position passed.
 		/// </summary>
@@ -811,7 +844,8 @@ namespace CodedThought.Core.Data
 				StringBuilder sql = new("SELECT ");
 				sql.Append(GenerateColumnList(selectColumns));
 				sql.Append($" FROM {GetTableName(schemaName, tableName)}");
-				sql.Append(" WITH (READPAST)");
+				if (SupportedDatabase == DBSupported.SqlServer)
+					sql.Append(" WITH (READPAST)");
 				if (parameters != null && parameters.Count > 0)
 				{
 					sql.Append(" WHERE " + GenerateWhereClauseFromParams(parameters));
@@ -898,7 +932,7 @@ namespace CodedThought.Core.Data
 		public DataSet GetDataSet(string tableName, List<string> selectColumns, ParameterCollection parameters) => GetDataSet(tableName, String.Empty, selectColumns, parameters);
 
 		/// <summary>Gets an DataSet this creates a simple query where all parameters are joined by 'AND'</summary>
-		public DataSet GetDataSet(string tableName, string schemaName, List<string> selectColumns, ParameterCollection parameters)
+		public virtual DataSet GetDataSet(string tableName, string schemaName, List<string> selectColumns, ParameterCollection parameters)
 		{
 			DataSet dataSet;
 			DefaultSchemaName = schemaName;
@@ -914,7 +948,9 @@ namespace CodedThought.Core.Data
 				{
 					sql.AppendFormat(" FROM {0}", tableName);
 				}
-				sql.Append(" WITH (READPAST)");
+				if (SupportedDatabase == DBSupported.SqlServer)
+					sql.Append(" WITH (READPAST)");
+
 				if (parameters != null && parameters.Count > 0)
 				{
 					sql.Append(" WHERE " + GenerateWhereClauseFromParams(parameters));
@@ -1157,6 +1193,10 @@ namespace CodedThought.Core.Data
 			{
 				DataReaderBehavior = CommandBehavior.SequentialAccess | CommandBehavior.CloseConnection;
 
+				if (SupportedDatabase == DBSupported.SqlServer)
+				{
+
+				}
 				// Add the transaction to set the isolation level.
 				IDbCommand cmd = Connection.CreateCommand();
 				cmd.CommandText = commandText;
@@ -1458,7 +1498,7 @@ namespace CodedThought.Core.Data
 		}
 
 		//TODO: don't use param name to refer to column name
-		private string GenerateWhereClauseFromParams(ParameterCollection parameters) => parameters != null ? parameters.GenerateWhereClauseFromParams(ParameterConnector) : string.Empty;
+		protected string GenerateWhereClauseFromParams(ParameterCollection parameters) => parameters != null ? parameters.GenerateWhereClauseFromParams(ParameterConnector) : string.Empty;
 
 		/// <summary>Generates an order by clause</summary>
 		/// <param name="columnList"></param>
@@ -1563,7 +1603,7 @@ namespace CodedThought.Core.Data
 		/// <summary>Removes the parameters from the parameter collection and adds them to the cmd.Parameter collection</summary>
 		/// <param name="parameters"></param>
 		/// <param name="cmd">       </param>
-		private void AddParametersToCommand(ParameterCollection parameters, IDbCommand cmd)
+		protected void AddParametersToCommand(ParameterCollection parameters, IDbCommand cmd)
 		{
 			if (parameters != null)
 			{
@@ -1575,7 +1615,7 @@ namespace CodedThought.Core.Data
 		/// <param name="parameters"></param>
 		/// <param name="cmd">       </param>
 
-		private void ExtractAndReloadParameterCollection(ParameterCollection parameters, IDbCommand cmd)
+		protected void ExtractAndReloadParameterCollection(ParameterCollection parameters, IDbCommand cmd)
 		{
 			if (parameters != null)
 			{
@@ -1585,7 +1625,7 @@ namespace CodedThought.Core.Data
 
 		/// <summary>Populates the CurrentDatabaseConnection object with the passed <see cref="ConnectionSetting" /></summary>
 		/// <param name="connectionSetting"></param>
-		private static void PopulateCurrentConnection(ConnectionSetting connectionSetting) => CurrentDatabaseConnection = new()
+		protected static void PopulateCurrentConnection(ConnectionSetting connectionSetting) => CurrentDatabaseConnection = new()
 		{
 			ConnectionName = connectionSetting.Name,
 			ConnectionString = connectionSetting.ConnectionString,

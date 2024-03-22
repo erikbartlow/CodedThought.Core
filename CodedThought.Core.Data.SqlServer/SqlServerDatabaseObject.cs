@@ -672,6 +672,10 @@ namespace CodedThought.Core.Data.SqlServer
 
 		#region Database Specific
 
+		public override string ConnectionName => base.ConnectionName;
+
+		public override DBSupported SupportedDatabase  => DBSupported.SqlServer;
+
 		public override string GetTableName(string defaultSchema, string tableName)
 		{
 			string? schemaName = defaultSchema;
@@ -685,6 +689,7 @@ namespace CodedThought.Core.Data.SqlServer
 			return $"[{schemaName}].[{tableName}]";
 
 		}
+		public override string GetSchemaName() => DefaultSchemaName == string.Empty ? "[dbo]" : $"[{DefaultSchemaName}]";
 		/// <summary>
 		/// Gets the current session default schema name.
 		/// </summary>

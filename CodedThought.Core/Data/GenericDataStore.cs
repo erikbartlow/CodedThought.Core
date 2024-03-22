@@ -23,7 +23,7 @@ namespace CodedThought.Core.Data
 		protected DatabaseConnection? _specifiedDatabaseConnection;
 		protected readonly IMemoryCache? _cache = null;
 		protected readonly runtime.MemoryCache? _runtimeCache = null;
-		private string defaultSchemaName = string.Empty;
+		protected string _defaultSchema;
 
 		public event SqlRowsCopiedEventHandler? BulkCopySqlRowsCopied;
 
@@ -67,8 +67,16 @@ namespace CodedThought.Core.Data
 		/// </summary>
 		public virtual string? DefaultSchemaName
 		{
-			get => defaultSchemaName == string.Empty ? "[dbo]" : $"[{defaultSchemaName}]";
-			set => defaultSchemaName = value;
+			get
+			{
+				if( _defaultSchema == String.Empty)
+				{
+					_defaultSchema = DatabaseObjectInstance.GetSchemaName();
+				}
+				return _defaultSchema;
+
+			}
+			set => _defaultSchema = value;
 		}
 
 		/// <summary>Gets or sets the database connection to use.</summary>
@@ -143,25 +151,6 @@ namespace CodedThought.Core.Data
 		/// Initializes a new instance of the GenericDataStore class. The internal ORM model (shared between all instances of the GenericDataStore class) is initialized to the calling assembly.
 		/// </summary>
 		/// <param name="serviceProvider"></param>
-		/// <param name="cache">Runtime Cache</param>
-		/// <param name="databaseToUse"></param>
-		/// <param name="serviceKey">If using a keyed service</param>
-		public GenericDataStore(IServiceProvider serviceProvider, runtime.MemoryCache cache, ConnectionSetting databaseToUse, string? serviceKey) : this(cache)
-		{
-			// The calling assembly should be the assembly with the data aware classes to load into the ORM.
-			if (ORM.Count == 0)
-			{
-				LoadAssemblyAndORM(Assembly.GetCallingAssembly());
-			}
-			TransactionInProgress = false;
-			DatabaseObjectInstance = DatabaseObject.DatabaseObjectFactory(serviceProvider, cache, databaseToUse, serviceKey);
-			DatabaseObjectInstance.CommandTimeout = 0;
-			DatabaseToUse = new(databaseToUse);
-		}
-		/// <summary>
-		/// Initializes a new instance of the GenericDataStore class. The internal ORM model (shared between all instances of the GenericDataStore class) is initialized to the calling assembly.
-		/// </summary>
-		/// <param name="serviceProvider"></param>
 		/// <param name="cache">Http Cache</param>
 		/// <param name="databaseToUse"></param>
 		public GenericDataStore(IServiceProvider serviceProvider, IMemoryCache cache, ConnectionSetting databaseToUse) : this(cache)
@@ -174,26 +163,6 @@ namespace CodedThought.Core.Data
 
 			TransactionInProgress = false;
 			DatabaseObjectInstance = DatabaseObject.DatabaseObjectFactory(serviceProvider, cache, databaseToUse);
-			DatabaseObjectInstance.CommandTimeout = 0;
-			DatabaseToUse = new(databaseToUse);
-		}
-		/// <summary>
-		/// Initializes a new instance of the GenericDataStore class. The internal ORM model (shared between all instances of the GenericDataStore class) is initialized to the calling assembly.
-		/// </summary>
-		/// <param name="serviceProvider"></param>
-		/// <param name="cache">Runtime Cache</param>
-		/// <param name="databaseToUse"></param>
-		/// <param name="serviceKey">If using a keyed service</param>
-		public GenericDataStore(IServiceProvider serviceProvider, IMemoryCache cache, ConnectionSetting databaseToUse, string key) : this(cache)
-		{
-			// The calling assembly should be the assembly with the data aware classes to load into the ORM.
-			if (ORM.Count == 0)
-			{
-				LoadAssemblyAndORM(Assembly.GetCallingAssembly());
-			}
-
-			TransactionInProgress = false;
-			DatabaseObjectInstance = DatabaseObject.DatabaseObjectFactory(serviceProvider, cache, databaseToUse, key);
 			DatabaseObjectInstance.CommandTimeout = 0;
 			DatabaseToUse = new(databaseToUse);
 		}
@@ -1302,11 +1271,7 @@ namespace CodedThought.Core.Data
 		public String GetSourceNameFromObject<T>()
 		{
 			DataTableAttribute table = (DataTableAttribute) ORM[typeof(T).FullName][typeof(T)];
-			if (String.IsNullOrEmpty(table.SchemaName))
-				if (!String.IsNullOrEmpty(DefaultSchemaName))
-					return $"{DefaultSchemaName}.{table.SourceName}";
-
-			return table.SourceName;
+			return DatabaseObjectInstance.GetTableName(DefaultSchemaName, table.SourceName);
 		}
 
 		/// <summary>Gets the source name from object.</summary>
@@ -1315,11 +1280,7 @@ namespace CodedThought.Core.Data
 		public string GetSourceNameFromObject(string typeName)
 		{
 			DataTableAttribute table = (DataTableAttribute) ORM[typeName][Type.GetType(typeName)];
-			if (String.IsNullOrEmpty(table.SchemaName))
-				if (!String.IsNullOrEmpty(DefaultSchemaName))
-					return $"{DefaultSchemaName}.{table.SourceName}";
-
-			return table.SourceName;
+			return DatabaseObjectInstance.GetTableName(DefaultSchemaName, table.SourceName);
 		}
 
 		/// <summary>Gets the column name from the passed property name.</summary>

@@ -7,6 +7,9 @@ namespace CodedThought.Core.Data.Interfaces {
 
 
 		#region Properties
+
+		string ConnectionName { get; }
+
 		ServiceLifetime ServiceLifetime { get; }
 
 		string ColumnDelimiter { get; set; }
@@ -34,6 +37,8 @@ namespace CodedThought.Core.Data.Interfaces {
 		event SqlRowsCopiedEventHandler BulkCopySqlRowsCopied;
 
 		void Add(string tableName, object obj, List<TableColumn> columns, IDBStore store);
+
+		DataSet GetDataSet(string tableName, string schemaName, List<string> selectColumns, ParameterCollection parameters);
 
 		IDbTransaction BeginTransaction();
 
@@ -125,6 +130,8 @@ namespace CodedThought.Core.Data.Interfaces {
 		bool GetBitValue(IDataReader reader, string columnName);
 
 		string GetTableName(string defaultSchema, string tableName);
+
+		string GetSchemaName();
 
 		IDataReader Get(string sourceName, List<string> selectColumns, ParameterCollection parameters);
 
