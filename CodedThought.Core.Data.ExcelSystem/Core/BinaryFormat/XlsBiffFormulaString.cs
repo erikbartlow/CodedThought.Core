@@ -1,32 +1,37 @@
 using System.Text;
 
-namespace CodedThought.Core.Data.ExcelSystem.Core.BinaryFormat {
+namespace CodedThought.Core.Data.ExcelSystem.Core.BinaryFormat
+{
+    /// <summary>Represents a string value of formula</summary>
+    internal class XlsBiffFormulaString : XlsBiffRecord
+    {
+        private Encoding m_UseEncoding = Encoding.Default;
+        private const int LEADING_BYTES_COUNT = 3;
 
-	/// <summary>Represents a string value of formula</summary>
-	internal class XlsBiffFormulaString : XlsBiffRecord {
-		private Encoding m_UseEncoding = Encoding.Default;
-		private const int LEADING_BYTES_COUNT = 3;
+        internal XlsBiffFormulaString(byte[] bytes, uint offset, ExcelBinaryReader reader)
+            : base(bytes, offset, reader)
+        {
+        }
 
-		internal XlsBiffFormulaString(byte[] bytes, uint offset, ExcelBinaryReader reader)
-			: base(bytes, offset, reader) {
-		}
+        /// <summary>Encoding used to deal with strings</summary>
+        public Encoding UseEncoding
+        {
+            get => m_UseEncoding; set => m_UseEncoding = value;
+        }
 
-		/// <summary>Encoding used to deal with strings</summary>
-		public Encoding UseEncoding {
-			get => m_UseEncoding; set => m_UseEncoding = value;
-		}
+        /// <summary>Length of the string</summary>
+        public ushort Length => base.ReadUInt16(0x0);
 
-		/// <summary>Length of the string</summary>
-		public ushort Length => base.ReadUInt16(0x0);
-
-		/// <summary>String text</summary>
-		public string Value {
-			get {
-				//is unicode?
-				return base.ReadUInt16(0x01) != 0
-					? Encoding.Unicode.GetString(m_bytes, m_readoffset + LEADING_BYTES_COUNT, Length * 2)
-					: m_UseEncoding.GetString(m_bytes, m_readoffset + LEADING_BYTES_COUNT, Length);
-			}
-		}
-	}
+        /// <summary>String text</summary>
+        public string Value
+        {
+            get
+            {
+                //is unicode?
+                return base.ReadUInt16(0x01) != 0
+                    ? Encoding.Unicode.GetString(m_bytes, m_readoffset + LEADING_BYTES_COUNT, Length * 2)
+                    : m_UseEncoding.GetString(m_bytes, m_readoffset + LEADING_BYTES_COUNT, Length);
+            }
+        }
+    }
 }

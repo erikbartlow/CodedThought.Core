@@ -34,9 +34,13 @@
 
 
   <ItemGroup>
-	<PackageReference Include="CodedThought.Core" Version="7.0.1.35" />
-	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.5" />
+	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
 	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodedThought.Core\CodedThought.Core.csproj" />
   </ItemGroup>
 
 

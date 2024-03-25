@@ -1,82 +1,96 @@
-namespace CodedThought.Core.Data.ExcelSystem.Core.OpenXmlFormat {
+namespace CodedThought.Core.Data.ExcelSystem.Core.OpenXmlFormat
+{
+    internal class XlsxDimension
+    {
+        public XlsxDimension(string value)
+        {
+            ParseDimensions(value);
+        }
 
-	internal class XlsxDimension {
+        public XlsxDimension(int rows, int cols)
+        {
+            this.FirstRow = 1;
+            this.LastRow = rows;
+            this.FirstCol = 1;
+            this.LastCol = cols;
+        }
 
-		public XlsxDimension(string value) {
-			ParseDimensions(value);
-		}
+        private int _FirstRow;
 
-		public XlsxDimension(int rows, int cols) {
-			this.FirstRow = 1;
-			this.LastRow = rows;
-			this.FirstCol = 1;
-			this.LastCol = cols;
-		}
+        public int FirstRow
+        {
+            get => _FirstRow; set => _FirstRow = value;
+        }
 
-		private int _FirstRow;
+        private int _LastRow;
 
-		public int FirstRow {
-			get => _FirstRow; set => _FirstRow = value;
-		}
+        public int LastRow
+        {
+            get => _LastRow; set => _LastRow = value;
+        }
 
-		private int _LastRow;
+        private int _FirstCol;
 
-		public int LastRow {
-			get => _LastRow; set => _LastRow = value;
-		}
+        public int FirstCol
+        {
+            get => _FirstCol; set => _FirstCol = value;
+        }
 
-		private int _FirstCol;
+        private int _LastCol;
 
-		public int FirstCol {
-			get => _FirstCol; set => _FirstCol = value;
-		}
+        public int LastCol
+        {
+            get => _LastCol; set => _LastCol = value;
+        }
 
-		private int _LastCol;
+        public void ParseDimensions(string value)
+        {
+            string[] parts = value.Split(':');
 
-		public int LastCol {
-			get => _LastCol; set => _LastCol = value;
-		}
+            int col;
+            int row;
 
-		public void ParseDimensions(string value) {
-			string[] parts = value.Split(':');
+            XlsxDim(parts[0], out col, out row);
+            FirstCol = col;
+            FirstRow = row;
 
-			int col;
-			int row;
+            if (parts.Length == 1)
+            {
+                LastCol = FirstCol;
+                LastRow = FirstRow;
+            }
+            else
+            {
+                XlsxDim(parts[1], out col, out row);
+                LastCol = col;
+                LastRow = row;
+            }
+        }
 
-			XlsxDim(parts[0], out col, out row);
-			FirstCol = col;
-			FirstRow = row;
+        /// <summary>Logic for the Excel dimensions. Ex: A15</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="val1"> out val1.</param>
+        /// <param name="val2"> out val2.</param>
+        public static void XlsxDim(string value, out int val1, out int val2)
+        {//INFO: Check for a simple Solution
+            int index = 0;
+            val1 = 0;
+            int[] arr = new int[value.Length - 1];
 
-			if (parts.Length == 1) {
-				LastCol = FirstCol;
-				LastRow = FirstRow;
-			} else {
-				XlsxDim(parts[1], out col, out row);
-				LastCol = col;
-				LastRow = row;
-			}
-		}
+            while (index < value.Length)
+            {
+                if (char.IsDigit(value[index]))
+                    break;
+                arr[index] = value[index] - 'A' + 1;
+                index++;
+            }
 
-		/// <summary>Logic for the Excel dimensions. Ex: A15</summary>
-		/// <param name="value">The value.</param>
-		/// <param name="val1"> out val1.</param>
-		/// <param name="val2"> out val2.</param>
-		public static void XlsxDim(string value, out int val1, out int val2) {//INFO: Check for a simple Solution
-			int index = 0;
-			val1 = 0;
-			int[] arr = new int[value.Length - 1];
+            for (int i = 0; i < index; i++)
+            {
+                val1 += (int) (arr[i] * Math.Pow(26, index - i - 1));
+            }
 
-			while (index < value.Length) {
-				if (char.IsDigit(value[index])) break;
-				arr[index] = value[index] - 'A' + 1;
-				index++;
-			}
-
-			for (int i = 0; i < index; i++) {
-				val1 += (int)(arr[i] * Math.Pow(26, index - i - 1));
-			}
-
-			val2 = int.Parse(value.Substring(index));
-		}
-	}
+            val2 = int.Parse(value.Substring(index));
+        }
+    }
 }

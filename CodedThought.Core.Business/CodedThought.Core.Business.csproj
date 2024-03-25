@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net6.0</TargetFramework>
+	<TargetFramework>net8.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
-	<AssemblyVersion>6.0.0.3</AssemblyVersion>
-	<FileVersion>6.0.0.3</FileVersion>
+	<AssemblyVersion>6.0.1.0</AssemblyVersion>
+	<FileVersion>6.0.1.0</FileVersion>
 	<Title>CodedThought.Core.Business</Title>
-	<VersionPrefix>6.0.0.3</VersionPrefix>
+	<VersionPrefix>6.0.1.0</VersionPrefix>
 	<Authors>Erik Bartlow</Authors>
-	<Company>Erik Bartlow</Company>
+	<Company>CodedThought</Company>
 	<Description>The CodedThought.Core.Business library collection of usefull business focused objects.</Description>
 	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
 	<RepositoryType>git</RepositoryType>
@@ -24,8 +24,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="CodedThought.Core" Version="7.0.1.35" />
 	<PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodedThought.Core\CodedThought.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net6.0</TargetFramework>
+	<TargetFramework>net8.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
-	<AssemblyVersion>6.0.0.3</AssemblyVersion>
-	<FileVersion>6.0.0.3</FileVersion>
-	<VersionPrefix>6.0.0.3</VersionPrefix>
+	<AssemblyVersion>6.0.1.0</AssemblyVersion>
+	<FileVersion>6.0.1.0</FileVersion>
+	<VersionPrefix>6.0.1.0</VersionPrefix>
 	<Title>CodedThought.Core.Validation</Title>
 	<Copyright>2023 CodedThought</Copyright>
 	<Authors>Erik Bartlow</Authors>
@@ -27,7 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="CodedThought.Core" Version="7.0.1.35" />
+    <ProjectReference Include="..\CodedThought.Core\CodedThought.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
