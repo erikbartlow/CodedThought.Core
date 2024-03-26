@@ -3,14 +3,7 @@
 
 name: Core Build Action
 
-on:
-  push:
-    branches:
-      - DependencyInjection
-  pull_request:
-    branches:
-      - DependencyInjection
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
   
 jobs:
   build:
