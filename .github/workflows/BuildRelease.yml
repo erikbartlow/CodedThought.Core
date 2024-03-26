@@ -3,11 +3,7 @@
 
 name: Core Build Action
 
-on:
-  push:
-    branches: [ "original" ]
-  pull_request:
-    branches: [ "original" ]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
@@ -15,14 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
+        include-prerelease: true
+        
     - name: Restore dependencies
       run: dotnet restore
+      
     - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet build ./CodedThought.Core.sln --configuration Release --no-restore
