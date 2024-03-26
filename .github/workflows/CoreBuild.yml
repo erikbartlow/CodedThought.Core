@@ -3,7 +3,14 @@
 
 name: Core Build Action
 
-on:  [push]
+on:
+  push:
+    branches:
+      - DependencyInjection
+on: 
+  workflow_dispatch:
+    branches:
+      - DependendyInjection
 
 env:
   NETCORE_VERSION: '8.0.x'
