@@ -13,9 +13,7 @@
 		public DataTableUsageAttribute() {
 		}
 
-		public DataTableUsageAttribute(DataTableUsage useAs) {
-			UseAs = useAs;
-		}
+		public DataTableUsageAttribute(DataTableUsage useAs) => UseAs = useAs;
 
 		public DataTableUsage UseAs { get; }
 

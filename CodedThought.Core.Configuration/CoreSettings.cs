@@ -7,8 +7,8 @@
 			Settings = new();
 		}
 
-		public List<ConnectionSetting>? Connections { get; set; }
-		public Dictionary<string, string> Settings { get; set; }
+		public required Dictionary<string, string> Settings { get; set; }
+		public required List<ConnectionSetting> Connections { get; set; }
 
 		/// <summary>Gets whether this application instance is running on http or local.</summary>
 		public Boolean IsWinForm {

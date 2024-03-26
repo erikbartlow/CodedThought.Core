@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net6.0</TargetFramework>
+	<TargetFramework>net8.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
-	<AssemblyVersion>6.0.0.12</AssemblyVersion>
-	<FileVersion>6.0.0.12</FileVersion>
-	<VersionPrefix>6.0.0.12</VersionPrefix>
+	<AssemblyVersion>6.0.1.0</AssemblyVersion>
+	<FileVersion>6.0.1.0</FileVersion>
+	<VersionPrefix>6.0.1.0</VersionPrefix>
 	<Title>CodedThought.Core.Data.ExcelSystem</Title>
 	<Authors>Erik Bartlow</Authors>
-	<Company>Erik Bartlow</Company>
+	<Company>CodedThought</Company>
 	<Description>The CodedThought.Core.Data.ExcelSystem package is a custom provider for use Microsoft Excel and CSV files.</Description>
 	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
 	<RepositoryType>git</RepositoryType>
@@ -25,16 +25,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="CodedThought.Core" Version="7.0.1.34" />
-	<PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
-	<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
-	<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+	<PackageReference Include="DocumentFormat.OpenXml" Version="3.0.2" />
 	<PackageReference Include="System.Collections" Version="4.3.0" />
 	<PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
 	<PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
 	<PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
 	<PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
 	<PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodedThought.Core\CodedThought.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

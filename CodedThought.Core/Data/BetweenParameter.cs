@@ -1,8 +1,9 @@
+using CodedThought.Core.Data.Interfaces;
+
 namespace CodedThought.Core.Data {
 
 	/// <summary>Parameter for comparing a date range</summary>
 	public class BetweenParameter : Parameter, IParameter {
-		private IDataParameter _dbParam2;
 
 		/// <summary>Initializes a new instance of the <see cref="BetweenParameter" /> class.</summary>
 		public BetweenParameter() : base() {
@@ -10,16 +11,13 @@ namespace CodedThought.Core.Data {
 
 		public BetweenParameter(IDataParameter startParam, IDataParameter endParam)
 			: base(startParam) {
-			_dbParam2 = endParam;
+			Parameter2 = endParam;
 			ParameterName = startParam.ParameterName;
 		}
 
 		#region Properties
 
-		public IDataParameter Parameter2 {
-			get { return _dbParam2; }
-			set { _dbParam2 = value; }
-		}
+		public IDataParameter Parameter2 { get; set; }
 
 		/// <summary>Gets and sets the DbType of the parameter.</summary>
 		public new DbType DbType {
@@ -28,7 +26,7 @@ namespace CodedThought.Core.Data {
 			}
 			set {
 				_dbParam.DbType = value;
-				_dbParam2.DbType = value;
+				Parameter2.DbType = value;
 			}
 		}
 
@@ -39,7 +37,7 @@ namespace CodedThought.Core.Data {
 			}
 			set {
 				_dbParam.Direction = value;
-				_dbParam2.Direction = value;
+				Parameter2.Direction = value;
 			}
 		}
 
@@ -50,7 +48,7 @@ namespace CodedThought.Core.Data {
 			}
 			set {
 				_dbParam.ParameterName = value + "_1";
-				_dbParam2.ParameterName = value + "_2";
+				Parameter2.ParameterName = value + "_2";
 			}
 		}
 
@@ -61,7 +59,7 @@ namespace CodedThought.Core.Data {
 			}
 			set {
 				_dbParam.SourceColumn = value;
-				_dbParam2.SourceColumn = value;
+				Parameter2.SourceColumn = value;
 			}
 		}
 
@@ -72,14 +70,14 @@ namespace CodedThought.Core.Data {
 			}
 			set {
 				_dbParam.SourceVersion = value;
-				_dbParam2.SourceVersion = value;
+				Parameter2.SourceVersion = value;
 			}
 		}
 
 		/// <summary>Gets and sets the second date for the between clause</summary>
 		public object Value2 {
-			get { return _dbParam2.Value; }
-			set { _dbParam2.Value = value; }
+			get { return Parameter2.Value; }
+			set { Parameter2.Value = value; }
 		}
 
 		#endregion Properties
@@ -92,9 +90,9 @@ namespace CodedThought.Core.Data {
 			switch (_dbParam.DbType) {
 				case DbType.String:
 					_dbParam.Value = $"'{_dbParam.Value}'";
-					_dbParam2.Value = $"'{_dbParam2.Value}'";
+					Parameter2.Value = $"'{Parameter2.Value}'";
 					_dbParam.DbType = DbType.String;
-					_dbParam2.DbType = DbType.String;
+					Parameter2.DbType = DbType.String;
 					break;
 
 				case DbType.Date:
@@ -102,12 +100,12 @@ namespace CodedThought.Core.Data {
 				case DbType.DateTime2:
 					// Convert the values to string to match the to_date function.
 					_dbParam.Value = $"'{Convert.ToDateTime(_dbParam.Value).ToString("MM/dd/yyyy")}'";
-					_dbParam2.Value = $"'{Convert.ToDateTime(_dbParam2.Value).ToString("MM/dd/yyyy")}'";
+					Parameter2.Value = $"'{Convert.ToDateTime(Parameter2.Value).ToString("MM/dd/yyyy")}'";
 					_dbParam.DbType = DbType.String;
-					_dbParam2.DbType = DbType.String;
+					Parameter2.DbType = DbType.String;
 					break;
 			}
-			return $" {(!firstInGroup ? _whereType.ToString() : "")} {_dbParam.SourceColumn} BETWEEN {_dbParam.Value} AND {_dbParam2.Value}";
+			return $" {(!firstInGroup ? _whereType.ToString() : "")} {_dbParam.SourceColumn} BETWEEN {_dbParam.Value} AND {Parameter2.Value}";
 		}
 	}
 }

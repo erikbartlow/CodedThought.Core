@@ -2,9 +2,7 @@
 
 	public static class Switch {
 
-		public static Switch<T> On<T>(T value) {
-			return new Switch<T>(value);
-		}
+		public static Switch<T> On<T>(T value) => new Switch<T>(value);
 	}
 
 	public class Switch<T> {
@@ -15,9 +13,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Switch{T}" /> class.</summary>
 		/// <param name="value">The value.</param>
-		public Switch(T value) {
-			this.value = value;
-		}
+		public Switch(T value) => this.value = value;
 
 		/// <summary>Switch case alternative.</summary>
 		/// <param name="compare">The compare.</param>
@@ -42,8 +38,6 @@
 		/// <param name="actualValue">The actual value.</param>
 		/// <param name="compare">    The compare.</param>
 		/// <returns></returns>
-		private bool AreEqual(T actualValue, T compare) {
-			return Equals(actualValue, compare);
-		}
+		private bool AreEqual(T actualValue, T compare) => Equals(actualValue, compare);
 	}
 }

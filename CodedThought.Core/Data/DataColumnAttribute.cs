@@ -97,18 +97,14 @@ namespace CodedThought.Core.Data {
 		}
 
 		public DataColumnAttribute(string name, DbType type, int size)
-			: this(name, type) {
-			Size = size;
-		}
+			: this(name, type) => Size = size;
 
 		/// <summary>Map a property to a database column or XML element</summary>
 		/// <param name="name">Name of the column or element to map</param>
 		/// <param name="type">Underlying DbType of the column</param>
 		/// <param name="size">Size of the column</param>
 		public DataColumnAttribute(string name, DbType type, int size, DataColumnOptions options)
-			: this(name, type, options) {
-			Size = size;
-		}
+			: this(name, type, options) => Size = size;
 
 		//----------
 		public DataColumnAttribute(string name, DbType type, Type extendedPropertyType, string extendedPropertyName)
@@ -124,14 +120,10 @@ namespace CodedThought.Core.Data {
 		}
 
 		public DataColumnAttribute(string name, DbType type, int size, Type extendedPropertyType, string extendedPropertyName)
-			: this(name, type, extendedPropertyType, extendedPropertyName) {
-			Size = size;
-		}
+			: this(name, type, extendedPropertyType, extendedPropertyName) => Size = size;
 
 		public DataColumnAttribute(string name, DbType type, int size, Type extendedPropertyType, string extendedPropertyName, DataColumnOptions options)
-			: this(name, type, extendedPropertyType, extendedPropertyName, options) {
-			Size = size;
-		}
+			: this(name, type, extendedPropertyType, extendedPropertyName, options) => Size = size;
 
 		#endregion Constructors
 

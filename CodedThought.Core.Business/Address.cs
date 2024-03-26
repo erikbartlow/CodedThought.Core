@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace CodedThought.Core.Business {
 
@@ -6,131 +7,62 @@ namespace CodedThought.Core.Business {
 	[Serializable]
 	public class Address : ObjectEntityBase {
 
-		#region Data
-
-		private AddressType type;
-		private string street;
-		private string street2;
-		private string street3;
-		private string street4;
-		private string street5;
-		private string street6;
-		private string city;
-		private string state;
-		private string postalcode;
-		private string country;
-		private Boolean primary;
-		private Boolean visible;
-
-		#endregion Data
-
 		#region Properties
 
 		/// <summary>Gets or sets the address's type.</summary>
-		public AddressType AddressType {
-			get { return this.type; }
-			set { this.type = value; }
-		}
+		public AddressType AddressType { get; set; }
 
 		/// <summary>Gets or sets the Address's street (line 1).</summary>
-		public string Street {
-			get { return this.street; }
-			set { this.street = value; }
-		}
+		public string Street { get; set; }
 
 		/// <summary>Gets or sets the Address's street (line 2).</summary>
-		public string Street2 {
-			get { return this.street2; }
-			set { this.street2 = value; }
-		}
+		public string Street2 { get; set; }
 
 		/// <summary>Gets or sets the Address's street (line 3).</summary>
-		public string Street3 {
-			get { return this.street3; }
-			set { this.street3 = value; }
-		}
+		public string Street3 { get; set; }
 
 		/// <summary>Gets or sets the Address's street (line 4).</summary>
-		public string Street4 {
-			get { return this.street4; }
-			set { this.street4 = value; }
-		}
+		public string Street4 { get; set; }
 
 		/// <summary>Gets or sets the Address's street (line 5).</summary>
-		public string Street5 {
-			get { return this.street5; }
-			set { this.street5 = value; }
-		}
+		public string Street5 { get; set; }
 
 		/// <summary>Gets or sets the Address's street (line 6).</summary>
-		public string Street6 {
-			get { return this.street6; }
-			set { this.street6 = value; }
-		}
+		public string Street6 { get; set; }
 
 		/// <summary>Gets or sets the Address's City.</summary>
-		public string City {
-			get { return this.city; }
-			set { this.city = value; }
-		}
+		public string City { get; set; }
 
 		/// <summary>Gets or sets the Addresse's State.</summary>
-		public string State {
-			get { return this.state; }
-			set { this.state = value; }
-		}
+		public string State { get; set; }
 
 		/// <summary>Gets or sets the Address's Postal Code.</summary>
-		public string PostalCode {
-			get { return this.postalcode; }
-			set { this.postalcode = value; }
-		}
+		public string PostalCode { get; set; }
 
 		/// <summary>Gets or sets the address's country.</summary>
-		public string Country {
-			get {
-				return this.country;
-			}
-			set {
-				this.country = value;
-			}
-		}
+		public string Country { get; set; }
 
 		/// <summary>Gets or sets if this is a primary address.</summary>
-		public Boolean PrimaryAddress {
-			get {
-				return this.primary;
-			}
-			set {
-				this.primary = value;
-			}
-		}
+		public Boolean PrimaryAddress { get; set; }
 
 		/// <summary>Gets or sets if this address is visible to the public or not.</summary>
-		public Boolean VisibleAddress {
-			get {
-				return this.visible;
-			}
-			set {
-				this.visible = value;
-			}
-		}
+		public Boolean VisibleAddress { get; set; }
 
 		/// <summary>Gets the full address concatentated together with carriage returns and line feeds.</summary>
 		public string FullAddress {
 			get {
-				System.Text.StringBuilder strAddress = new();
-				if (this.street.Length > 0) {
+				StringBuilder strAddress = new();
+				if (Street.Length > 0) {
 					// Ouput the attendee's address
-					strAddress.Append(this.street + "\r\n");
-					if (this.street2.Length > 0) { strAddress.Append(this.street2 + "\r\n"); }
-					if (this.street3.Length > 0) { strAddress.Append(this.street3 + "\r\n"); }
-					if (this.street4.Length > 0) { strAddress.Append(this.street4 + "\r\n"); }
-					if (this.street5.Length > 0) { strAddress.Append(this.street5 + "\r\n"); }
-					if (this.street6.Length > 0) { strAddress.Append(this.street6 + "\r\n"); }
-					strAddress.Append(this.city + ", ");
-					strAddress.Append(this.state + "  ");
-					strAddress.Append(this.postalcode);
+					strAddress.Append(Street + "\r\n");
+					if (Street2.Length > 0) { strAddress.Append(Street2 + "\r\n"); }
+					if (Street3.Length > 0) { strAddress.Append(Street3 + "\r\n"); }
+					if (Street4.Length > 0) { strAddress.Append(Street4 + "\r\n"); }
+					if (Street5.Length > 0) { strAddress.Append(Street5 + "\r\n"); }
+					if (Street6.Length > 0) { strAddress.Append(Street6 + "\r\n"); }
+					strAddress.Append(City + ", ");
+					strAddress.Append(State + "  ");
+					strAddress.Append(PostalCode);
 				}
 				return strAddress.ToString();
 			}
@@ -139,18 +71,18 @@ namespace CodedThought.Core.Business {
 		/// <summary>Gets the full address concatentated together with carriage returns and line feeds.</summary>
 		public string FullAddressHTML {
 			get {
-				System.Text.StringBuilder strAddress = new();
-				if (this.street.Length > 0) {
+				StringBuilder strAddress = new();
+				if (Street.Length > 0) {
 					// Ouput the attendee's address
-					strAddress.Append(this.street + "<br>");
-					if (this.street2.Length > 0) { strAddress.Append(this.street2 + "<br>"); }
-					if (this.street3.Length > 0) { strAddress.Append(this.street3 + "<br>"); }
-					if (this.street4.Length > 0) { strAddress.Append(this.street4 + "<br>"); }
-					if (this.street5.Length > 0) { strAddress.Append(this.street5 + "<br>"); }
-					if (this.street6.Length > 0) { strAddress.Append(this.street6 + "<br>"); }
-					strAddress.Append(this.city + ", ");
-					strAddress.Append(this.state + "  ");
-					strAddress.Append(this.postalcode);
+					strAddress.Append(Street + "<br>");
+					if (Street2.Length > 0) { strAddress.Append(Street2 + "<br>"); }
+					if (Street3.Length > 0) { strAddress.Append(Street3 + "<br>"); }
+					if (Street4.Length > 0) { strAddress.Append(Street4 + "<br>"); }
+					if (Street5.Length > 0) { strAddress.Append(Street5 + "<br>"); }
+					if (Street6.Length > 0) { strAddress.Append(Street6 + "<br>"); }
+					strAddress.Append(City + ", ");
+					strAddress.Append(State + "  ");
+					strAddress.Append(PostalCode);
 				}
 				return strAddress.ToString();
 			}
@@ -178,45 +110,45 @@ namespace CodedThought.Core.Business {
 					//Get the street lines
 					switch (x) {
 						case 0:
-							this.street = aryAddress[x].ToString().Trim();
+							Street = aryAddress[x].ToString().Trim();
 							break;
 
 						case 1:
-							this.street2 = aryAddress[x].ToString().Trim();
+							Street2 = aryAddress[x].ToString().Trim();
 							break;
 
 						case 2:
-							this.street3 = aryAddress[x].ToString().Trim();
+							Street3 = aryAddress[x].ToString().Trim();
 							break;
 
 						case 3:
-							this.street4 = aryAddress[x].ToString().Trim();
+							Street4 = aryAddress[x].ToString().Trim();
 							break;
 
 						case 4:
-							this.street5 = aryAddress[x].ToString().Trim();
+							Street5 = aryAddress[x].ToString().Trim();
 							break;
 
 						case 5:
-							this.street6 = aryAddress[x].ToString().Trim();
+							Street6 = aryAddress[x].ToString().Trim();
 							break;
 
 						default:
-							this.street = aryAddress[x].ToString().Trim();
+							Street = aryAddress[x].ToString().Trim();
 							break;
 					}
 				} else {
 					//Get the City
 					char[] sep1 = { ',' };
 					ary3rdLine = aryAddress[x].Split(sep1);
-					this.city = ary3rdLine[0].ToString().Trim();
+					City = ary3rdLine[0].ToString().Trim();
 					//Get the State
 					char[] sep2 = { ' ', ' ' };
 					Regex r = new("  ");
 					aryStatePostalCode = r.Split(ary3rdLine[1]);
-					this.state = aryStatePostalCode[0].ToString().Trim();
+					State = aryStatePostalCode[0].ToString().Trim();
 					//Get the postal code
-					this.postalcode = aryStatePostalCode[1].ToString().Trim();
+					PostalCode = aryStatePostalCode[1].ToString().Trim();
 				}
 			}
 		}
@@ -227,16 +159,18 @@ namespace CodedThought.Core.Business {
 
 		public Address()
 			: base() {
-			this.street = String.Empty;
-			this.street2 = String.Empty;
-			this.street3 = String.Empty;
-			this.street4 = String.Empty;
-			this.street5 = String.Empty;
-			this.street6 = String.Empty;
-			this.city = String.Empty;
-			this.state = String.Empty;
-			this.postalcode = String.Empty;
-			this.primary = false;
+			Street = String.Empty;
+			Street2 = String.Empty;
+			Street3 = String.Empty;
+			Street4 = String.Empty;
+			Street5 = String.Empty;
+			Street6 = String.Empty;
+			City = String.Empty;
+			State = String.Empty;
+			PostalCode = String.Empty;
+			Country = String.Empty;
+			PrimaryAddress = false;
+			AddressType = new();
 		}
 
 		#endregion Constructor

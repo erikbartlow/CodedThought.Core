@@ -20,8 +20,8 @@ namespace CodedThought.Core.Configuration {
 				.SetBasePath(Directory.GetCurrentDirectory())
 				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 				.AddJsonFile($"appsettings.{environmentName}.json", true, true)
-				.AddJsonFile("hpsettings.json", optional: false, reloadOnChange: true)
-				.AddJsonFile($"hpsettings.{environmentName}.json", true, true)
+				.AddJsonFile("ctsettings.json", optional: false, reloadOnChange: true)
+				.AddJsonFile($"ctsettings.{environmentName}.json", true, true)
 				.AddEnvironmentVariables();
 		}
 

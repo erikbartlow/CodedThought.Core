@@ -1,18 +1,20 @@
 ﻿namespace CodedThought.Core.Data {
-	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
-	public class DataAwareAssemblyAttribute : Attribute {
-		private readonly bool _isDataAware;
-		/// <summary>
-		/// Gets whether this assembly contains CodedThought.Core data aware entities and controllers.
-		/// </summary>
-		public bool IsDataAware { get {  return _isDataAware; } }
-		public DataAwareAssemblyAttribute() : this(false) { }
+	/// <summary>
+	/// Defines an assembly as data aware for the CodedThought.Core.Data ORM management.
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false, AllowMultiple = false)]
+	public sealed class DataAwareAssemblyAttribute : Attribute {
+		/// 
+		/// Summary:
+		///		Gets whether this assembly contains CodedThought.Core data aware entities and controllers.
+		/// Returns:
+		///		A string representing a boolean value.  The reason for a string rather than a boolean is due 
+		///		to the current Visual Studio limitations on assembly attributes only allowing string based parameters.
+		public string IsDataAware { get; }
 		/// <summary>
 		/// Construct a new instance of the data aware assembly attribute with the string based boolean true/false.
 		/// </summary>
 		/// <param name="isDataAware"></param>
-		public DataAwareAssemblyAttribute(bool isDataAware) {
-			_isDataAware = isDataAware;
-		}
+		public DataAwareAssemblyAttribute(string isDataAware) => IsDataAware = isDataAware;
 	}
 }

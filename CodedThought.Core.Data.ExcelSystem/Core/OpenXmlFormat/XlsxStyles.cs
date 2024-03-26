@@ -1,22 +1,25 @@
-namespace CodedThought.Core.Data.ExcelSystem.Core.OpenXmlFormat {
+namespace CodedThought.Core.Data.ExcelSystem.Core.OpenXmlFormat
+{
+    internal class XlsxStyles
+    {
+        public XlsxStyles()
+        {
+            _cellXfs = new List<XlsxXf>();
+            _NumFmts = new List<XlsxNumFmt>();
+        }
 
-	internal class XlsxStyles {
+        private List<XlsxXf> _cellXfs;
 
-		public XlsxStyles() {
-			_cellXfs = new List<XlsxXf>();
-			_NumFmts = new List<XlsxNumFmt>();
-		}
+        public List<XlsxXf> CellXfs
+        {
+            get => _cellXfs; set => _cellXfs = value;
+        }
 
-		private List<XlsxXf> _cellXfs;
+        private List<XlsxNumFmt> _NumFmts;
 
-		public List<XlsxXf> CellXfs {
-			get => _cellXfs; set => _cellXfs = value;
-		}
-
-		private List<XlsxNumFmt> _NumFmts;
-
-		public List<XlsxNumFmt> NumFmts {
-			get => _NumFmts; set => _NumFmts = value;
-		}
-	}
+        public List<XlsxNumFmt> NumFmts
+        {
+            get => _NumFmts; set => _NumFmts = value;
+        }
+    }
 }

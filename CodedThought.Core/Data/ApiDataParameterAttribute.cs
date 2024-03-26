@@ -32,16 +32,12 @@
 		/// <summary>Initializes an Api Data Parameter for this property. The name should match the arguement name passed to a REST Api.</summary>
 		/// <param name="name"></param>
 		/// <example>https://url/controller/action? <see cref="ParameterName" />?=value</example>
-		public ApiDataParameterAttribute(string name) {
-			ParameterName = name;
-		}
+		public ApiDataParameterAttribute(string name) => ParameterName = name;
 
 		/// <summary>Initializes an Api Data Parameter for this property including any option flags.</summary>
 		/// <param name="name">   </param>
 		/// <param name="options"><see cref="ApiDataParameterOptions" /></param>
 		/// <example>https://url/controller/action? <see cref="ParameterName" />?=value</example>
-		public ApiDataParameterAttribute(string name, ApiDataParameterOptions options) : this(name) {
-			Options = options;
-		}
+		public ApiDataParameterAttribute(string name, ApiDataParameterOptions options) : this(name) => Options = options;
 	}
 }

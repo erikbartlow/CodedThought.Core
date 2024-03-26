@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodedThought.Core.Configura
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodedThought.Core.Data.SqlServer", "CodedThought.Core.Data.SqlServer\CodedThought.Core.Data.SqlServer.csproj", "{D048DF9A-1579-4F16-B3E7-17BF58799430}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodedThought.Core.Workflow", "CodedThought.Core.Workflow\CodedThought.Core.Workflow.csproj", "{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodedThought.Core.Validation", "CodedThought.Core.Validation\CodedThought.Core.Validation.csproj", "{C14324F5-383A-4ED5-8A8C-746726E007FC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodedThought.Core.Data.ExcelSystem", "CodedThought.Core.Data.ExcelSystem\CodedThought.Core.Data.ExcelSystem.csproj", "{70FFBAEE-37CF-425A-8990-BA47CBB80C0D}"
@@ -22,6 +20,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodedThought.Core.Transport", "CodedThought.Core.Transport\CodedThought.Core.Transport.csproj", "{0626D757-A3C0-4237-91D4-C13C34381787}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodedThought.Core.Data.ApiServer", "CodedThought.Core.Data.ApiServer\CodedThought.Core.Data.ApiServer.csproj", "{E2A0F5A0-31B0-404A-BC8C-23FA18B62338}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{850DD4C7-57F6-43DC-8230-173BF0907550}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,20 +72,7 @@ Global
 		{D048DF9A-1579-4F16-B3E7-17BF58799430}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D048DF9A-1579-4F16-B3E7-17BF58799430}.Release|x86.ActiveCfg = Release|Any CPU
 		{D048DF9A-1579-4F16-B3E7-17BF58799430}.Release|x86.Build.0 = Release|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Debug|x86.Build.0 = Debug|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Dev|Any CPU.ActiveCfg = Debug|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Dev|Any CPU.Build.0 = Debug|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Dev|x86.ActiveCfg = Debug|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Dev|x86.Build.0 = Debug|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Release|x86.ActiveCfg = Release|Any CPU
-		{6410AC68-25E0-428B-AF2A-6F36D71D9ACC}.Release|x86.Build.0 = Release|Any CPU
 		{C14324F5-383A-4ED5-8A8C-746726E007FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C14324F5-383A-4ED5-8A8C-746726E007FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C14324F5-383A-4ED5-8A8C-746726E007FC}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{C14324F5-383A-4ED5-8A8C-746726E007FC}.Debug|x86.Build.0 = Debug|Any CPU
 		{C14324F5-383A-4ED5-8A8C-746726E007FC}.Dev|Any CPU.ActiveCfg = Debug|Any CPU

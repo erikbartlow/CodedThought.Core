@@ -1,10 +1,11 @@
 using System.Collections;
 
+using CodedThought.Core.Data.Interfaces;
+
 namespace CodedThought.Core.Data {
 
 	/// <summary>ParameterCollection provides a type safe collection of IDataParameter objects. It is not specif to any database.</summary>
 	public class ParameterCollection : CollectionBase {
-		private DatabaseObject _dbo;
 
 		#region Constructors
 
@@ -16,7 +17,7 @@ namespace CodedThought.Core.Data {
 		/// <param name="databaseToUse">The database to use.</param>
 		public ParameterCollection(IDatabaseObject databaseToUse) : base() {
 			_subList = new ParameterCollection();
-			_dbo = (DatabaseObject)databaseToUse;
+			DerivedDatabaseObject = (DatabaseObject)databaseToUse;
 		}
 
 		#endregion Constructors
@@ -170,9 +171,7 @@ namespace CodedThought.Core.Data {
 		/// <summary>Adds the sub group parameter list.</summary>
 		/// <param name="list">The list.</param>
 		/// <returns></returns>
-		public void AddSubGroupParameterList(ParameterCollection list) {
-			_subList = list;
-		}
+		public void AddSubGroupParameterList(ParameterCollection list) => _subList = list;
 
 		/// <summary>Adds a parameter for the REST Api call.</summary>
 		/// <param name="actionName">    </param>
@@ -188,30 +187,21 @@ namespace CodedThought.Core.Data {
 
 		#region Properties
 
-		private WhereType _subListWhereType = WhereType.AND;
 		private ParameterCollection _subList;
 
 		/// <summary>Gets or sets the type of the sub parameter group where clause.</summary>
 		/// <value>The type of the sub parameter group where.</value>
-		public WhereType SubParameterGroupWhereType {
-			get { return _subListWhereType; }
-			set { _subListWhereType = value; }
-		}
+		public WhereType SubParameterGroupWhereType { get; set; } = WhereType.AND;
 
 		/// <summary>Gets the derived database object.</summary>
 		/// <value>The derived database object.</value>
-		internal DatabaseObject DerivedDatabaseObject {
-			get { return this._dbo; }
-			set { this._dbo = value; }
-		}
+		internal DatabaseObject DerivedDatabaseObject { get; set; }
 
 		#endregion Properties
 
 		/// <summary>remove a parameter from the collection</summary>
 		/// <param name="index">zero bound index of the parameter in the collection to remove</param>
-		public void Remove(int index) {
-			List.RemoveAt(index);
-		}
+		public void Remove(int index) => List.RemoveAt(index);
 
 		/// <summary>Add the ParameterCollection to this collection</summary>
 		/// <param name="parameters">the parameter collection to add</param>

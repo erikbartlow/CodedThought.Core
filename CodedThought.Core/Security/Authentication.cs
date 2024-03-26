@@ -10,40 +10,24 @@ namespace CodedThought.Core.Security {
 
 		#region Declarations
 
-		private String _url;
-		private String _userName;
-		private String _password;
-		private String _domain;
 
 		#endregion Declarations
 
 		#region Properties
 
-		public String Url {
-			get { return _url; }
-			set { _url = value; }
-		}
+		public String Url { get; set; }
 
 		/// <summary>Gets or sets the name of the user.</summary>
 		/// <value>The name of the user.</value>
-		public String UserName {
-			get { return _userName; }
-			set { _userName = value; }
-		}
+		public String UserName { get; set; }
 
 		/// <summary>Gets or sets the password.</summary>
 		/// <value>The password.</value>
-		public String Password {
-			get { return _password; }
-			set { _password = value; }
-		}
+		public String Password { get; set; }
 
 		/// <summary>Gets or sets the domain.</summary>
 		/// <value>The domain.</value>
-		public String Domain {
-			get { return _domain; }
-			set { _domain = value; }
-		}
+		public String Domain { get; set; }
 
 		#endregion Properties
 
@@ -52,8 +36,8 @@ namespace CodedThought.Core.Security {
 		/// <summary>Gets the current user default credentials.</summary>
 		/// <returns></returns>
 		public NetworkCredential GetCurrentUserCredentials() {
-			if (_url != String.Empty) {
-				return System.Net.CredentialCache.DefaultCredentials.GetCredential(new Uri(_url), "");
+			if (Url != String.Empty) {
+				return System.Net.CredentialCache.DefaultCredentials.GetCredential(new Uri(Url), "");
 			} else {
 				throw new Exceptions.CodedThoughtApplicationException("The Url parameter is missing.");
 			}
@@ -63,7 +47,7 @@ namespace CodedThought.Core.Security {
 		/// <param name="url">The URL.</param>
 		/// <returns></returns>
 		public NetworkCredential GetCurrentUserCredentials(String url) {
-			_url = url;
+			Url = url;
 			return GetCurrentUserCredentials();
 		}
 
@@ -84,9 +68,7 @@ namespace CodedThought.Core.Security {
 		/// <param name="password">The password.</param>
 		/// <param name="domain">  The domain.</param>
 		/// <returns></returns>
-		public NetworkCredential GetCurrentUserCredentials(String userName, String password, String domain) {
-			return new NetworkCredential(userName, password, domain);
-		}
+		public NetworkCredential GetCurrentUserCredentials(String userName, String password, String domain) => new NetworkCredential(userName, password, domain);
 
 		#endregion Methods
 

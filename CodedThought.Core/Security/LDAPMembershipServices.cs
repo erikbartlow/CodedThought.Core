@@ -55,7 +55,8 @@ namespace CodedThought.Core.Security {
 					}
 				}
 				SearchResult result = search.FindOne();
-				if (result == null) throw new MissingMemberException("The system was unable to determine the current user.");
+				if (result == null)
+					throw new MissingMemberException("The system was unable to determine the current user.");
 
 				if (result.Path != null || result.Path != string.Empty) {
 					string email = (string)result.Properties["uid"][0];
@@ -115,9 +116,7 @@ namespace CodedThought.Core.Security {
 		/// <summary>Determines whether [is group member] [the specified group name].</summary>
 		/// <param name="groupName">Name of the group.</param>
 		/// <returns><c>true</c> if [is group member] [the specified group name]; otherwise, <c>false</c>.</returns>
-		protected bool IsGroupMember(string groupName, string email) {
-			return GetADGroupUsers(groupName).Contains(email);
-		}
+		protected bool IsGroupMember(string groupName, string email) => GetADGroupUsers(groupName).Contains(email);
 
 		/// <summary>Gets the AD user groups.</summary>
 		/// <param name="groupName">Name of the group.</param>
@@ -173,9 +172,7 @@ namespace CodedThought.Core.Security {
 		/// <summary>Fixes the username.</summary>
 		/// <param name="userName">Name of the user.</param>
 		/// <returns></returns>
-		private string FixUsername(string userName) {
-			return userName.Replace("\\", ":");
-		}
+		private string FixUsername(string userName) => userName.Replace("\\", ":");
 
 		/// <summary>Gets the current directory entry.</summary>
 		/// <returns></returns>
@@ -198,9 +195,7 @@ namespace CodedThought.Core.Security {
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="LDAPMembershipServices" /> class.</summary>
-		public LDAPMembershipServices() {
-			AuthenticationMode = LDAPAuthenticationType.Anonymous;
-		}
+		public LDAPMembershipServices() => AuthenticationMode = LDAPAuthenticationType.Anonymous;
 
 		/// <summary>Initializes a new instance of the <see cref="LDAPMembershipServices" /> class.</summary>
 		/// <param name="user">The user.</param>

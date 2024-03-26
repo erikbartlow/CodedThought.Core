@@ -1,9 +1,7 @@
 ﻿namespace CodedThought.Core.Configuration {
 	public class ApiConnectionSetting : ConnectionSetting {
 
-		public ApiConnectionSetting(ConnectionSetting hpConnectionSetting) : base() {
-			PopulateCurrentConnection(hpConnectionSetting);
-		}
+		public ApiConnectionSetting(ConnectionSetting hpConnectionSetting) : base() => PopulateCurrentConnection(hpConnectionSetting);
 
 		#region Properties
 		protected int Port { get; set; }
@@ -21,6 +19,7 @@
 		public string? Password { get; set; }
 
 		#endregion Properties
+
 		/// <summary>
 		/// Parses the passed REST Api connection string.
 		/// </summary>
@@ -28,7 +27,7 @@
 		/// <returns></returns>
 		private void PopulateCurrentConnection(ConnectionSetting connectionSetting) {
 
-			this.Name = connectionSetting.Name;
+			Name = connectionSetting.Name;
 
 			string[] urlParts = connectionSetting.ConnectionString.Split(";".ToCharArray());
 			for (int i = 0; i <= urlParts.Length - 1; i++) {

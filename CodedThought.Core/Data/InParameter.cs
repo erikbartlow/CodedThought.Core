@@ -1,15 +1,13 @@
+using CodedThought.Core.Data.Interfaces;
+
 namespace CodedThought.Core.Data {
 
 	public class InParameter : Parameter, IParameter {
 
-		public InParameter() : base() {
-			NegateClause = false;
-		}
+		public InParameter() : base() => NegateClause = false;
 
 		public InParameter(IDataParameter baseParam)
-			: base(baseParam) {
-			NegateClause = false;
-		}
+			: base(baseParam) => NegateClause = false;
 
 		public List<IDataParameter> InParameters { get; set; }
 		public List<string> ParamValues;
