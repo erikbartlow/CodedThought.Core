@@ -1,9 +1,9 @@
-# CodedThought.Core.Data.MyServer
-## _A .NET Core Data Entity Provider for MySql Server._
+# CodedThought.Core.Data.SqlServer
+## _A .NET Core Data Entity Provider for Sql Server._
 
 ### Requirements
 
-SqlServer requires CodedThough.Core.Configuration and  CodedThought.Core.  These can be found in NuGet.
+SqlServer requires CodedThough.Core.Configuration and CodedThought.Core.  These can be found in NuGet.
 	- [CodedThought.Core.Configuration](https://www.nuget.org/packages/CodedThought.Core.Configuration)
 	- [CodedThought.Core](https://www.nuget.org/packages/CodedThought.Core/)
 
@@ -61,3 +61,4 @@ SqlServer requires CodedThough.Core.Configuration and  CodedThought.Core.  These
 		public string LastName { get; set; }
 	}
 ```
+
