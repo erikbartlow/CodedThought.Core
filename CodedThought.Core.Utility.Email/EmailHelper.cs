@@ -47,7 +47,7 @@ namespace CodedThought.Core.Utility.Email {
 		public EmailHelper() {
 			ReceiverEmail = new List<EmailAddress>();
 			CCEmail = new List<EmailAddress>();
-			this.Attachments = new List<EmailHelperAttachment>();
+			Attachments = new List<EmailHelperAttachment>();
 		}
 
 		/// <summary>Constructor with all the information you need to send emails Console App</summary>
@@ -57,7 +57,7 @@ namespace CodedThought.Core.Utility.Email {
 		/// <param name="smtp">         Service or Server to send the Email example: smtp3.CodedThought.com or SendGrid</param>
 		public EmailHelper(List<EmailAddress> receiverEmail, EmailAddress senderEmail, string subject, string smtp) : this() {
 			ReceiverEmail = new List<EmailAddress>();
-			this.Attachments = new List<EmailHelperAttachment>();
+			Attachments = new List<EmailHelperAttachment>();
 
 			ReceiverEmail = receiverEmail;
 			SenderEmail = senderEmail;
@@ -75,7 +75,7 @@ namespace CodedThought.Core.Utility.Email {
 
 			ReceiverEmail = new List<EmailAddress>();
 			CCEmail = new List<EmailAddress>();
-			this.Attachments = new List<EmailHelperAttachment>();
+			Attachments = new List<EmailHelperAttachment>();
 		}
 
 		/// <summary>Constructor with all the information you need to send emails</summary>
@@ -87,7 +87,7 @@ namespace CodedThought.Core.Utility.Email {
 		ITempDataProvider tempDataProvider,
 			IServiceProvider serviceProvider, List<EmailAddress> receiverEmail, EmailAddress senderEmail, string subject, string smtp) : this(viewEngine, tempDataProvider, serviceProvider) {
 			ReceiverEmail = new List<EmailAddress>();
-			this.Attachments = new List<EmailHelperAttachment>();
+			Attachments = new List<EmailHelperAttachment>();
 
 			ReceiverEmail = receiverEmail;
 			SenderEmail = senderEmail;
@@ -100,16 +100,14 @@ namespace CodedThought.Core.Utility.Email {
 		/// <summary>Method to Add an email to the list of receivers</summary>
 		/// <param name="email">Email of receiver</param>
 		public void AddReceiverEmail(EmailAddress email) {
-			if (ReceiverEmail == null)
-				ReceiverEmail = new List<EmailAddress>();
+			ReceiverEmail ??= new List<EmailAddress>();
 			ReceiverEmail.Add(email);
 		}
 
 		/// <summary>Adds the cc email.</summary>
 		/// <param name="email">The email.</param>
 		public void AddCCEmail(EmailAddress email) {
-			if (CCEmail == null)
-				CCEmail = new List<EmailAddress>();
+			CCEmail ??= new List<EmailAddress>();
 			CCEmail.Add(email);
 		}
 
@@ -117,35 +115,39 @@ namespace CodedThought.Core.Utility.Email {
 		/// <param name="TemplateHTML">Template of the email</param>
 		/// <param name="elements">    Class with all the elements to put in your template.</param>
 		public void RenderString(string TemplateHTML, object? elements = null) {
-			try {
+            try
+            {
 				this.TemplateHTML = (elements != null) ? PutParameterOnHTML(TemplateHTML, elements) : TemplateHTML;
-			} catch (Exception ex) {
-				throw ex;
-			}
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		/// <summary>Method to render the elements into your template file</summary>
 		/// <param name="filename">Path/FileName of the html template</param>
 		/// <param name="elements">Class with all the elements to put in your template.</param>
-		public void RenderFileToString(string filename, object elements = null) {
-			try {
+		public void RenderFileToString(string filename, object? elements = null) {
+            try
+            {
 				TextFileReader file = new(filename);
 				TemplateHTML = file.Read();
 				TemplateHTML = (elements != null) ? PutParameterOnHTML(TemplateHTML, elements) : TemplateHTML;
-			} catch (Exception ex) {
-				throw ex;
-			}
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		/// <summary>Method to render the elements into your template partial view</summary>
 		/// <param name="viewName">Path/Name of the Partial View</param>
 		/// <param name="elements">Class with all the elements to put in your template.</param>
 		public async Task RenderPartialToString(string controlName, object viewData) {
-			var actionContext = GetActionContext();
+            ActionContext actionContext = GetActionContext();
 			IView partial = FindView(actionContext, controlName);
 
-			using (var output = new StringWriter()) {
-				var viewContext = new ViewContext(
+			using (StringWriter output = new()) {
+                ViewContext viewContext = new(
 					actionContext,
 					partial,
 						new ViewDataDictionary<object>(
@@ -160,23 +162,23 @@ namespace CodedThought.Core.Utility.Email {
 					new HtmlHelperOptions()
 				);
 				await partial.RenderAsync(viewContext);
-				this.TemplateHTML = output.ToString();
+				TemplateHTML = output.ToString();
 			}
 		}
 
 		private IView FindView(ActionContext actionContext, string partialName) {
-			var getPartialResult = _viewEngine.GetView(null, partialName, false);
+            ViewEngineResult getPartialResult = _viewEngine.GetView(null, partialName, false);
 			if (getPartialResult.Success) {
 				return getPartialResult.View;
 			}
 
-			var findPartialResult = _viewEngine.FindView(actionContext, partialName, false);
+            ViewEngineResult findPartialResult = _viewEngine.FindView(actionContext, partialName, false);
 			if (findPartialResult.Success) {
 				return findPartialResult.View;
 			}
 
-			var searchedLocations = getPartialResult.SearchedLocations.Concat(findPartialResult.SearchedLocations);
-			var errorMessage = string.Join(
+            IEnumerable<string> searchedLocations = getPartialResult.SearchedLocations.Concat(findPartialResult.SearchedLocations);
+            string errorMessage = string.Join(
 				Environment.NewLine,
 				new[] { $"Unable to find partial '{partialName}'. The following locations were searched:" }.Concat(searchedLocations)); ;
 
@@ -184,7 +186,8 @@ namespace CodedThought.Core.Utility.Email {
 		}
 
 		private ActionContext GetActionContext() {
-			var httpContext = new DefaultHttpContext {
+            DefaultHttpContext httpContext = new()
+            {
 				RequestServices = _serviceProvider
 			};
 
@@ -193,7 +196,8 @@ namespace CodedThought.Core.Utility.Email {
 
 		/// <summary>Method to send your email</summary>
 		public void Send() {
-			try {
+            try
+            {
 				if (Validate()) {
 					switch (SMTPService) {
 						//case "SendGrid":
@@ -206,14 +210,16 @@ namespace CodedThought.Core.Utility.Email {
 				} else {
 					throw new Exception("You need to configure this library");
 				}
-			} catch (Exception ex) {
-				throw ex;
-			}
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		/// <summary>Method to send your email asynchronous</summary>
 		public Task SendAsync() {
-			try {
+            try
+            {
 				if (Validate()) {
 					switch (SMTPService) {
 						//case "SendGrid":
@@ -224,27 +230,32 @@ namespace CodedThought.Core.Utility.Email {
 				} else {
 					throw new Exception("You need to configure this library");
 				}
-			} catch (Exception ex) {
-				throw ex;
-			}
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		public string PutParametersOnSubject(string TemplateHTML, object elements) {
-			try {
-				return this.PutParameterOnHTML(TemplateHTML, elements);
-			} catch (Exception ex) {
-				throw ex;
-			}
+            try
+            {
+				return PutParameterOnHTML(TemplateHTML, elements);
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		public void PutParameterOnObjectTemplate(string parameter_name, string value, object obj) {
-			try {
+            try
+            {
 				Type myType = obj.GetType();
 				PropertyInfo pinfo = myType.GetProperty(parameter_name);
 				pinfo.SetValue(obj, value, null);
-			} catch (Exception ex) {
-				throw ex;
-			}
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		#region Private Methods
@@ -260,12 +271,13 @@ namespace CodedThought.Core.Utility.Email {
 		}
 
 		private string PutParameterOnHTML(string TemplateHTML, object elements) {
-			try {
+            try
+            {
 				MatchCollection template_values = Regex.Matches(TemplateHTML, @"\{{([A-Za-z]+)\}}");
 
 				List<String> parameters = new();
 
-				foreach (Match t in template_values) {
+				foreach (Match t in template_values.Cast<Match>()) {
 					parameters.Add(t.Value.Replace("{", string.Empty).Replace("}", string.Empty));
 				}
 
@@ -283,9 +295,10 @@ namespace CodedThought.Core.Utility.Email {
 				}
 
 				return TemplateHTML;
-			} catch (Exception ex) {
-				throw ex;
-			}
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		private void EmailServiceSMTP() {
@@ -297,7 +310,7 @@ namespace CodedThought.Core.Utility.Email {
 				};
 
 				if (Attachments.Count > 0) {
-					foreach (var a in Attachments.Where(x => !x.Inline).ToList()) {
+					foreach (EmailHelperAttachment? a in Attachments.Where(x => !x.Inline).ToList()) {
 						System.Net.Mail.Attachment attachment;
 						attachment = new System.Net.Mail.Attachment(a.Pathfile);
 						message.Attachments.Add(attachment);
@@ -316,9 +329,10 @@ namespace CodedThought.Core.Utility.Email {
 				SmtpClient client = new() { Host = SMTPService };
 				if (Port > 0) client.Port = Port;
 				client.Send(message);
-			} catch (Exception ex) {
-				throw ex;
-			}
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		private async Task EmailServiceSMTPAsync() {
@@ -330,7 +344,7 @@ namespace CodedThought.Core.Utility.Email {
 				};
 
 				if (Attachments.Count > 0) {
-					foreach (var a in Attachments.Where(x => !x.Inline).ToList()) {
+					foreach (EmailHelperAttachment? a in Attachments.Where(x => !x.Inline).ToList()) {
 						System.Net.Mail.Attachment attachment;
 						attachment = new System.Net.Mail.Attachment(a.Pathfile);
 						message.Attachments.Add(attachment);
@@ -355,30 +369,37 @@ namespace CodedThought.Core.Utility.Email {
 					}
 				};
 				await client.SendMailAsync(message);
-			} catch (Exception ex) {
-				throw ex;
-			}
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		private AlternateView GetAlternateView() {
 			try {
 				AlternateView alternateView = AlternateView.CreateAlternateViewFromString(TemplateHTML, null, MediaTypeNames.Text.Html);
-				foreach (var a in Attachments.Where(x => x.Inline).ToList()) {
+				foreach (EmailHelperAttachment? a in Attachments.Where(x => x.Inline).ToList()) {
 					LinkedResource inline = new(a.Pathfile) {
 						ContentId = a.AttachmentName
 					};
 					alternateView.LinkedResources.Add(inline);
 				}
 				return alternateView;
-			} catch (Exception ex) {
-				throw ex;
-			}
+			} catch (Exception)
+            {
+                throw;
+            }
 		}
 
 		#endregion Private Methods
 	}
 
 	public class EmailHelperAttachment {
+		public EmailHelperAttachment()
+		{
+			Pathfile = string.Empty;
+			AttachmentName = string.Empty;
+		}
 		public bool Inline { get; set; }
 
 		public string Pathfile { get; set; }
