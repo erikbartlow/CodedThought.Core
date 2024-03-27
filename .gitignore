@@ -397,3 +397,10 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /.editorconfig
+
+# Ignore specific folders
+CodedThought.Core.Data.SqlServer/
+CodedThought.Core.Data.MySql/
+CodedThought.Core.Data.OleDb/
+CodedThought.Core.Data.Oracle/
+CodedThought.Core.Data.ApiServer/
