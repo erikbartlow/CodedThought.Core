@@ -8,8 +8,8 @@
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>8.0.0-alpha</AssemblyVersion>
-	<FileVersion>8.0.0-alpha</FileVersion>
+	<AssemblyVersion>8.0.0.0</AssemblyVersion>
+	<FileVersion>8.0.0.0</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
 	<Version>8.0.0-alpha</Version>
 	<Authors>Erik Bartlow</Authors>
