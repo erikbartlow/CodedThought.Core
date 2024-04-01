@@ -8,6 +8,7 @@
 	<FileVersion>6.0.1.0</FileVersion>
 	<Title>CodedThought.Core.Business</Title>
 	<VersionPrefix>6.0.1.0</VersionPrefix>
+	<Version>6.0.1.0</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>CodedThought</Company>
 	<Description>The CodedThought.Core.Business library collection of usefull business focused objects.</Description>
@@ -16,10 +17,12 @@
 	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core</RepositoryUrl>
 	<IncludeContentInPack>true</IncludeContentInPack>
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<IncludeReferencedProjects>true</IncludeReferencedProjects>
+	<Copyright>Copyright (c) 2023 Erik Bartlow, All rights reserved</Copyright>
+	<PackageReleaseNotes>Upgraded to .NET 8.0.</PackageReleaseNotes>
 
   </PropertyGroup>
 
@@ -28,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	<None Update="Licenses\LICENSE.txt" Pack="true" PackagePath="" />
+	<None Update="LICENSE" Pack="true" PackagePath="" />
 	<None Update="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 

@@ -7,6 +7,7 @@
 	<AssemblyVersion>6.0.1.0</AssemblyVersion>
 	<FileVersion>6.0.1.0</FileVersion>
 	<VersionPrefix>6.0.1.0</VersionPrefix>
+	<Version>6.0.1.0</Version>
 	<Title>CodedThought.Core.Data.ExcelSystem</Title>
 	<Authors>Erik Bartlow</Authors>
 	<Company>CodedThought</Company>
@@ -22,6 +23,7 @@
 	<IncludeReferencedProjects>true</IncludeReferencedProjects>
 	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<Copyright>Copyright (c) 2023 Erik Bartlow, All rights reserved</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

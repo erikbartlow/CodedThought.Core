@@ -23,6 +23,7 @@
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
 	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<Copyright>Copyright (c) 2023 Erik Bartlow, All rights reserved</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

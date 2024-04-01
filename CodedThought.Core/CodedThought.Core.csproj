@@ -20,8 +20,10 @@
 	<IncludeContentInPack>true</IncludeContentInPack>
 	<IncludeReferencedProjects>true</IncludeReferencedProjects>
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<Copyright>Copyright (c) 2023 Erik Bartlow, All rights reserved</Copyright>
+	<PackageReleaseNotes>This is a breaking upgrade from CodedThought.Core 7.0.1.35.  This version changes the mechanism for loading the specific data provider libraries from file based in the bin folder to dependency injection.  Additionally, this version is compiled to work with .NET 8.0.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,8 +48,8 @@
   </ItemGroup>
 
   <ItemGroup>
-	<None Update="Licenses\LICENSE.txt" Pack="true" PackagePath="" />
 	<None Update="README.md" Pack="true" PackagePath="" />
+	<None Update="LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

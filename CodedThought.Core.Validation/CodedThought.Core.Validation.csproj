@@ -8,7 +8,7 @@
 	<FileVersion>6.0.1.0</FileVersion>
 	<VersionPrefix>6.0.1.0</VersionPrefix>
 	<Title>CodedThought.Core.Validation</Title>
-	<Copyright>2023 CodedThought</Copyright>
+	<Copyright>CodedThought (c) 2024, Erik Bartlow, All Rights Reserved</Copyright>
 	<Authors>Erik Bartlow</Authors>
 	<Description>The CodedThought.Core.Validation package is a custom validation provider to use with imported files or data sets.</Description>
 	<Authors>Erik Bartlow</Authors>
@@ -24,6 +24,7 @@
 	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<IncludeReferencedProjects>true</IncludeReferencedProjects>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
