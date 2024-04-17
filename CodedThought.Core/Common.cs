@@ -3,7 +3,7 @@ using System.Net;
 
 namespace CodedThought.Core {
 
-	internal class Common {
+	public class Common {
 
 		#region Enumerators
 
