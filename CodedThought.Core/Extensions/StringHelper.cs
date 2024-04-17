@@ -294,5 +294,19 @@ namespace CodedThought.Core.Extensions {
 			string qString = string.Join("&", values.Select(kvp => string.Format("{0}={1}", kvp.Key, HttpUtility.UrlEncode(kvp.Value))));
 			return values.Count > 0 ? "?" + qString : string.Empty;
 		}
-	}
+		/// <summary>
+		/// Returns the current string with the first character in lower case.
+		/// </summary>
+		/// <param name="str"></param>
+		/// <returns></returns>
+        public static string ToLowerFirstCase(this string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return str;
+
+            char[] chars = str.ToCharArray();
+            chars[0] = char.ToLower(chars[0]);
+            return new string(chars);
+        }
+    }
 }
