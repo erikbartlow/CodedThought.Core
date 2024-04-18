@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 using CodedThought.Core.Data.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.Memory;
+using Org.BouncyCastle.Crypto.Agreement;
 
 namespace CodedThought.Core.Data
 {
@@ -690,58 +691,57 @@ namespace CodedThought.Core.Data
 		/// <returns></returns>
 		public abstract string ConvertToChar(string columnName);
 
-		/// <summary>Gets the table definition query for the supported database.</summary>
+		/// <summary>
+		/// Gets the table definition query for the supported database.
+		/// </summary>
 		/// <param name="tableName">Name of the table.</param>
 		/// <returns></returns>
-		protected abstract String GetTableDefinitionQuery(string tableName);
+		public abstract String GetTableDefinitionQuery(string tableName);
+        /// <summary>
+        /// Gets the view definition query for the supported database.
+        /// </summary>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns></returns>
+        public abstract string GetViewDefinitionQuery(string viewName);
+		/// <summary>
+		/// Gets the query to use  in order to get the table's schema.
+		/// This is overridden by the specifiic database provider library.
+		/// </summary>
+		/// <returns><see cref="System.String"/></returns>
+		public abstract string GetTableSchemaDefinitionsQuery(string tableName);
+        /// <summary>
+        /// Gets the query to use  in order to get the table's schema.
+        /// This is overridden by the specifiic database provider library.
+        /// </summary>
+        /// <returns><see cref="System.String"/></returns>
+        public abstract string GetViewSchemaDefinitionQuery(string viewName);
+		public abstract IEnumerable<ITableColumn> GetTableDefinition(string tableName);
+		public abstract IEnumerable<ITableColumn> GetViewDefinition(string viewName);
+		public abstract IEnumerable<ITableSchema> GetTableDefinitions(string tableName);
+		public abstract IEnumerable<IViewSchema> GetViewDefinitions(string viewName);
 		/// <summary>
 		/// Gets the current session default schema query for the supported database.
 		/// </summary>
 		/// <returns></returns>
-		protected abstract String GetDefaultSessionSchemaNameQuery();
+		public abstract String GetDefaultSessionSchemaNameQuery();
 
-		public virtual List<TableColumn> GetTableDefinition(string tableName)
-		{
-			try
-			{
-				List<TableColumn> tableDefinition = new();
+        #endregion Database Specific Abstracts
 
-				DataTable dtColumns = ExecuteDataTable(GetTableDefinitionQuery(tableName));
-				foreach (DataRow row in dtColumns.Rows)
-				{
-					TableColumn column = new("", DbTypeSupported.dbVarChar, 0, true)
-					{
-						name = row["COLUMN_NAME"].ToString(),
-						isNullable = Convert.ToBoolean(row["IS_NULLABLE"]),
-						systemType = ToSystemType(row["DATA_TYPE"].ToString()),
-						maxLength = Convert.ToInt32(row["CHARACTER_MAXIMUM_LENGTH"]),
-						isIdentity = Convert.ToBoolean(row["IS_IDENTITY"]),
-						ordinalPosition = Convert.ToInt32(row["ORDINAL_POSITION"])
-					};
-					tableDefinition.Add(column);
-				}
-				return tableDefinition;
-			}
-			catch { throw; }
-		}
+        #endregion Abstract Methods
 
-		#endregion Database Specific Abstracts
+        #endregion Methods
 
-		#endregion Abstract Methods
+        #region CreateWhereOverloads
 
-		#endregion Methods
-
-		#region CreateWhereOverloads
-
-		//TODO: parameter name should return a unique name
-		/// <summary>
-		/// Create a database specific where clause with parameters. for example x = @x for SQLServer. Additionally, the parameter created is automatically added to the parameter collection passed in
-		/// </summary>
-		/// <param name="parameters">     </param>
-		/// <param name="tableColumnName">Name of column in table this parameter refers to</param>
-		/// <param name="parameterValue"> Value to assign parameter</param>
-		/// <returns></returns>
-		public string CreateWhere(ParameterCollection parameters, string tableColumnName, int parameterValue)
+        //TODO: parameter name should return a unique name
+        /// <summary>
+        /// Create a database specific where clause with parameters. for example x = @x for SQLServer. Additionally, the parameter created is automatically added to the parameter collection passed in
+        /// </summary>
+        /// <param name="parameters">     </param>
+        /// <param name="tableColumnName">Name of column in table this parameter refers to</param>
+        /// <param name="parameterValue"> Value to assign parameter</param>
+        /// <returns></returns>
+        public string CreateWhere(ParameterCollection parameters, string tableColumnName, int parameterValue)
 		{
 			IDataParameter param = CreateInt32Parameter(ToSafeParamName(tableColumnName), parameterValue);
 			parameters.Add(param);
@@ -1655,6 +1655,7 @@ namespace CodedThought.Core.Data
 			return $"{sourceUrl}/{controller}";
 		}
 
-		#endregion Helpers
-	}
+
+        #endregion Helpers
+    }
 }
