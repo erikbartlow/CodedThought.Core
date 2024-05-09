@@ -39,7 +39,7 @@ namespace CodedThought.Core.Data
 		public bool UseHttpCache => _runtimeCache == null;
 		/// <summary>Gets or sets the database object instance.</summary>
 		/// <value>The database object instance.</value>
-		protected IDatabaseObject DatabaseObjectInstance { get; private set; }
+		protected DatabaseObject DatabaseObjectInstance { get; private set; }
 
 		/// <summary>Gets the connection.</summary>
 		/// <value>The connection.</value>

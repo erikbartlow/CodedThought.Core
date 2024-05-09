@@ -15,30 +15,29 @@ namespace CodedThought.Core.Configuration {
 			return Configure(config, env.EnvironmentName);
 		}
 
-		private static IConfigurationBuilder Configure(IConfigurationBuilder config, string environmentName) {
-			return config
-				.SetBasePath(Directory.GetCurrentDirectory())
-				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-				.AddJsonFile($"appsettings.{environmentName}.json", true, true)
-				.AddJsonFile("ctsettings.json", optional: false, reloadOnChange: true)
-				.AddJsonFile($"ctsettings.{environmentName}.json", true, true)
-				.AddEnvironmentVariables();
-		}
+        private static IConfigurationBuilder Configure(IConfigurationBuilder config, string environmentName) => config
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{environmentName}.json", true, true)
+                .AddJsonFile("ctsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"ctsettings.{environmentName}.json", true, true)
+                .AddEnvironmentVariables();
 
-		/// <summary>
-		/// Use for .NET Core Console applications.
-		/// </summary>
-		/// <returns></returns>
-		public static IConfiguration CreateConfiguration() {
-			var env = new HostingEnvironment {
+        /// <summary>
+        /// Use for .NET Core Console applications.
+        /// </summary>
+        /// <returns></returns>
+        public static IConfiguration CreateConfiguration() {
+            HostingEnvironment env = new()
+            {
 				EnvironmentName = Environment.GetEnvironmentVariable("DOTNETCORE_ENVIRONMENT") ?? "Production",
 				ApplicationName = AppDomain.CurrentDomain.FriendlyName,
 				ContentRootPath = AppDomain.CurrentDomain.BaseDirectory,
 				ContentRootFileProvider = new PhysicalFileProvider(AppDomain.CurrentDomain.BaseDirectory)
 			};
 
-			var config = new ConfigurationBuilder();
-			var configured = Configure(config, env);
+            ConfigurationBuilder config = new();
+            IConfigurationBuilder configured = Configure(config, env);
 			return configured.Build();
 		}
 	}

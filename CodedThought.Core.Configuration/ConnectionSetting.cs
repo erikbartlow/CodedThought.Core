@@ -51,8 +51,8 @@
 		public void CheckProvider()
 		{
 			string providerValue = ProviderType;
-			List<string> validProviders = new();
-			validProviders.AddRange("SqlServer,Oracle,MongoDb,OleDb,MySql,ApiServer".ToLower().Split(",".ToCharArray()));
+			List<string> validProviders = [];
+			validProviders.AddRange("SqlServer,Oracle,MongoDb,OleDb,MySql,ApiServer,PostgreSQL".ToLower().Split(",".ToCharArray()));
 
 			if (String.IsNullOrEmpty(providerValue))
 			{
@@ -68,8 +68,8 @@
 		public void CheckProvider(string providerType)
 		{
 			string providerValue = providerType;
-			List<string> validProviders = new();
-			validProviders.AddRange("SqlServer,Oracle,MongoDb,OleDb,MySql,ApiServer".ToLower().Split(",".ToCharArray()));
+			List<string> validProviders = [];
+			validProviders.AddRange("SqlServer,Oracle,MongoDb,OleDb,MySql,ApiServer,PostgreSQL".ToLower().Split(",".ToCharArray()));
 
 			if (!validProviders.Contains(providerValue.ToLower()))
 			{

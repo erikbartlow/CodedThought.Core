@@ -13,6 +13,7 @@ namespace CodedThought.Core.Data
         public ViewSchema() : base()
         {
             SqlDefinition = string.Empty;
+            IsView = true;
         }
         public string? SqlDefinition {  get; set; }
     }

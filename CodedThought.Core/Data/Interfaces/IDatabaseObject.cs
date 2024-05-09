@@ -193,53 +193,6 @@ namespace CodedThought.Core.Data.Interfaces {
 
 		void Update(string tableName, ParameterCollection parameters, ParameterCollection whereParamCollection);
 
-        #region Schema Definition Query Methods
-        /// <summary>
-        /// Gets the query to use  in order to get the table's schema.
-        /// This is overridden by the specifiic database provider library.
-        /// </summary>
-        /// <returns><see cref="System.String"/></returns>
-        string GetTableSchemaDefinitionsQuery(string? tableName);
-        /// <summary>
-        /// Gets the query to use  in order to get the view's schema.
-        /// This is overridden by the specifiic database provider library.
-        /// </summary>
-        /// <returns><see cref="System.String"/></returns>
-		string GetViewSchemaDefinitionQuery(string? tableName);
-        /// <summary>
-        /// Gets the table's column definition query.
-        /// </summary>
-        /// <param name="tableName"></param>
-        /// <returns><see cref="System.String"/></returns>
-        string GetTableDefinitionQuery(string? tableName);
-        /// <summary>
-        /// Gets the view's column definition query.
-        /// </summary>
-        /// <param name="viewName"></param>
-        /// <returns></returns>
-        string GetViewDefinitionQuery(string? tableName);
-
-        #endregion Schema Definition Query Methods
-
-        #region Schema Methods
-
-		IEnumerable<ITableColumn> GetTableDefinition(string tableName);
-		IEnumerable<ITableColumn> GetViewDefinition(string viewName);
-        /// <summary>
-        /// Gets a list of table schema objects.
-        /// </summary>
-        /// <param name="tableName"></param>
-        /// <returns></returns>
-        IEnumerable<ITableSchema> GetTableDefinitions(string tableName);
-        /// <summary>
-        /// Gets a list of view schema objects.  Optionally, a
-        /// specific biew can be passed as a filter.
-        /// </summary>
-        /// <param name="viewName"></param>
-        /// <returns></returns>
-        IEnumerable<IViewSchema> GetViewDefinitions(string viewName);
-
-        #endregion Schema Methods
 
         #endregion Methods and Events
     }

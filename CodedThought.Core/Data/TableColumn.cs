@@ -15,14 +15,21 @@ namespace CodedThought.Core.Data
 
         /// <summary>system data type</summary>
         public Type SystemType { get; set; }
+        /// <summary>
+        /// System DbType
+        /// </summary>
+        public DbType DbType { get; set; }
 
         /// <summary>column size</summary>
         public int Size { get; set; }
 
+        /// <summary>Gets or sets whether this column is the primary column.
+        public Boolean IsPrimary { get; set; }
+
         /// <summary>IsUpdatable flag</summary>
         public Boolean IsUpdateable { get; set; }
 
-        /// <summary>use this column fo rsorting data</summary>
+        /// <summary>Use this column for sorting data</summary>
         public Boolean IsSortColumn { get; set; }
 
         /// <summary>This column is nullable or not.</summary>
@@ -51,12 +58,13 @@ namespace CodedThought.Core.Data
         /// <param name="type">        </param>
         /// <param name="size">        </param>
         /// <param name="isUpdateable"></param>
-        public TableColumn(string name, DbTypeSupported type, int size, Boolean isUpdateable)
+        public TableColumn(string name, DbTypeSupported type, int size, Boolean isPrimary)
         {
             Name = name;
             Type = type;
             Size = size;
-            IsUpdateable = isUpdateable;
+            IsPrimary = isPrimary;
+            IsUpdateable = isPrimary == false;
             IsSortColumn = false;
             IsInsertable = true;
             IsNullable = true;
@@ -68,12 +76,8 @@ namespace CodedThought.Core.Data
         /// <param name="size">        </param>
         /// <param name="isUpdateable"></param>
         /// <param name="isSortColumn"></param>
-        public TableColumn(string name, DbTypeSupported type, int size, Boolean isUpdateable, Boolean isSortColumn)
+        public TableColumn(string name, DbTypeSupported type, int size, Boolean isPrimary, Boolean isSortColumn) : this(name, type, size, isPrimary)
         {
-            Name = name;
-            Type = type;
-            Size = size;
-            IsUpdateable = isUpdateable;
             IsSortColumn = isSortColumn;
             IsInsertable = true;
             IsNullable = true;
@@ -87,13 +91,8 @@ namespace CodedThought.Core.Data
         /// <param name="isUpdateable"></param>
         /// <param name="isSortColumn"></param>
         /// <param name="isDescending"></param>
-        public TableColumn(string name, DbTypeSupported type, int size, Boolean isUpdateable, Boolean isSortColumn, Boolean isDescending)
+        public TableColumn(string name, DbTypeSupported type, int size, Boolean isPrimary, Boolean isSortColumn, Boolean isDescending) : this(name, type, size, isPrimary, isSortColumn)
         {
-            Name = name;
-            Type = type;
-            Size = size;
-            IsUpdateable = isUpdateable;
-            IsSortColumn = isSortColumn;
             IsInsertable = true;
             IsDescending = isDescending;
         }

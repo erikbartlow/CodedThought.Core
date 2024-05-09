@@ -14,10 +14,12 @@ namespace CodedThought.Core.Data
         {
             Owner = string.Empty;
             Name = string.Empty;
+            IsView = false;
             Columns = [];
         }
         public string Owner { get; set; }
         public string Name { get; set; }
-        public List<ITableColumn> Columns { get; set; }
+        public bool IsView {  get; set; }
+        public List<TableColumn> Columns { get; set; }
     }
 }

@@ -4,10 +4,11 @@ namespace CodedThought.Core.Data {
 
 	public sealed class DbTypeConvertor {
 
-		private struct DbTypeMapEntry {
+		protected struct DbTypeMapEntry {
 			public Type Type;
 			public DbType DbType;
 			public SqlDbType SqlDbType;
+			public DbTypeSupported DbSupportedType;
 
 			public DbTypeMapEntry(Type type, DbType dbType, SqlDbType sqlDbType) {
 				this.Type = type;
@@ -17,7 +18,7 @@ namespace CodedThought.Core.Data {
 		};
 
 		private static ArrayList _DbTypeList = new();
-
+		private static Dictionary<Type, SqlDbType> _sqlDbTypeMap;
 		#region Constructors
 
 		static DbTypeConvertor() {
@@ -97,6 +98,7 @@ namespace CodedThought.Core.Data {
 		/// <param name="sqlDbType"></param>
 		/// <returns></returns>
 		public static Type ToNetType(SqlDbType sqlDbType) {
+			
 			DbTypeMapEntry entry = Find(sqlDbType);
 			return entry.Type;
 		}
@@ -116,7 +118,16 @@ namespace CodedThought.Core.Data {
 			DbTypeMapEntry entry = Find(sqlDbType);
 			return entry.DbType;
 		}
-
+		/// <summary>
+		/// Converts a <see cref="DbTypeSupported"/> enum value to DbType
+		/// </summary>
+		/// <param name="dbTypeSupported"></param>
+		/// <returns></returns>
+		public static DbType ToDbType(DbTypeSupported dbTypeSupported)
+		{
+			DbTypeMapEntry entry = Find(dbTypeSupported);
+			return entry.DbType;
+		}
 		/// <summary>Convert .Net type to TSQL data type</summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
@@ -132,7 +143,11 @@ namespace CodedThought.Core.Data {
 			DbTypeMapEntry entry = Find(dbType);
 			return entry.SqlDbType;
 		}
-
+		public static DbTypeSupported ToSupportedDbType(Type systemType)
+		{
+			DbTypeMapEntry entry = Find(systemType);
+			return entry.DbSupportedType;
+		}
 		private static DbTypeMapEntry Find(Type type) {
 			object retObj = null;
 			for (int i = 0; i < _DbTypeList.Count; i++) {
@@ -178,6 +193,23 @@ namespace CodedThought.Core.Data {
 				: (DbTypeMapEntry)retObj;
 		}
 
-		#endregion Methods
-	}
+        private static DbTypeMapEntry Find(DbTypeSupported dbTypeSupported)
+        {
+            object retObj = null;
+            for (int i = 0; i < _DbTypeList.Count; i++)
+            {
+                DbTypeMapEntry entry = (DbTypeMapEntry) _DbTypeList[i];
+                if (entry.DbSupportedType == dbTypeSupported)
+                {
+                    retObj = entry;
+                    break;
+                }
+            }
+            return retObj == null
+                ? throw
+                new ApplicationException("Referenced an unsupported SqlDbType")
+                : (DbTypeMapEntry) retObj;
+        }
+        #endregion Methods
+    }
 }

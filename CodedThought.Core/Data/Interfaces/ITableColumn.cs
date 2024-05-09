@@ -3,6 +3,7 @@
     public interface ITableColumn
     {
         string CorrespondingPropertyName { get; set; }
+        bool IsPrimary {  get; set; }
         bool IsDescending { get; set; }
         bool IsIdentity { get; set; }
         bool IsInsertable { get; set; }
@@ -15,5 +16,6 @@
         int Size { get; set; }
         Type SystemType { get; set; }
         DbTypeSupported Type { get; set; }
+        DbType DbType { get; set; }
     }
 }

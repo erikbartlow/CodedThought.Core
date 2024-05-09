@@ -24,7 +24,9 @@
 		/// <remarks>
 		/// It is worth noting that the REST Api database object is significantly less functional than a direct database connection. Most interface methods simply do not work in a REST environment.
 		/// </remarks>
-		ApiServer
+		ApiServer,
+		/// <summary>PostgreSQL</summary>
+		PostgreSQL
 	};
 
 	/// <summary>Database types that are supported</summary>
@@ -73,7 +75,9 @@
 		dbGUID,
 
 		/// <summary>Use for standard string and Unicode character strings.</summary>
-		dbNVarChar
+		dbNVarChar,
+		/// <summary> Use for standard time data.</summary>
+		dbTime
 	};
 
 	/// <summary>Database vendor name enum.</summary>
@@ -81,7 +85,8 @@
 		SqlServer,
 		Oracle,
 		MySql,
-		OleDb
+		OleDb,
+		PostGresSql
 	}
 
 	/// <summary>List of Date format string</summary>

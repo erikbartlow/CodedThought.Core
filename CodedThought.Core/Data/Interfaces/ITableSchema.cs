@@ -18,9 +18,13 @@ namespace CodedThought.Core.Data.Interfaces
         /// </summary>
         string Name { get; set; }
         /// <summary>
+        /// Gets or sets if this object is a view.
+        /// </summary>
+        bool IsView {  get; set; }
+        /// <summary>
         /// Gets or sets the associated columns.
         /// </summary>
-        List<ITableColumn> Columns { get; set; }
+        List<TableColumn> Columns { get; set; }
 
     }
 }

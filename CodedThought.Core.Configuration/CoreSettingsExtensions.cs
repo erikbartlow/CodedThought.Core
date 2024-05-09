@@ -81,6 +81,19 @@ namespace CodedThought.Core.Configuration
 			return options.Connections.FirstOrDefault(x => x.Primary == true);
 		}
 		/// <summary>
+		/// Gets a distinct list of ProviderType values from each connection in the Connections section.
+		/// </summary>
+		/// <param name="configuration"></param>
+		/// <returns></returns>
+		public static List<string> GetCoreDatabaseProviders(this IConfiguration configuration)
+		{
+			List<String> configuredProviders = [];
+			CoreSettings options = new() { Settings = [], Connections = [] };
+			configuration.GetSection(nameof(CoreSettings)).Bind(options);
+			configuredProviders =  options.Connections.Select(cn => cn.ProviderType).Distinct().ToList();
+			return configuredProviders;
+		}
+		/// <summary>
 		/// Gets the database connection from the ctsettings file with the Primary=true setting.
 		/// </summary>
 		/// <param name="configuration"></param>
