@@ -39,7 +39,7 @@ namespace CodedThought.Core.Data
 		public bool UseHttpCache => _runtimeCache == null;
 		/// <summary>Gets or sets the database object instance.</summary>
 		/// <value>The database object instance.</value>
-		protected IDatabaseObject DatabaseObjectInstance { get; private set; }
+		protected DatabaseObject DatabaseObjectInstance { get; private set; }
 
 		/// <summary>Gets the connection.</summary>
 		/// <value>The connection.</value>
@@ -419,7 +419,7 @@ namespace CodedThought.Core.Data
 			foreach (DataColumnAttribute attrColumn in attrTable.Properties)
 			{
 				TableColumn tc = new(attrColumn.ColumnName, attrColumn.ConvertTypeToDbTypeSupported(), attrColumn.Size, attrColumn.IsUpdateable);
-				tc.isInsertable = tc.isUpdateable;
+				tc.IsInsertable = tc.IsUpdateable;
 				listColumns.Add(tc);
 			}
 			DatabaseObjectInstance.Add(GetTableNameFromObject<T>(), obj, listColumns, this);
@@ -504,21 +504,21 @@ namespace CodedThought.Core.Data
 				DataTable dt = new(tableName);
 				List<TableColumn> tableColumns = DatabaseObjectInstance.GetTableDefinition(tableName);
 				tableColumns.Sort(delegate (TableColumn c1, TableColumn c2)
-				{ return c1.ordinalPosition.CompareTo(c2.ordinalPosition); });
+				{ return c1.OrdinalPosition.CompareTo(c2.OrdinalPosition); });
 
-				tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.name) != String.Empty && col.isIdentity != true).ToList();
+				tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.Name) != String.Empty && col.IsIdentity != true).ToList();
 				// Propertied columns refers to columns in the table that indeed have a property assigned to them in the object.
-				List<TableColumn> propertiedColumns = tableColumns.Where(col => col.isIdentity != true)
+				List<TableColumn> propertiedColumns = tableColumns.Where(col => col.IsIdentity != true)
 					.Select(col =>
 					{
-						col.correspondingPropertyName = GetPropertyNameColumn<T>(col.name);
+						col.CorrespondingPropertyName = GetPropertyNameColumn<T>(col.Name);
 						return col;
 					}).ToList();
 				// Create the DataTable from the object. This allows changes to be made in the data object and flow to this controller.
 				foreach (TableColumn col in propertiedColumns)
 				{
-					DataColumnAttribute colAttrib = GetColumnDataAttribute<T>(col.correspondingPropertyName);
-					dt.Columns.Add(col.name, colAttrib.PropertyType);
+					DataColumnAttribute colAttrib = GetColumnDataAttribute<T>(col.CorrespondingPropertyName);
+					dt.Columns.Add(col.Name, colAttrib.PropertyType);
 				}
 
 				// Convert the list to a DataTable.
@@ -552,7 +552,7 @@ namespace CodedThought.Core.Data
 					foreach (TableColumn col in propertiedColumns)
 					{
 						//bulkCopy.ColumnMappings.Add( x, col.ordinalPosition ); // Part Number
-						bulkCopy.ColumnMappings.Add(x, col.ordinalPosition);
+						bulkCopy.ColumnMappings.Add(x, col.OrdinalPosition);
 						x++;
 					}
 					// Set the destination table name
@@ -601,14 +601,14 @@ namespace CodedThought.Core.Data
 				DataTable dt = records;
 				List<TableColumn> tableColumns = DatabaseObjectInstance.GetTableDefinition(GetTableNameFromObject<T>());
 				tableColumns.Sort(delegate (TableColumn c1, TableColumn c2)
-				{ return c1.ordinalPosition.CompareTo(c2.ordinalPosition); });
+				{ return c1.OrdinalPosition.CompareTo(c2.OrdinalPosition); });
 
-				tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.name) != String.Empty && col.isIdentity != true).ToList();
+				tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.Name) != String.Empty && col.IsIdentity != true).ToList();
 				// Propertied columns refers to columns in the table that indeed have a property assigned to them in the object.
-				List<TableColumn> propertiedColumns = tableColumns.Where(col => col.isIdentity != true)
+				List<TableColumn> propertiedColumns = tableColumns.Where(col => col.IsIdentity != true)
 					.Select(col =>
 					{
-						col.correspondingPropertyName = GetPropertyNameColumn<T>(col.name);
+						col.CorrespondingPropertyName = GetPropertyNameColumn<T>(col.Name);
 						return col;
 					}).ToList();
 
@@ -629,7 +629,7 @@ namespace CodedThought.Core.Data
 					int x = 0;
 					foreach (TableColumn col in propertiedColumns)
 					{
-						bulkCopy.ColumnMappings.Add(x, col.ordinalPosition);
+						bulkCopy.ColumnMappings.Add(x, col.OrdinalPosition);
 						x++;
 					}
 					// Set the destination table name
@@ -1356,11 +1356,11 @@ namespace CodedThought.Core.Data
 
 				foreach (TableColumn col in tableDefinition)
 				{
-					col.correspondingPropertyName = GetPropertyNameColumn<T>(col.name);
+					col.CorrespondingPropertyName = GetPropertyNameColumn<T>(col.Name);
 				}
 				return !includeIdentityColumns
 					? tableDefinition.FindAll(delegate (TableColumn c)
-					{ return c.isIdentity == false; })
+					{ return c.IsIdentity == false; })
 					: tableDefinition;
 			}
 			catch (Exception ex)

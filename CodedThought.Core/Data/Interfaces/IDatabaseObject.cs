@@ -177,8 +177,6 @@ namespace CodedThought.Core.Data.Interfaces {
 
 		string GetStringToDateSqlSyntax(DateTime dateSQL);
 
-		List<TableColumn> GetTableDefinition(string tableName);
-
 		string GetVarCharValue(IDataReader reader, string columnName);
 
 		string GetYearSQLSyntax(string dateString);
@@ -195,6 +193,7 @@ namespace CodedThought.Core.Data.Interfaces {
 
 		void Update(string tableName, ParameterCollection parameters, ParameterCollection whereParamCollection);
 
-		#endregion Methods and Events
-	}
+
+        #endregion Methods and Events
+    }
 }
