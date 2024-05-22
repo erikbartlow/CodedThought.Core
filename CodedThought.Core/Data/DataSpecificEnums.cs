@@ -77,8 +77,12 @@
 		/// <summary>Use for standard string and Unicode character strings.</summary>
 		dbNVarChar,
 		/// <summary> Use for standard time data.</summary>
-		dbTime
-	};
+		dbTime,
+		/// <summary>Use for Sql Variant types typically found in MySql and Sql Server</summary>
+		dbSqlVariant,
+        /// <summary>Use for the tiny int data typestypically found in MySql and Sql Server</summary>
+		dbTinyInt
+    };
 
 	/// <summary>Database vendor name enum.</summary>
 	public enum DBVendor {
