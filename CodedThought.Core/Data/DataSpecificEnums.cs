@@ -32,48 +32,54 @@
 	/// <summary>Database types that are supported</summary>
 	public enum DbTypeSupported {
 
-		/// <summary>Use for non Unicode strings.</summary>
+		///<summary>Use for non Unicode strings.</summary>
 		dbVarChar = 0,
 
-		/// <summary>SmallInt</summary>
+		/// <summary>TinyInt</summary>
+		dbTinyInt,
+
+		///<summary>SmallInt</summary>
 		dbInt16,
 
-		/// <summary>int</summary>
+		///<summary>int</summary>
 		dbInt32,
 
-		/// <summary>BigInt</summary>
+		///<summary>BigInt</summary>
 		dbInt64,
 
-		/// <summary>double</summary>
+		///<summary>double</summary>
 		dbDouble,
 
-		/// <summary>DateTime</summary>
+		///<summary>DateTime</summary>
 		dbDateTime,
 
-		/// <summary>DateTime2</summary>
+		///<summary>DateTime2</summary>
 		dbDateTime2,
 
-		/// <summary>Char</summary>
+		///<summary>Char</summary>
 		dbChar,
 
-		/// <summary>Binary Large Object</summary>
+		///<summary>Binary Large Object</summary>
 		dbBlob,
 
-		/// <summary>Bit</summary>
+		///<summary>Bit</summary>
 		dbBit,
 
-		/// <summary>decimal (scaled int)</summary>
+		///<summary>decimal (scaled int)</summary>
 		dbDecimal,
 
-		/// <summary>Use for binary data for files.</summary>
+		///<summary>Use for binary data for files.</summary>
 		dbImage,
 
-		/// <summary>Use for binary data for files.</summary>
+		///<summary>Use for binary data for files.</summary>
 		dbVarBinary,
 
-		/// <summary>GUID</summary>
-		dbGUID,
+		/// <summary>Use for Sql Variant data type if supported.</summary>
+		dbSqlVariant,
 
+		///<summary>GUID</summary>
+		dbGUID,
+    
 		/// <summary>Use for standard string and Unicode character strings.</summary>
 		dbNVarChar,
 		/// <summary> Use for standard time data.</summary>
@@ -82,7 +88,7 @@
 		dbSqlVariant,
         /// <summary>Use for the tiny int data typestypically found in MySql and Sql Server</summary>
 		dbTinyInt
-    };
+  };
 
 	/// <summary>Database vendor name enum.</summary>
 	public enum DBVendor {

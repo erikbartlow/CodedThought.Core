@@ -1,43 +1,52 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<IsPackable>true</IsPackable>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<PackageId>$(AssemblyName)</PackageId>
-		<Title>CodedThought Core Utility Email Dotnet 6</Title>
-		<VersionPrefix>6.0.0.3</VersionPrefix>
-		<AssemblyVersion>6.0.0.3</AssemblyVersion>
-		<FileVersion>6.0.0.3</FileVersion>
-		<Description>The CodedThought.Core library is an email helper that utilizes MVC Razor templates to author emails.</Description>
-		<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-		<Version>$(AssemblyPrefix)</Version>
-		<Authors>Erik Bartlow</Authors>
-		<Company>Erik Bartlow</Company>
-		<PackageProjectUrl>https://hpi-wehp-cits.visualstudio.com/CodedThought.Core/_artifacts/feed/CodedThought.Core/NuGet/CodedThought.Core.Utility.Email/overview/$(AssemblyVersion)</PackageProjectUrl>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	</PropertyGroup>
+  <PropertyGroup>
+	<TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<IsPackable>true</IsPackable>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<PackageId>$(AssemblyName)</PackageId>
+	<Title>CodedThought Core Utility Email Dotnet 8</Title>
+	<VersionPrefix>7.0.0.0</VersionPrefix>
+	<AssemblyVersion>7.0.0.0</AssemblyVersion>
+	<FileVersion>7.0.0.0</FileVersion>
+	<Description>The CodedThought.Core library is an email helper that utilizes MVC Razor templates to author emails.</Description>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
+	<Version>$(AssemblyPrefix)</Version>
+	<Authors>Erik Bartlow</Authors>
+	<Company>Erik Bartlow</Company>
+	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core/tree/original/CodedThought.Core.Utility.Email</PackageProjectUrl>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.1.3" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="..\CodedThought.Core.Transport\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
-	<ItemGroup>
-	  <None Update="Licenses\LICENSE.txt">
-	    <Pack>true</Pack>
-	    <PackagePath></PackagePath>
-	  </None>
-	  <None Update="README.md">
-	    <PackagePath></PackagePath>
-	    <Pack>true</Pack>
-	  </None>
-	</ItemGroup>
+  <ItemGroup>
+	<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.1.3" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<None Update="LICENSE.txt">
+	  <Pack>true</Pack>
+	  <PackagePath></PackagePath>
+	</None>
+	<None Update="README.md">
+	  <PackagePath></PackagePath>
+	  <Pack>true</Pack>
+	</None>
+  </ItemGroup>
 
 </Project>
