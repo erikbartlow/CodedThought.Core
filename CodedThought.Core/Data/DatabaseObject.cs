@@ -243,21 +243,12 @@ namespace CodedThought.Core.Data
         #endregion Properties
 
         #region Methods
-        private bool CheckForDuplicateConnectionTypes(IServiceProvider services)
-        {
-            try
-            {
-                return false;
-            }
-            catch (Exception)
-            {
 
-                throw;
-            }
-        }
         /// <summary>Begins a transaction for the connection</summary>
         public IDbTransaction BeginTransaction()
         {
+            if (Connection.State == ConnectionState.Closed)
+                OpenConnection();
             Transaction ??= Connection.BeginTransaction(IsolationLevel.ReadCommitted);
             return Transaction;
         }
@@ -703,7 +694,35 @@ namespace CodedThought.Core.Data
             // If no match then return a basic string.
             return DbType.String;
         }
+        public virtual DbType ToDbType(DbTypeSupported dbTypeSupported)
+        {
+            Dictionary<DbTypeSupported, DbType> TypeToDbTypeMap = new Dictionary<DbTypeSupported, DbType>(){
+                { DbTypeSupported.dbVarBinary, DbType.Binary },
+                { DbTypeSupported.dbInt32, DbType.Int32 },
+                { DbTypeSupported.dbInt64, DbType.Int64 },
+                { DbTypeSupported.dbInt16, DbType.Int16 },
+                { DbTypeSupported.dbTinyInt, DbType.Byte },
+                { DbTypeSupported.dbNumeric, DbType.Decimal },
+                { DbTypeSupported.dbDecimal, DbType.Decimal },
+                { DbTypeSupported.dbDouble, DbType.Double },
+                { DbTypeSupported.dbBit, DbType.Boolean },
+                { DbTypeSupported.dbDateTime, DbType.DateTime },
+                { DbTypeSupported.dbDateTime2, DbType.DateTime2 },
+                { DbTypeSupported.dbVarChar, DbType.String },
+                { DbTypeSupported.dbChar, DbType.String },
+                { DbTypeSupported.dbBlob, DbType.Binary },
+                { DbTypeSupported.dbImage, DbType.Binary },
+                { DbTypeSupported.dbGUID, DbType.Guid },
+                { DbTypeSupported.dbSqlVariant, DbType.Object }
+            };
 
+            if (TypeToDbTypeMap.ContainsKey(dbTypeSupported))
+            {
+                return TypeToDbTypeMap[dbTypeSupported];
+            }
+            // If no match then return a basic string.
+            return DbType.String;
+        }
         /// <summary>Convert any data type to Char</summary>
         /// <param name="columnName"></param>
         /// <returns></returns>
@@ -859,7 +878,7 @@ namespace CodedThought.Core.Data
             {
                 StringBuilder sql = new("SELECT ");
                 sql.Append(GenerateColumnList(selectColumns));
-                sql.Append($" FROM {GetTableName(schemaName, tableName)}");
+                sql.Append($" FROM {tableName}");
                 if (SupportedDatabase == DBSupported.SqlServer)
                     sql.Append(" WITH (READPAST)");
                 if (parameters != null && parameters.Count > 0)
@@ -951,25 +970,20 @@ namespace CodedThought.Core.Data
         public virtual DataSet GetDataSet(string tableName, string schemaName, List<string> selectColumns, ParameterCollection parameters)
         {
             DataSet dataSet;
-            DefaultSchemaName = schemaName;
+            if (string.IsNullOrEmpty(schemaName))
+            { schemaName = DefaultSchemaName; }
+
             try
             {
                 StringBuilder sql = new("SELECT ");
                 sql.Append(GenerateColumnList(selectColumns));
-                if (DefaultSchemaName != string.Empty)
-                {
-                    sql.AppendFormat(" FROM {0}.{1}", DefaultSchemaName, tableName);
-                }
-                else
-                {
-                    sql.AppendFormat(" FROM {0}", tableName);
-                }
+                sql.Append($" FROM {GetTableName(schemaName, tableName)} ");
                 if (SupportedDatabase == DBSupported.SqlServer)
-                    sql.Append(" WITH (READPAST)");
+                    sql.Append("WITH (READPAST) ");
 
                 if (parameters != null && parameters.Count > 0)
                 {
-                    sql.Append(" WHERE " + GenerateWhereClauseFromParams(parameters));
+                    sql.Append("WHERE " + GenerateWhereClauseFromParams(parameters));
                 }
 
                 dataSet = ExecuteDataSet(sql.ToString(), parameters);
@@ -1012,19 +1026,13 @@ namespace CodedThought.Core.Data
             {
                 BeginTransaction();
                 string sql;
-                if (schemaName != string.Empty && schemaName != null)
-                {
-                    sql = $"DELETE FROM {schemaName}.{tableName}";
-                }
-                else
-                {
-                    sql = $"DELETE FROM {tableName}";
-                }
+
+                sql = $"DELETE FROM {GetTableName(schemaName, tableName)} ";
                 //ParameterCollection deleteParameters=new ParameterCollection();
 
                 if (parameters != null && parameters.Count > 0)
                 {
-                    sql += $" WHERE {GenerateWhereClauseFromParams(parameters)}";
+                    sql += $"WHERE {GenerateWhereClauseFromParams(parameters)}";
                 }
 
                 ExecuteNonQuery(sql.ToString(), parameters);
@@ -1069,15 +1077,7 @@ namespace CodedThought.Core.Data
             {
                 BeginTransaction();
                 StringBuilder sql = new();
-                if (schemaName != string.Empty && schemaName != null)
-                {
-                    sql.Append($"UPDATE {schemaName}.{tableName} SET ");
-                }
-                else
-                {
-                    sql.Append($"UPDATE {tableName} SET ");
-                }
-
+                sql.Append($"UPDATE {GetTableName(schemaName, tableName)} SET ");
                 sql.Append(GenerateUpdateList(parameters));
 
                 if (whereParamCollection != null && whereParamCollection.Count > 0)

@@ -13,39 +13,39 @@ namespace CodedThought.Core.Data {
 
 		#region Properties
 
-		public string TableName {
-			get {
-				return String.IsNullOrEmpty(_tableName) && (!UseView && String.IsNullOrEmpty(_viewName))
-					?                  throw new MissingArguementException("The table name is not set for this object.")
-					: _tableName;
-			}
-			set {
-				_tableName = value;
-			}
-		}
+		public string TableName
+        {
+            get => String.IsNullOrEmpty(_tableName) && (!UseView && String.IsNullOrEmpty(_viewName))
+                    ? throw new MissingArguementException("The table name is not set for this object.")
+                    : _tableName;
+            set => _tableName = value;
+        }
 
-		/// <summary>Gets or sets the name of the view.</summary>
-		/// <value>If a view is set then it will be used during all Get methods.</value>
-		/// <remarks>
-		/// This is typically used when custom queries are needed to occur before the results are returned to the object for instantiation.
-		/// Important:  The column names must match those in the table. To force the framework to use the view name see the <see cref="UseView" /> property.
-		/// </remarks>
-		public string ViewName {
-			get {
-				if (String.IsNullOrEmpty(TableName) && String.IsNullOrEmpty(_viewName)) {
-					throw new MissingArguementException("The view name is not set.  If the table name is not set then a view name must be set.");
-				} else {
-					string tblName = _viewName;
-					return String.IsNullOrEmpty(tblName) ? string.Empty : SchemaName != string.Empty ? $"[{SchemaName}].[{tblName}]" : $"[{tblName}]";
-				}
-			}
-			set {
-				_viewName = value;
-			}
-		}
+        /// <summary>Gets or sets the name of the view.</summary>
+        /// <value>If a view is set then it will be used during all Get methods.</value>
+        /// <remarks>
+        /// This is typically used when custom queries are needed to occur before the results are returned to the object for instantiation.
+        /// Important:  The column names must match those in the table. To force the framework to use the view name see the <see cref="UseView" /> property.
+        /// </remarks>
+        public string ViewName
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(TableName) && String.IsNullOrEmpty(_viewName))
+                {
+                    throw new MissingArguementException("The view name is not set.  If the table name is not set then a view name must be set.");
+                }
+                else
+                {
+                    string tblName = _viewName;
+                    return String.IsNullOrEmpty(tblName) ? string.Empty : SchemaName != string.Empty ? $"[{SchemaName}].[{tblName}]" : $"[{tblName}]";
+                }
+            }
+            set => _viewName = value;
+        }
 
-		/// <summary>Gets or set the schema name that the table or view belongs in.  This will override the schema name specific in the connection or DefaultSchemaName property in the DatabaseObject.</summary>
-		public string SchemaName { get; set; }
+        /// <summary>Gets or set the schema name that the table or view belongs in.  This will override the schema name specific in the connection or DefaultSchemaName property in the DatabaseObject.</summary>
+        public string SchemaName { get; set; }
 
 		/// <summary>Gets the name of the source based on the <see cref="UseView" /> property and availability of the table and view name properties.</summary>
 		/// <value>The name of the source.</value>

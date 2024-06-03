@@ -47,6 +47,9 @@
 		/// <summary>double</summary>
 		dbDouble,
 
+		/// <summary>numeric</summary>
+		dbNumeric,
+
 		/// <summary>DateTime</summary>
 		dbDateTime,
 
