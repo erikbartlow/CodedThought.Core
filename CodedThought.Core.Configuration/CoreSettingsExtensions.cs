@@ -44,7 +44,6 @@ namespace CodedThought.Core.Configuration
 		/// <remarks>The naming of the settings json file is case sensitive and should be match the environment name in the ASPNETCORE_ENVIRONMENT variable.</remarks>
 		public static IConfigurationBuilder AddCoreSettingsConfiguration(this IConfigurationBuilder builder, IHostEnvironment env, string settingsFileName)
 		{
-			AddCoreSettingsConfiguration(builder);
 			// Remove any .json extensions.
 			settingsFileName = settingsFileName.Replace(".json", "");
 			builder.AddJsonFile($"{settingsFileName}.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
