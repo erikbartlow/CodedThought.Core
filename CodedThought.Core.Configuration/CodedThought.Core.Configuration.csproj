@@ -7,11 +7,11 @@
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core Configuration</Title>
-	<AssemblyVersion>8.0.0.3</AssemblyVersion>
-	<FileVersion>8.0.0.3</FileVersion>
+	<AssemblyVersion>8.0.0.4</AssemblyVersion>
+	<FileVersion>8.0.0.4</FileVersion>
 	<Description>The CodedThought.Core.Configuration library is a custom settings provider for the CodedThought.Core library.</Description>
 	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-	<Version>8.0.0-beta-1</Version>
+	<Version>8.0.0-beta-2</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>CodedThought</Company>
 	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
