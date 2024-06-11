@@ -45,10 +45,17 @@ namespace CodedThought.Core.Configuration
 		public static IConfigurationBuilder AddCoreSettingsConfiguration(this IConfigurationBuilder builder, IHostEnvironment env, string settingsFileName)
 		{
 			builder.AddJsonFile(settingsFileName, optional: false, reloadOnChange: true);
-			// Remove any .json extensions.
-			settingsFileName = settingsFileName.Replace(".json", "");
-			builder.AddJsonFile($"{settingsFileName}.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
-			return builder;
+			if (env.EnvironmentName.ToLower() != "production")
+			{
+				// Remove any .json extensions.
+				settingsFileName = settingsFileName.Replace(".json", "");
+				builder.AddJsonFile($"{settingsFileName}.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+			}
+			else
+			{
+                builder.AddJsonFile(settingsFileName, optional: true, reloadOnChange: true);
+            }
+            return builder;
 		}
 		/// <summary>
 		/// Loads the default appsettings.json file to the builder.
