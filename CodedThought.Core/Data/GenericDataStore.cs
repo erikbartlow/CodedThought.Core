@@ -1860,7 +1860,14 @@ namespace CodedThought.Core.Data
                     ? ((DateTime?) value) ?? GetTypeMinValue(expectedType)
                     : expectedType.Name switch
                     {
-                        "Boolean" => Convert.ToBoolean(value),
+                        nameof(Boolean) => Convert.ToBoolean(value),
+                        nameof(Guid) => Guid.Parse(value.ToString()),
+                        nameof(Int16) => Int16.Parse(value.ToString()),
+                        nameof(Int32) => Int32.Parse(value.ToString()),
+                        nameof(DateTime) => DateTime.Parse(value.ToString()),
+                        nameof(Double) => Double.Parse(value.ToString()),
+                        nameof(Decimal) => Decimal.Parse(value.ToString()),
+                        nameof(Int64) => Int64.Parse(value.ToString()),
                         _ => value,
                     };
             }

@@ -1213,10 +1213,9 @@ namespace CodedThought.Core.Data
             {
                 DataReaderBehavior = CommandBehavior.SequentialAccess | CommandBehavior.CloseConnection;
 
-                if (SupportedDatabase == DBSupported.SqlServer)
-                {
+                if (Connection.State == ConnectionState.Closed)
+                    OpenConnection();
 
-                }
                 // Add the transaction to set the isolation level.
                 using (IDbCommand cmd = Connection.CreateCommand())
                 {
@@ -1312,6 +1311,9 @@ namespace CodedThought.Core.Data
         {
             try
             {
+                if (Connection.State == ConnectionState.Closed)
+                    OpenConnection();
+
                 if (parameters != null)
                 {
                     if (type == CommandType.Text && parameters.Count > 0 && !commandText.ToUpper().Contains("WHERE"))
@@ -1354,6 +1356,9 @@ namespace CodedThought.Core.Data
             try
             {
                 object? returnValue = null;
+
+                if (Connection.State == ConnectionState.Closed)
+                    OpenConnection();
 
                 using (IDbCommand cmd = Connection.CreateCommand())
                 {
@@ -1402,6 +1407,9 @@ namespace CodedThought.Core.Data
             }
             else
             {
+                if (Connection.State == ConnectionState.Closed)
+                    OpenConnection();
+
                 // Bulk Insert the DataTable to the database.
                 using (Connection)
                 {
