@@ -2,7 +2,8 @@
 
 	public enum ApiDataControllerOptions {
 		/// <summary>Informs the framework that the Api calls with this object do not use a controller and should only use the endpoint plus the action.</summary>
-		NoController = 0
+		NoOptions = 0,
+		NoController = 1
 	}
 
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
@@ -27,11 +28,9 @@
 			ClassName = string.Empty;
 			ControllerName = string.Empty;
 			Properties = new();
+			Options = ApiDataControllerOptions.NoOptions;
 		}
-		public ApiDataControllerAttribute(ApiDataControllerOptions options) {
-			ClassName = string.Empty;
-			ControllerName = string.Empty;
-			Properties = new();
+		public ApiDataControllerAttribute(ApiDataControllerOptions options):this() {
 			Options = options;
 		}
 		/// <summary>Initializes this object as an Api capable object with it's controller parameter.</summary>

@@ -1,7 +1,7 @@
 ﻿namespace CodedThought.Core.Configuration {
 	public class ApiConnectionSetting : ConnectionSetting {
 
-		public ApiConnectionSetting(ConnectionSetting hpConnectionSetting) : base() => PopulateCurrentConnection(hpConnectionSetting);
+		public ApiConnectionSetting(ConnectionSetting connectionSetting) : base() => PopulateCurrentConnection(connectionSetting);
 
 		#region Properties
 		protected int Port { get; set; }
@@ -28,6 +28,12 @@
 		private void PopulateCurrentConnection(ConnectionSetting connectionSetting) {
 
 			Name = connectionSetting.Name;
+			ProviderName = connectionSetting.ProviderName;
+			ProviderType = connectionSetting.ProviderType;
+			ConnectionString = connectionSetting.ConnectionString;
+			Primary = connectionSetting.Primary;
+			Timeout = connectionSetting.Timeout;
+			DefaultSchema = connectionSetting.DefaultSchema;
 
 			string[] urlParts = connectionSetting.ConnectionString.Split(";".ToCharArray());
 			for (int i = 0; i <= urlParts.Length - 1; i++) {

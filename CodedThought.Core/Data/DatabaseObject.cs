@@ -88,9 +88,19 @@ namespace CodedThought.Core.Data
                 if (dbo != null)
                 {
                     dbo.SetDatabaseObjectProperties(connection, connection.ConnectionString, connection.DefaultSchema);
-                    dbo.OpenConnection();
-                    if (dbo.Connection.State != ConnectionState.Open)
-                        throw new CodedThoughtDatabaseException("Unable to connection to the database with the passed connection string.");
+                    if (dbo.SupportedDatabase != DBSupported.ApiServer)
+                    {
+                        dbo.OpenConnection();
+                        if (dbo.Connection.State != ConnectionState.Open)
+                            throw new CodedThoughtDatabaseException("Unable to connect to the database with the passed connection string.");
+                    }
+                    else
+                    {
+                        if( !dbo.TestConnection())
+                        {
+                            throw new CodedThoughtApplicationException($"Unable to determine if the web service at {((ApiConnectionSetting) dbo.CoreConnection).SourceUrl} is online.  A Ping test was unsuccessfull.");
+                        }
+                    }
                     cache.AddToHttpCache(objectCacheName, dbo);
                     retVal = dbo;
                 }

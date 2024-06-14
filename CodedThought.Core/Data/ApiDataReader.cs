@@ -1,5 +1,4 @@
 using System.Net;
-
 namespace CodedThought.Core.Data {
 
 	public class ApiDataReader : IDataReader {
@@ -89,15 +88,15 @@ namespace CodedThought.Core.Data {
 			string[] urlParts = connectionSetting.Split(";".ToCharArray());
 			for (int i = 0; i <= urlParts.Length - 1; i++) {
 				string[] connectionParameter = urlParts[i].Split("=".ToCharArray());
-				switch (connectionParameter[0]) {
-					case "Api Url":
-					case "Data Source":
+				switch (connectionParameter[0].ToLower()) {
+					case "api url":
+					case "data source":
 						SourceUrl = connectionParameter[1];
 						break;
-					case "User Id":
+					case "user id":
 						Username = connectionParameter[1];
 						break;
-					case "Password":
+					case "password":
 						Password = connectionParameter[1];
 						break;
 				}
