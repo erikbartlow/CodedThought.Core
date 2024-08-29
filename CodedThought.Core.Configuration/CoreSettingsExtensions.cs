@@ -45,9 +45,12 @@ namespace CodedThought.Core.Configuration
         public static IConfigurationBuilder AddCoreSettingsConfiguration(this IConfigurationBuilder builder, IHostEnvironment env, string settingsFileName, bool optional = true, bool reloadOnChange = true)
         {
             builder.AddJsonFile(settingsFileName, optional: false, reloadOnChange: true);
-            // Remove any .json extensions.
-            settingsFileName = settingsFileName.Replace(".json", "");
-            builder.AddJsonFile($"{settingsFileName}.{env.EnvironmentName}.json", optional, reloadOnChange);
+            if (!env.IsProduction())
+            {
+                // Remove any .json extensions.
+                settingsFileName = settingsFileName.Replace(".json", "");
+                builder.AddJsonFile($"{settingsFileName}.{env.EnvironmentName}.json", optional, reloadOnChange);
+            }
             return builder;
         }
         /// <summary>
@@ -70,7 +73,9 @@ namespace CodedThought.Core.Configuration
         public static IConfigurationBuilder AddAppSettingsConfiguration(this IConfigurationBuilder builder, IHostEnvironment env, bool optional = true, bool reloadOnChange = true)
         {
             AddAppSettingsConfiguration(builder);
-            builder.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional, reloadOnChange);
+            if (!env.IsDevelopment())
+                builder.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional, reloadOnChange);
+
             return builder;
         }
         [Obsolete("This method is obsolete as it was renamed to GetCorePrimaryConnection.")]

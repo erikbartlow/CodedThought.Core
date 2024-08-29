@@ -184,7 +184,7 @@ namespace CodedThought.Core.Data
         /// Parses an assembly for ORM mappings.
         /// </summary>
         /// <param name="assembly">The assembly to parse.</param>
-        public void LoadAssemblyAndORM(Assembly callingAssembly)
+        public virtual void LoadAssemblyAndORM(Assembly callingAssembly)
         {
             if (UseHttpCache)
             {
@@ -425,6 +425,7 @@ namespace CodedThought.Core.Data
             {
                 TableColumn tc = new(attrColumn.ColumnName, attrColumn.ConvertTypeToDbTypeSupported(), attrColumn.Size, attrColumn.IsPrimaryKey);
                 tc.IsInsertable = tc.IsUpdateable;
+                tc.IsIdentity = attrColumn.IsIdentity;
                 listColumns.Add(tc);
             }
             DatabaseObjectInstance.Add(attrTable.TableName, obj, listColumns, this);
@@ -727,7 +728,7 @@ namespace CodedThought.Core.Data
                     throw new Exception($"This component, {typeof(T).Name}, is coded to be Read-Only.  Therefore no update or delete operations can be performed against it.");
 
                 SetParameterCollectionDbObject(parameters);
-                DatabaseObjectInstance.Remove(attrTable.TableName,attrTable.SchemaName, parameters);
+                DatabaseObjectInstance.Remove(attrTable.TableName, attrTable.SchemaName, parameters);
             }
             catch { throw; }
         }
@@ -1900,7 +1901,8 @@ namespace CodedThought.Core.Data
         /// <returns></returns>
         protected object FormatValueForNull(object value)
         {
-            if (value.Equals(null)) return DBNull.Value;
+            if (value.Equals(null))
+                return DBNull.Value;
             return FormatValueForNull(value, value.GetType());
         }
 
@@ -2094,7 +2096,7 @@ namespace CodedThought.Core.Data
             }
             catch { throw; }
         }
-        private List<Assembly> GetDataAwareAssemblies()
+        protected List<Assembly> GetDataAwareAssemblies()
         {
             try
             {
@@ -2144,26 +2146,52 @@ namespace CodedThought.Core.Data
 
         int IDBStore.GetPrimaryKey(object obj)
         {
-            Type t = obj.GetType();
-            return ORM.ContainsKey(t.FullName)
-                ? ((DataTableAttribute) ORM[t.FullName][t]).Key.ColumnType switch
-                {
-                    DbType.Int16 or DbType.Int32 or DbType.Int64 or DbType.Decimal => Convert.ToInt32(t.GetProperty(((DataTableAttribute) ORM[t.FullName][t]).Key.PropertyName).GetValue(obj, null)),
-                    _ => 0,
-                }
-                : 0;
-        }
+            try
+            {
+                Type t = obj.GetType();
+                return ORM.ContainsKey(t.FullName)
+                    ? ((DataTableAttribute) ORM[t.FullName][t]).Key.ColumnType switch
+                    {
+                        DbType.Int16 or DbType.Int32 or DbType.Int64 or DbType.Decimal => Convert.ToInt32(t.GetProperty(((DataTableAttribute) ORM[t.FullName][t]).Key.PropertyName).GetValue(obj, null)),
+                        _ => 0,
+                    }
+                    : 0;
+            }
+            catch { return 0; }
 
+        }
+        DataColumnAttribute IDBStore.GetPrimaryKeyColumnAttribute(object obj)
+        {
+            try
+            {
+                Type t = obj.GetType();
+                DataColumnAttribute dca = null;
+                if (ORM.ContainsKey(t.FullName))
+                {
+                    dca = ((DataTableAttribute) ORM[t.FullName][t]).Key;
+                }
+                return dca;
+            }
+            catch { return null; }
+        }
         string IDBStore.GetPrimaryKeyName(object obj)
         {
-            Type t = obj.GetType();
-            return ORM.ContainsKey(t.FullName) ? ((DataTableAttribute) ORM[t.FullName][t]).Key.ColumnName : String.Empty;
+            try
+            {
+                Type t = obj.GetType();
+                return ORM.ContainsKey(t.FullName) ? ((DataTableAttribute) ORM[t.FullName][t]).Key.ColumnName : String.Empty;
+            }
+            catch { return string.Empty; }
         }
 
         bool IDBStore.HasKeyColumn(object obj)
         {
-            Type t = obj.GetType();
-            return ORM.ContainsKey(t.FullName) && ((DataTableAttribute) ORM[t.FullName][t]).Key != null;
+            try
+            {
+                Type t = obj.GetType();
+                return ORM.ContainsKey(t.FullName) && ((DataTableAttribute) ORM[t.FullName][t]).Key != null;
+            }
+            catch { return false; }
         }
 
         bool IDBStore.SetPrimaryKey(object obj, int value)

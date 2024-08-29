@@ -16,7 +16,10 @@ namespace CodedThought.Core.Data {
 		OverridesInherited = 8,
 
 		/// <summary>Causes the framework to know whether or not to allow null values based on the database struture.</summary>
-		AllowNull = 16
+		AllowNull = 16,
+		
+		/// <summary>Informs the framework that this is configured as an Identity or Auto Increment column.</summary>
+		IsIdentity = 32,
 	}
 
 	/// <summary>Maps a property to a Database Column or XML Element</summary>
@@ -37,6 +40,8 @@ namespace CodedThought.Core.Data {
 		public string ColumnName { get; set; }
 
 		public bool IsPrimaryKey { get; set; }
+
+		public bool IsIdentity {  get; set; }
 
 		public bool IsUpdateable { get; set; }
 
@@ -234,6 +239,9 @@ namespace CodedThought.Core.Data {
 				IsUpdateable = false;
 			} else {
 				IsUpdateable = true;
+			}
+			if (options.HasFlag(DataColumnOptions.IsIdentity)){
+				IsIdentity = true;
 			}
 			if (options.HasFlag(DataColumnOptions.UpdateablePrimaryKey)) {
 				IsUpdateable = true;

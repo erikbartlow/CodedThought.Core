@@ -47,7 +47,7 @@ namespace CodedThought.Core.Data
 
         public DatabaseObject()
         {
-            CoreConnection = new();
+            CoreConnection = new ConnectionSetting();
             ConnectionString = String.Empty;
             DefaultSchemaName = String.Empty;
             ParameterConnector = "@";
@@ -55,7 +55,7 @@ namespace CodedThought.Core.Data
             ColumnDelimiter = ",";
             BulkCopySqlRowsCopied += DatabaseObject_BulkCopySqlRowsCopied1;
         }
-        public void SetDatabaseObjectProperties(ConnectionSetting coreConnection, string connectionString, string? defaultSchema)
+        public virtual void SetDatabaseObjectProperties(ConnectionSetting coreConnection, string connectionString, string? defaultSchema)
         {
             CoreConnection = coreConnection;
             ConnectionString = connectionString;
@@ -98,7 +98,8 @@ namespace CodedThought.Core.Data
                     {
                         if( !dbo.TestConnection())
                         {
-                            throw new CodedThoughtApplicationException($"Unable to determine if the web service at {((ApiConnectionSetting) dbo.CoreConnection).SourceUrl} is online.  A Ping test was unsuccessfull.");
+
+                            throw new CodedThoughtApplicationException($"Unable to determine if the web service is online.  A Ping test was unsuccessfull.  Pleaes review connection string:  {dbo.CoreConnection.ConnectionString}.");
                         }
                     }
                     cache.AddToHttpCache(objectCacheName, dbo);
@@ -219,7 +220,7 @@ namespace CodedThought.Core.Data
 
         #region Properties
 
-        public ConnectionSetting CoreConnection { get; set; }
+        public virtual IConnectionSetting CoreConnection { get; set; }
         public virtual string ConnectionName => CoreConnection.Name;
         public string ConnectionString { get; set; }
 
@@ -325,10 +326,6 @@ namespace CodedThought.Core.Data
         public virtual string ColumnDelimiter { get; set; }
 
         public ServiceLifetime ServiceLifetime => throw new NotImplementedException();
-
-        /// <summary>Tests the connection.</summary>
-        /// <returns></returns>
-        public abstract bool TestConnection();
 
         public abstract ParameterCollection CreateParameterCollection();
 
@@ -1121,6 +1118,19 @@ namespace CodedThought.Core.Data
         /// <summary>Opens a connection to the database in question.</summary>
         /// <returns></returns>
         protected abstract IDbConnection OpenConnection();
+        /// <summary>
+        /// Opens a connection to the database asyncronously.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract Task<IDbConnection> OpenConnectionAsync();
+        /// <summary>Tests the connection.</summary>
+        /// <returns></returns>
+        public abstract bool TestConnection();
+        /// <summary>
+        /// Tests the connection asyncronously.
+        /// </summary>
+        /// <returns></returns>
+        public abstract Task<bool> TestConnectionAsync();
 
         /// <summary>Commits updates and inserts. This is only for Oracle database operations.</summary>
         public abstract void Commit();

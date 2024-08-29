@@ -14,6 +14,13 @@ namespace CodedThought.Core.Data.Interfaces {
 		/// <returns></returns>
 		int GetPrimaryKey(object obj);
 
+		/// <summary>
+		/// Gets the primary key's <see cref="DataColumn"/> object.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		DataColumnAttribute GetPrimaryKeyColumnAttribute(object obj);
+
 		/// <summary>Gets the name of the primary key.</summary>
 		/// <param name="obj">The obj.</param>
 		/// <returns></returns>

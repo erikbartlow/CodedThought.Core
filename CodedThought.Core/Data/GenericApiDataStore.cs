@@ -22,7 +22,7 @@ namespace CodedThought.Core.Data {
 			: base(serviceProvider, cache, connectionSetting ) {
 			UseBasicAuth = false;
 			PopulateCurrentConnection(connectionSetting);
-			CommandTimeout = 0;
+			CommandTimeout = connectionSetting.Timeout;
 		}
 
 		#endregion Constructors
@@ -31,9 +31,10 @@ namespace CodedThought.Core.Data {
 
 		public new DatabaseConnection? CurrentDatabaseConnection { get; set; }
 
-		/// <summary>Gets or sets the database object instance.</summary>
-		/// <value>The database object instance.</value>
-		private new IDatabaseObject? DatabaseObjectInstance { get; set; }
+		public ApiDataControllerAttribute ApiDataControllerAttribute { get; set; }
+        /// <summary>Gets or sets the database object instance.</summary>
+        /// <value>The database object instance.</value>
+        private new IDatabaseObject? DatabaseObjectInstance { get; set; }
 
 		public new IDatabaseObject? DeriveDatabaseObject => DatabaseObjectInstance;
 
@@ -57,15 +58,80 @@ namespace CodedThought.Core.Data {
 		protected static Boolean UseBasicAuth { get; set; }
 		public static string? RawResponse { get; private set; } = string.Empty;
 		public int HttpTimeout { get { return CommandTimeout; } set { CommandTimeout = value; } }
-		#endregion Properties
+        #endregion Properties
 
-		#region Public Methods
+        #region Public Methods
 
-		/// <summary>Gets the name of the key property.</summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public new string? GetKeyPropertyName<T>() {
-			foreach (ApiDataParameterAttribute attr in ((ApiDataControllerAttribute)ORM[$"{typeof(T).FullName}.api"][typeof(T)]).Properties) {
+        /// <summary>
+        /// Parses an assembly for ORM mappings.
+        /// </summary>
+        /// <param name="assembly">The assembly to parse.</param>
+        public override void LoadAssemblyAndORM(Assembly callingAssembly)
+        {
+            if (UseHttpCache)
+            {
+
+                listLoadedAssemblies = _cache.GetFromHttpCache<List<string>>(ORM_ASSEMBLIES_KEY);
+                if (listLoadedAssemblies == null)
+                {
+                    // Load all data aware assemblies.
+                    listLoadedAssemblies = [];
+                    List<Assembly> dataAwareAssemblies = base.GetDataAwareAssemblies();
+                    dataAwareAssemblies.ForEach(a =>
+					{
+						listLoadedAssemblies.Add(a.GetName().Name);
+                        GenerateMapCollection(ORM, a);
+                        // Cache the objects for next time.
+                        _cache.AddToHttpCache(ORM_KEY, ORM);
+                        _cache.AddToHttpCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
+                    });
+                }
+                listLoadedAssemblies ??= [];
+                if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name))
+                {
+                    listLoadedAssemblies.Add(callingAssembly.GetName().Name);
+                    GenerateMapCollection(ORM, callingAssembly);
+
+                    //re-cache the objects after updates
+                    _cache.AddToHttpCache(ORM_KEY, ORM);
+                    _cache.AddToHttpCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
+                }
+            }
+            else
+            {
+                listLoadedAssemblies = _runtimeCache.GetFromLocalCache<List<string>>(ORM_ASSEMBLIES_KEY);
+                if (listLoadedAssemblies == null)
+                {
+                    // Load all data aware assemblies.
+                    listLoadedAssemblies = [];
+                    List<Assembly> dataAwareAssemblies = GetDataAwareAssemblies();
+                    dataAwareAssemblies.ForEach(a =>
+                    {
+                        listLoadedAssemblies.Add(a.GetName().Name);
+                        GenerateMapCollection(ORM, a);
+                        // Cache the objects for next time.
+                        _runtimeCache.AddToLocalCache(ORM_KEY, ORM);
+                        _runtimeCache.AddToLocalCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
+                    });
+                }
+                if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name))
+                {
+                    listLoadedAssemblies.Add(callingAssembly.GetName().Name);
+                    GenerateMapCollection(ORM, callingAssembly);
+
+                    //re-cache the objects after updates
+                    _runtimeCache.AddToLocalCache(ORM_KEY, ORM);
+                    _runtimeCache.AddToLocalCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
+                }
+            }
+        }
+
+
+        /// <summary>Gets the name of the key property.</summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public new string? GetKeyPropertyName<T>() {
+			foreach (ApiDataParameterAttribute attr in ((ApiDataControllerAttribute)ORM[$"{typeof(T).FullName}{ORM_API_KEY_EXT}"][typeof(T)]).Properties) {
 				if (attr.Options.HasFlag(ApiDataParameterOptions.DefaultParameter)) {
 					return attr.PropertyName;
 				}
@@ -123,7 +189,7 @@ namespace CodedThought.Core.Data {
 					dynamic responseObj = DeserializeApiResponse<TResponse>(reader);
 					return responseObj;
 				} else {
-					throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
+					throw new CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
 				}
 			} catch {
 
@@ -159,7 +225,7 @@ namespace CodedThought.Core.Data {
 					dynamic responseObj = DeserializeApiResponse<T>(reader);
 					return responseObj;
 				} else {
-					throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
+					throw new CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
 				}
 			} catch {
 				throw;
@@ -183,7 +249,7 @@ namespace CodedThought.Core.Data {
 					dynamic responseObj = DeserializeApiResponse<T>(reader);
 					return responseObj;
 				} else {
-					throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
+					throw new CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {(int)reader.StatusCode} {reader.ErrorMessage}.");
 				}
 
 			} catch {
@@ -202,7 +268,7 @@ namespace CodedThought.Core.Data {
 			ApiDataControllerAttribute attr = GetApiDataControllerAttribute<B>();
 			return attr.Action != null
 				? await Post<T, B>(attr.Action, obj)
-				: throw new Exceptions.CodedThoughtApplicationException($"The object type, {typeof(B).Name}, does not contain an action.  Please update its ApiDataControllerAttribute or use the other Save method to explicitly pass the action.");
+				: throw new CodedThoughtApplicationException($"The object type, {typeof(B).Name}, does not contain an action.  Please update its ApiDataControllerAttribute or use the other Save method to explicitly pass the action.");
 		}
 		/// <summary>Saves the passed object to the Api based on the current controller and passed action name.</summary>
 		/// <typeparam name="T">The type of object to posted.</typeparam>
@@ -234,7 +300,7 @@ namespace CodedThought.Core.Data {
 		/// <returns></returns>
 		public async Task<TResponse> Post<TResponse, BObject>(string controller, string action, BObject obj) {
 			try {
-				string serializedObj = JsonConvert.SerializeObject(obj);
+				string serializedObj = System.Text.Json.JsonSerializer.Serialize(obj);
 				using (HttpClient httpClient = new()) {
 					Uri baseUri = new(SourceUrl);
 					httpClient.Timeout = new TimeSpan(0, 0, this.HttpTimeout);
@@ -264,7 +330,7 @@ namespace CodedThought.Core.Data {
 							ApiResponseMessage = RawResponse = apiResponse;
 							return DeserializeApiResponse<TResponse>(apiResponse);
 						} else {
-							throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {apiCall.StatusCode}.");
+							throw new CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {apiCall.StatusCode}.");
 						}
 					}
 				}
@@ -289,10 +355,10 @@ namespace CodedThought.Core.Data {
 				}
 			}
 			return keyValue == null
-				? throw new Exceptions.CodedThoughtApplicationException($"The object type, {typeof(T).Name}, does not contain a default parameter.  Please add the DefaultParameter flag to an Api attribute or use the other Remove method to explicity pass the key value.")
+				? throw new CodedThoughtApplicationException($"The object type, {typeof(T).Name}, does not contain a default parameter.  Please add the DefaultParameter flag to an Api attribute or use the other Remove method to explicity pass the key value.")
 				: attr.Action != null && keyValue != null
 				? await Remove<T, B>(attr.Action, keyValue.ToString())
-				: throw new Exceptions.CodedThoughtApplicationException($"The object type, {typeof(T).Name}, does not contain an action.  Please update its ApiDataControllerAttribute or use the other Remove method to explicitly pass the action.");
+				: throw new CodedThoughtApplicationException($"The object type, {typeof(T).Name}, does not contain an action.  Please update its ApiDataControllerAttribute or use the other Remove method to explicitly pass the action.");
 		}
 
 		/// <summary>Deletes the passed object using the Api based on the current controller and configured action.</summary>
@@ -322,7 +388,7 @@ namespace CodedThought.Core.Data {
 							ApiResponseMessage = RawResponse = apiResponse;
 							return DeserializeApiResponse<T>(apiResponse);
 						} else {
-							throw new Exceptions.CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {apiCall.StatusCode}.");
+							throw new CodedThoughtApplicationException($"There was an error calling the web service.  The reported error was {apiCall.StatusCode}.");
 						}
 					}
 				}
