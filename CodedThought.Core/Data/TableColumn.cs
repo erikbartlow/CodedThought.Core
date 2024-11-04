@@ -39,7 +39,7 @@ namespace CodedThought.Core.Data
         public Boolean IsIdentity { get; set; }
 
         /// <summary>The maximum length of the values in this column.</summary>
-        public Int32 MaxLength { get; set; }
+        public long MaxLength { get; set; }
 
         /// <summary>Is the sorting order descending? Default is ascending.</summary>
         public Boolean IsDescending { get; set; } = false;

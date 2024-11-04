@@ -5,7 +5,7 @@ namespace CodedThought.Core.Data {
 
 		#region Properties
 
-		private DatabaseConnection? _connectionSetting;
+		//private DatabaseConnection? _connectionSetting;
 		protected static string? SourceUrl { get; set; }
 		protected static string? Controller { get; set; }
 		protected static string? Username { get; set; }

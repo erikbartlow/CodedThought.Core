@@ -12,7 +12,7 @@
             DefaultSchema = "dbo";
             Primary = false;
             ProviderName = "SqlServer";
-            ProviderType = "SqlServer";
+            _providerType = "SqlServer";
             Timeout = 0;
         }
         /// <summary>

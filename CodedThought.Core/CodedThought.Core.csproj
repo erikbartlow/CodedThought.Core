@@ -8,10 +8,10 @@
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>8.0.0.27</AssemblyVersion>
-	<FileVersion>8.0.0.27</FileVersion>
+	<AssemblyVersion>8.0.1.0</AssemblyVersion>
+	<FileVersion>8.0.1.0</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>8.0.0-rc.8</Version>
+	<Version>8.0.1.0</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>Erik Bartlow</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
@@ -22,8 +22,16 @@
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<Copyright>Copyright (c) 2023 Erik Bartlow, All rights reserved</Copyright>
+	<Copyright>Copyright (c) 2024 Erik Bartlow, All rights reserved</Copyright>
 	<PackageReleaseNotes>This is a breaking upgrade from CodedThought.Core 7.0.1.35.  This version changes the mechanism for loading the specific data provider libraries from file based in the bin folder to dependency injection.  Additionally, this version is compiled to work with .NET 8.0.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CS0649</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CS0649</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,12 +41,13 @@
   <ItemGroup>
 	<PackageReference Include="BouncyCastle.NetCore" Version="2.2.1" />
 	<PackageReference Include="ChoPGP.Core" Version="1.0.1.2" />
-	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
+	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
 	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
-	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
 	<PackageReference Include="Microsoft.Net.Http.Headers" Version="[2.1.14]" />
+	<PackageReference Include="SkiaSharp" Version="2.88.8" />
 	<PackageReference Include="System.DirectoryServices" Version="8.0.0" />
-	<PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
+	<PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.1" />
 	<PackageReference Include="System.Drawing.Common" Version="8.0.3" />
 	<PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
   </ItemGroup>

@@ -7,11 +7,11 @@
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core Configuration</Title>
-	<AssemblyVersion>8.0.0.9</AssemblyVersion>
-	<FileVersion>8.0.0.9</FileVersion>
+	<AssemblyVersion>8.0.1.0</AssemblyVersion>
+	<FileVersion>8.0.1.0</FileVersion>
 	<Description>The CodedThought.Core.Configuration library is a custom settings provider for the CodedThought.Core library.</Description>
 	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-	<Version>8.0.0-beta-9</Version>
+	<Version>8.0.0-rc.1</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>CodedThought</Company>
 	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
@@ -24,6 +24,14 @@
 	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Copyright>Copyright (c) 2024 Erik Bartlow, All rights reserved</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CS0649;CS8603</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CS0649;CS8603</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

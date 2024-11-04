@@ -10,7 +10,7 @@
         bool IsNullable { get; set; }
         bool IsSortColumn { get; set; }
         bool IsUpdateable { get; set; }
-        int MaxLength { get; set; }
+        long MaxLength { get; set; }
         string Name { get; set; }
         int OrdinalPosition { get; set; }
         int Size { get; set; }

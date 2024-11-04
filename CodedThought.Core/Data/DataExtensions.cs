@@ -9,18 +9,17 @@
 		/// <param name="table">    The table.</param>
 		/// <param name="refColumn">The reference column.</param>
 		/// <returns></returns>
-		public static List<T> ToList<T>(this DataTable table, DataColumn refColumn) => table.ToList<T>(refColumn.ColumnName);
+		public static List<T?> ToList<T>(this DataTable table, DataColumn refColumn) => table.ToList<T>(refColumn.ColumnName);
 
 		/// <summary>To the list.</summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="table">     The table.</param>
 		/// <param name="columnName">Name of the column.</param>
 		/// <returns></returns>
-		public static List<T> ToList<T>(this DataTable table, string columnName) {
+		public static List<T?> ToList<T>(this DataTable table, string columnName) {
 			IList<PropertyInfo> properties = typeof(T).GetProperties().ToList();
-			List<T> result = new();
 
-			result = table.Rows.OfType<DataRow>()
+            List<T?> result = table.Rows.OfType<DataRow>()
 				.Select(dr => dr.Field<T>(columnName)).ToList();
 
 			return result;
@@ -30,9 +29,9 @@
 		/// <typeparam name="T"></typeparam>
 		/// <param name="table">The table.</param>
 		/// <returns></returns>
-		public static IList<T> ToList<T>(this DataTable table) where T : new() {
+		public static IList<T?> ToList<T>(this DataTable table) where T : new() {
 			IList<PropertyInfo> properties = typeof(T).GetProperties().ToList();
-			IList<T> result = new List<T>();
+			IList<T?> result = [];
 
 			foreach (object? row in table.Rows) {
 				T? item = CreateItemFromRow<T>((DataRow)row, properties);

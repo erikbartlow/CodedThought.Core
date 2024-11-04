@@ -43,7 +43,7 @@ namespace CodedThought.Core.Data {
 		/// <returns></returns>
 		public static String DecryptString(string encryptedString) {
 			try {
-				return CodedThought.Core.Security.CodedThoughtEncryption.DecryptPassword(encryptedString);
+				return Security.CodedThoughtEncryption.DecryptPassword(encryptedString);
 			} catch {
 				return string.Empty;
 			}
@@ -93,7 +93,7 @@ namespace CodedThought.Core.Data {
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
 		/// <param name="connectionName">Name of the connection.</param>
 		/// <param name="decryptionKey"> The decryption key.</param>
-		public DatabaseConnection(ConnectionSetting connection, string decryptionKey) : this(connection) => ConnectionString = DecryptString(connection.ConnectionString, decryptionKey);
+		public DatabaseConnection(ConnectionSetting connection, string decryptionKey) : this(connection) => ConnectionString = DecryptString(connection.ConnectionString);
 
 		/// <summary>Initializes a new instance of the <see cref="DatabaseConnection" /> class.</summary>
 		/// <param name="connectionName">  Name of the connection.</param>
