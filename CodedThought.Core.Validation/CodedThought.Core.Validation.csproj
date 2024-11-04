@@ -4,9 +4,9 @@
 	<TargetFramework>net8.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
-	<AssemblyVersion>6.0.1.0</AssemblyVersion>
-	<FileVersion>6.0.1.0</FileVersion>
-	<VersionPrefix>6.0.1.0</VersionPrefix>
+	<AssemblyVersion>8.0.0.0</AssemblyVersion>
+	<FileVersion>8.0.0.0</FileVersion>
+	<VersionPrefix>8.0.0.0</VersionPrefix>
 	<Title>CodedThought.Core.Validation</Title>
 	<Copyright>CodedThought (c) 2024, Erik Bartlow, All Rights Reserved</Copyright>
 	<Authors>Erik Bartlow</Authors>
