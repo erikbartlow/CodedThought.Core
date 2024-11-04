@@ -1,12 +1,14 @@
 ﻿using CodedThought.Core.Configuration.Validation;
 
+using Microsoft.Extensions.Configuration;
+
 namespace CodedThought.Core.Validation.Exceptions {
 
 	public class ExceptionMessages {
 		public static ValidationConfigurationProvider ConfigurationProvider { get; set; }
 
-		public ExceptionMessages() {
-			ConfigurationProvider = new ValidationConfigurationProvider();
+		public ExceptionMessages(IConfiguration configuration) {
+			ConfigurationProvider = new ValidationConfigurationProvider(configuration);
 			ConfigurationProvider.Load();
 		}
 
