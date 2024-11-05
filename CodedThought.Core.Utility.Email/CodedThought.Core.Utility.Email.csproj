@@ -8,9 +8,9 @@
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core Utility Email Dotnet 8</Title>
-	<VersionPrefix>7.0.0.0</VersionPrefix>
-	<AssemblyVersion>7.0.0.0</AssemblyVersion>
-	<FileVersion>7.0.0.0</FileVersion>
+	<VersionPrefix>8.0.0.0</VersionPrefix>
+	<AssemblyVersion>8.0.0.0</AssemblyVersion>
+	<FileVersion>8.0.0.0</FileVersion>
 	<Description>The CodedThought.Core library is an email helper that utilizes MVC Razor templates to author emails.</Description>
 	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
 	<Version>$(AssemblyPrefix)</Version>
