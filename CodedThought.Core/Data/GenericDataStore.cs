@@ -302,10 +302,11 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T">The type of objects to retrieve.</typeparam>
         /// <param name="parameters">A collection of Key-Value pairs.</param>
         /// <returns>Returns a List&lt;&gt; of type T</returns>
-        public List<T> GetMultiple<T>(ParameterCollection parameters) where T : class, new()
+        public List<T> GetMultiple<T>(ParameterCollection? parameters) where T : class, new()
         {
-            SetParameterCollectionDbObject(parameters);
-            IList<T> list = new List<T>();
+            if (parameters != null)
+                SetParameterCollectionDbObject(parameters);
+            IList<T> list = [];
             GetMultiple(ref list, parameters);
             return (List<T>) list;
         }
@@ -314,7 +315,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T">The type of objects to retrieve.</typeparam>
         /// <param name="list">      A reference to the list in which the items are to be returned.</param>
         /// <param name="parameters">A collection of Key-Value pairs.</param>
-        public void GetMultiple<T>(ref IList<T> list, ParameterCollection parameters) where T : class, new()
+        public void GetMultiple<T>(ref IList<T> list, ParameterCollection? parameters) where T : class, new()
         {
             IDataReader reader = null;
             try
@@ -324,7 +325,14 @@ namespace CodedThought.Core.Data
                 string sourceName = attrTable.UseView ? attrTable.ViewName : attrTable.TableName;
                 List<string> selectColumns = GetColumnNames<T>();
                 List<string> orderColumns = GetOrderByColumnNames<T>();
-                SetParameterCollectionDbObject(parameters);
+                if (parameters != null)
+                {
+                    SetParameterCollectionDbObject(parameters);
+                }
+                else
+                {
+                    parameters = [];
+                }
                 if (CommandTimeout > -1)
                 { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 reader = DatabaseObjectInstance.Get(sourceName, schemaName, selectColumns, parameters, orderColumns);

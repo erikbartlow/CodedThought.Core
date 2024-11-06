@@ -8,10 +8,10 @@
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>8.0.1.1</AssemblyVersion>
-	<FileVersion>8.0.1.1</FileVersion>
+	<AssemblyVersion>8.0.1.2</AssemblyVersion>
+	<FileVersion>8.0.1.2</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>8.0.1.1</Version>
+	<Version>8.0.1.2</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>Erik Bartlow</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
@@ -23,7 +23,7 @@
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Copyright>Copyright (c) 2024 Erik Bartlow, All rights reserved</Copyright>
-	<PackageReleaseNotes>This version is compiled to work with .NET 8.0. Additionally, it removes the System.Drawing dependency and replaces it with SkiaSharp to better support other non-windows platforms.</PackageReleaseNotes>
+	<PackageReleaseNotes>This version is compiled to work with .NET 8.0. It removes the System.Drawing dependency and replaces it with SkiaSharp to better support other non-windows platforms. It updates the GetMultiple methods to have nullable parameter collections.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
