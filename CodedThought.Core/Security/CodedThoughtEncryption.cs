@@ -29,7 +29,7 @@ namespace CodedThought.Core.Security {
 
 				EncryptedPassword = Convert.ToBase64String(ms.ToArray());
 			} catch (Exception ex) {
-				throw ex;
+				throw;
 			} finally {
 				if (cs != null)
 					cs.Close();
@@ -66,7 +66,7 @@ namespace CodedThought.Core.Security {
 
 				DecryptedPassword = Encoding.UTF8.GetString(ms.ToArray());
 			} catch (Exception ex) {
-				throw ex;
+				throw;
 			} finally {
 				if (cs != null)
 					cs.Close();

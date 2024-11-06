@@ -113,12 +113,9 @@ namespace CodedThought.Core {
 		/// <summary>Renders the image to stream.</summary>
 		/// <param name="imageBytes">The image bytes.</param>
 		/// <returns></returns>
-		public static System.Drawing.Image? RenderImageToStream(byte[] imageBytes) {
-			MemoryStream stream = new();
-
+		public static SkiaSharp.SKBitmap? RenderImageToStream(byte[] imageBytes) {
 			try {
-				stream.Write(imageBytes, 0, imageBytes.Length);
-				return stream != null ? System.Drawing.Image.FromStream(stream) : null;
+				return imageBytes.Length>0 ? SkiaSharp.SKBitmap.Decode(imageBytes) : null;
 			} catch {
 				throw;
 			}
@@ -127,7 +124,7 @@ namespace CodedThought.Core {
 		/// <summary>Renders the image to stream from file.</summary>
 		/// <param name="filename">The filename.</param>
 		/// <returns></returns>
-		public static System.Drawing.Image RenderImageToStreamFromFile(string filename) {
+		public static SkiaSharp.SKBitmap? RenderImageToStreamFromFile(string filename) {
 			FileStream fs = new(filename, FileMode.Open, FileAccess.Read);
 			// Create a byte array of file stream length
 			byte[] ImageData = new byte[fs.Length];

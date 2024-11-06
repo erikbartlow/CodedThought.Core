@@ -17,8 +17,8 @@ namespace CodedThought.Core.Data {
 			}
 		};
 
-		private static ArrayList _DbTypeList = new();
-		private static Dictionary<Type, SqlDbType> _sqlDbTypeMap;
+		private static readonly ArrayList _DbTypeList = [];
+
 		#region Constructors
 
 		static DbTypeConvertor() {

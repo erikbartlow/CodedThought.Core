@@ -584,7 +584,7 @@ namespace CodedThought.Core.Data
                         }
                         else
                         {
-                            throw ex;
+                            throw;
                         }
                     }
                 }
@@ -592,7 +592,7 @@ namespace CodedThought.Core.Data
             }
             catch (CodedThoughtException ex)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -661,7 +661,7 @@ namespace CodedThought.Core.Data
                         }
                         else
                         {
-                            throw ex;
+                            throw;
                         }
                     }
                 }
@@ -669,7 +669,7 @@ namespace CodedThought.Core.Data
             }
             catch (CodedThoughtException ex)
             {
-                throw ex;
+                throw;
             }
         }
         [Obsolete("Due to naming violations from previous .NET versions this signature is obsolete.  Please use the one with the capitalized start.")]
@@ -761,7 +761,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -780,7 +780,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -800,7 +800,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -821,7 +821,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -919,7 +919,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -1002,7 +1002,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {
@@ -1164,7 +1164,7 @@ namespace CodedThought.Core.Data
             catch (Exception ex)
             {
                 Rollback();
-                throw ex;
+                throw;
             }
             finally
             {
@@ -1843,7 +1843,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -1932,7 +1932,7 @@ namespace CodedThought.Core.Data
             }
             catch (CodedThoughtException ex)
             {
-                throw ex;
+                throw;
             }
         }
 
