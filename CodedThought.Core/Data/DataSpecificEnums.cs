@@ -83,8 +83,10 @@
 		dbTime,
 		/// <summary>Use for Sql Variant types typically found in MySql and Sql Server</summary>
 		dbSqlVariant,
-        /// <summary>Use for the tiny int data typestypically found in MySql and Sql Server</summary>
-		dbTinyInt
+        /// <summary>Use for the tiny int data types typically found in MySql and Sql Server</summary>
+		dbTinyInt,
+		/// <summary>Use for date only types</summary>
+		dbDate
     };
 
 	/// <summary>Database vendor name enum.</summary>

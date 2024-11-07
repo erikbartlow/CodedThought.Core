@@ -19,7 +19,7 @@ namespace CodedThought.Core.Data
         protected const string ORM_KEY = "ORM";
         protected const string ORM_ASSEMBLIES_KEY = "ORM_ASSEMBLIES";
         protected Dictionary<string, Dictionary<Type, Attribute>>? ORM; //object-relational-mapping
-        protected List<String>? listLoadedAssemblies;
+        protected List<string>? listLoadedAssemblies;
         protected DatabaseConnection? _specifiedDatabaseConnection;
         protected readonly IMemoryCache? _cache = null;
         protected readonly runtime.MemoryCache? _runtimeCache = null;
@@ -69,7 +69,7 @@ namespace CodedThought.Core.Data
         {
             get
             {
-                if (_defaultSchema == String.Empty)
+                if (_defaultSchema == string.Empty)
                 {
                     _defaultSchema = DatabaseObjectInstance.GetSchemaName();
                 }
@@ -99,7 +99,7 @@ namespace CodedThought.Core.Data
 
         /// <summary>Gets or sets the timeout override.</summary>
         /// <value>The timeout override. If the value is not set then the default timeout of the connection set in the connection string will be used.</value>
-        public virtual Int32 CommandTimeout { get; set; }
+        public virtual int CommandTimeout { get; set; }
 
         /// <summary>Gets the wildcard character.</summary>
         /// <value>The wildcard character.</value>
@@ -506,7 +506,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="records">The records.</param>
         /// <returns></returns>
-        public Boolean SaveBulk<T>(List<T> records, int notifyAfter = 2000)
+        public bool SaveBulk<T>(List<T> records, int notifyAfter = 2000)
         {
             try
             {
@@ -514,13 +514,13 @@ namespace CodedThought.Core.Data
                 if (attrTable.ReadOnly)
                     throw new Exception($"This component, {typeof(T).Name}, is coded to be Read-Only.  Therefore no update or delete operations can be performed against it.");
 
-                String tableName = attrTable.TableName;
+                string tableName = attrTable.TableName;
                 DataTable dt = new(tableName);
                 List<TableColumn> tableColumns = DatabaseObjectInstance.GetTableDefinition(tableName);
                 tableColumns.Sort(delegate (TableColumn c1, TableColumn c2)
                 { return c1.OrdinalPosition.CompareTo(c2.OrdinalPosition); });
 
-                tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.Name) != String.Empty && col.IsIdentity != true).ToList();
+                tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.Name) != string.Empty && col.IsIdentity != true).ToList();
                 // Propertied columns refers to columns in the table that indeed have a property assigned to them in the object.
                 List<TableColumn> propertiedColumns = tableColumns.Where(col => col.IsIdentity != true)
                     .Select(col =>
@@ -558,7 +558,7 @@ namespace CodedThought.Core.Data
                     SqlBulkCopy bulkCopy =
                         new((SqlConnection) DatabaseObjectInstance.Connection)
                         {
-                            BulkCopyTimeout = (DatabaseObjectInstance.CommandTimeout < 0 ? 0 : DatabaseObjectInstance.CommandTimeout)
+                            BulkCopyTimeout = DatabaseObjectInstance.CommandTimeout < 0 ? 0 : DatabaseObjectInstance.CommandTimeout
                         };
 
                     // Set up the bulk copy mappings
@@ -604,7 +604,7 @@ namespace CodedThought.Core.Data
             }
         }
 
-        public Boolean SaveBulk<T>(DataTable records, int notifyAfter = 2000)
+        public bool SaveBulk<T>(DataTable records, int notifyAfter = 2000)
         {
             try
             {
@@ -617,7 +617,7 @@ namespace CodedThought.Core.Data
                 tableColumns.Sort(delegate (TableColumn c1, TableColumn c2)
                 { return c1.OrdinalPosition.CompareTo(c2.OrdinalPosition); });
 
-                tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.Name) != String.Empty && col.IsIdentity != true).ToList();
+                tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.Name) != string.Empty && col.IsIdentity != true).ToList();
                 // Propertied columns refers to columns in the table that indeed have a property assigned to them in the object.
                 List<TableColumn> propertiedColumns = tableColumns.Where(col => col.IsIdentity != true)
                     .Select(col =>
@@ -701,13 +701,13 @@ namespace CodedThought.Core.Data
 
                 FieldInfo fi = typeof(SqlBulkCopy).GetField("_sortedColumnMappings", BindingFlags.NonPublic | BindingFlags.Instance);
                 object? sortedColumns = fi.GetValue(bulkcopy);
-                object[]? items = (Object[]) sortedColumns.GetType().GetField("_items", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(sortedColumns);
+                object[]? items = (object[]) sortedColumns.GetType().GetField("_items", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(sortedColumns);
 
                 FieldInfo itemdata = items[index].GetType().GetField("_metadata", BindingFlags.NonPublic | BindingFlags.Instance);
                 object? metadata = itemdata.GetValue(items[index]);
                 object? column = metadata.GetType().GetField("column", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).GetValue(metadata);
                 object? length = metadata.GetType().GetField("length", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).GetValue(metadata);
-                message = String.Format("Column: {0} contains data with a length greater than: {1}", column, length);
+                message = string.Format("Column: {0} contains data with a length greater than: {1}", column, length);
             }
             return message;
         }
@@ -1210,7 +1210,7 @@ namespace CodedThought.Core.Data
 
         /// <summary>Tests the connection.</summary>
         /// <returns></returns>
-        public Boolean TestConnection() => DatabaseObjectInstance.TestConnection();
+        public bool TestConnection() => DatabaseObjectInstance.TestConnection();
 
         /// <summary>Rollback a transaction inside of the <see cref="Transaction" /> method.</summary>
         public void Rollback()
@@ -1226,7 +1226,7 @@ namespace CodedThought.Core.Data
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public String GetTableNameFromObject<T>()
+        public string GetTableNameFromObject<T>()
         {
             DataTableAttribute table = GetTableAttribute<T>();
             return table == null
@@ -1251,32 +1251,32 @@ namespace CodedThought.Core.Data
 		/// configured then the default schema will be used if set.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <returns><see cref="String"/></returns>
-        public String? GetSchemaNameFromObject<T>()
+        /// <returns><see cref="string"/></returns>
+        public string? GetSchemaNameFromObject<T>()
         {
             DataTableAttribute table = GetTableAttribute<T>();
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the passed type, {nameof(T)}.")
-                : String.IsNullOrEmpty(table.SchemaName) ? DefaultSchemaName : table.SchemaName;
+                : string.IsNullOrEmpty(table.SchemaName) ? DefaultSchemaName : table.SchemaName;
         }
         /// <summary>
         /// Gets the schema name from the passed type name.  If none is
         /// configured then the default schema will be used if set.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <returns><see cref="String"/></returns>
-        public String? GetSchemaNameFromObject(string typeName)
+        /// <returns><see cref="string"/></returns>
+        public string? GetSchemaNameFromObject(string typeName)
         {
             DataTableAttribute table = GetTableAttribute(typeName);
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the pass generic type, {typeName}.")
-                : String.IsNullOrEmpty(table.SchemaName) ? DefaultSchemaName : table.SchemaName;
+                : string.IsNullOrEmpty(table.SchemaName) ? DefaultSchemaName : table.SchemaName;
         }
 
         /// <summary>Gets the view name from object type.</summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public String? GetViewNameFromObject<T>()
+        public string? GetViewNameFromObject<T>()
         {
             DataTableAttribute table = GetTableAttribute<T>();
             return table == null
@@ -1299,7 +1299,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         [Obsolete("The method is obsolete.  The full source name should be pulled from the inheriting provider's methods of GetTableName and GetSchemaName.")]
-        public String GetSourceNameFromObject<T>()
+        public string GetSourceNameFromObject<T>()
         {
             DataTableAttribute table = GetTableAttribute<T>();
             return DatabaseObjectInstance.GetTableName(DefaultSchemaName, table.SourceName);
@@ -1319,9 +1319,9 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="propertyName">Name of the property.</param>
         /// <returns></returns>
-        public String GetColumnNameFromProperty<T>(string propertyName)
+        public string GetColumnNameFromProperty<T>(string propertyName)
         {
-            String columName = String.Empty;
+            string columName = string.Empty;
             foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
             {
                 if (attrColumn.PropertyName == propertyName)
@@ -1337,9 +1337,9 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="columnName">Name of the column.</param>
         /// <returns></returns>
-        public String GetPropertyNameColumn<T>(string columnName)
+        public string GetPropertyNameColumn<T>(string columnName)
         {
-            String propertyName = String.Empty;
+            string propertyName = string.Empty;
             foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
             {
                 if (attrColumn.ColumnName == columnName)
@@ -1405,7 +1405,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="includeIdentityColumns">The include identity columns.</param>
         /// <returns></returns>
-        public List<TableColumn> GetTableDefinition<T>(Boolean includeIdentityColumns)
+        public List<TableColumn> GetTableDefinition<T>(bool includeIdentityColumns)
         {
             try
             {
@@ -1576,7 +1576,7 @@ namespace CodedThought.Core.Data
         /// <summary>Gets the column names from the passed data object.</summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<String> GetColumnNames<T>()
+        public List<string> GetColumnNames<T>()
         {
             List<string> listColumns = [];
             foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
@@ -1596,7 +1596,7 @@ namespace CodedThought.Core.Data
             return listParameters;
         }
 
-        protected List<String> GetOrderByColumnNames<T>()
+        protected List<string> GetOrderByColumnNames<T>()
         {
             List<string> listColumns = [];
             //not supported at the moment
@@ -1859,49 +1859,78 @@ namespace CodedThought.Core.Data
         /// <param name="value">       The value.</param>
         /// <param name="expectedType">The expected type.</param>
         /// <returns></returns>
-        protected object GetReaderValueAs(object value, Type expectedType)
+        protected object? GetReaderValueAs(object value, Type targetType)
         {
-            if (value != DBNull.Value)
-            {
-                return expectedType.GetType() == typeof(Enum)
-                    ? value
-                    : expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(Nullable<>)
-                    ? ((DateTime?) value) ?? GetTypeMinValue(expectedType)
-                    : expectedType.Name switch
-                    {
-                        nameof(Boolean) => Convert.ToBoolean(value),
-                        nameof(Guid) => Guid.Parse(value.ToString()),
-                        nameof(Int16) => Int16.Parse(value.ToString()),
-                        nameof(Int32) => Int32.Parse(value.ToString()),
-                        nameof(DateTime) => DateTime.Parse(value.ToString()),
-                        nameof(Double) => Double.Parse(value.ToString()),
-                        nameof(Decimal) => Decimal.Parse(value.ToString()),
-                        nameof(Int64) => Int64.Parse(value.ToString()),
-                        _ => value,
-                    };
-            }
-            else
-            {
-                if (expectedType.IsPrimitive
-                    || expectedType.Equals(typeof(string))
-                    || expectedType.Equals(typeof(bool)))
-                {
-                    object? returnVal = null;
-                    Switch.On(expectedType)
-                        .Case(typeof(string), () => returnVal = String.Empty)
-                        .Case(typeof(String), () => returnVal = String.Empty)
-                        .Case(typeof(Char), () => returnVal = String.Empty)
-                        .Case(typeof(Boolean), () => returnVal = false)
-                        .Case(typeof(bool), () => returnVal = false)
-                        .Default(() => returnVal = null);
+            if (value == DBNull.Value)
+                return null;
 
-                    return returnVal;
-                }
-                else
-                {
-                    return GetTypeMinValue(expectedType);
-                }
+            // Handle null values for nullable types
+            if (value == null && targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                return null;
             }
+
+            // Get the underlying type if it's nullable
+            Type nonNullableType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+            try
+            {
+                return Convert.ChangeType(value, nonNullableType);
+            }
+            catch (InvalidCastException)
+            {
+                throw new InvalidCastException($"Cannot convert value '{value}' to type {targetType.Name}");
+            }
+            catch (FormatException)
+            {
+                throw new FormatException($"Value '{value}' is not in a format suitable for type {targetType.Name}");
+            }
+            catch (OverflowException)
+            {
+                throw new OverflowException($"Value '{value}' is outside the range for type {targetType.Name}");
+            }
+
+            //if (value != DBNull.Value)
+            //{
+            //    return expectedType.GetType() == typeof(Enum)
+            //        ? value
+            //        : expectedType.IsGenericType && expectedType.GetGenericTypeDefinition() == typeof(Nullable<>)
+            //        ? ((DateTime?) value) ?? GetTypeMinValue(expectedType)
+            //        : expectedType.Name switch
+            //        {
+            //            nameof(Boolean) => Convert.ToBoolean(value),
+            //            nameof(Guid) => Guid.Parse(value.ToString()),
+            //            nameof(Int16) => Int16.Parse(value.ToString()),
+            //            nameof(Int32) => Int32.Parse(value.ToString()),
+            //            nameof(DateTime) => DateTime.Parse(value.ToString()),
+            //            nameof(Double) => Double.Parse(value.ToString()),
+            //            nameof(Decimal) => Decimal.Parse(value.ToString()),
+            //            nameof(Int64) => Int64.Parse(value.ToString()),
+            //            _ => value,
+            //        };
+            //}
+            //else
+            //{
+            //    if (expectedType.IsPrimitive
+            //        || expectedType.Equals(typeof(string))
+            //        || expectedType.Equals(typeof(bool)))
+            //    {
+            //        object? returnVal = null;
+            //        Switch.On(expectedType)
+            //            .Case(typeof(string), () => returnVal = String.Empty)
+            //            .Case(typeof(String), () => returnVal = String.Empty)
+            //            .Case(typeof(Char), () => returnVal = String.Empty)
+            //            .Case(typeof(Boolean), () => returnVal = false)
+            //            .Case(typeof(bool), () => returnVal = false)
+            //            .Default(() => returnVal = null);
+
+            //        return returnVal;
+            //    }
+            //    else
+            //    {
+            //        return GetTypeMinValue(expectedType);
+            //    }
+            //}
         }
 
         /// <summary>Formats the value for null based on the determined type of the value.</summary>
@@ -1923,19 +1952,27 @@ namespace CodedThought.Core.Data
             try
             {
                 CodedThought.Core.Switch.On(valueType)
-                    .Case(typeof(Int16), () => returnVal = (Int16.MinValue == (Int16) value ? DBNull.Value : value))
-                    .Case(typeof(Int32), () => returnVal = (Int32.MinValue == (Int32) value ? DBNull.Value : value))
-                    .Case(typeof(Int64), () => returnVal = (Int64.MinValue == (Int64) value ? DBNull.Value : value))
-                    .Case(typeof(Boolean), () => returnVal = value)
-                    .Case(typeof(float), () => returnVal = (float.MinValue == (float) value ? DBNull.Value : value))
-                    .Case(typeof(Double), () => returnVal = (Double.MinValue == (Double) value ? DBNull.Value : value))
-                    .Case(typeof(Decimal), () => returnVal = (Decimal.MinValue == (Decimal) value ? DBNull.Value : value))
-                    .Case(typeof(String), () => returnVal = (String.IsNullOrEmpty((string) value) ? DBNull.Value : value))
-                    .Case(typeof(Char), () => returnVal = (String.IsNullOrEmpty((string) value) ? DBNull.Value : value))
-                    .Case(typeof(DateTime), () => returnVal = (DateTime.MinValue == ConvertToSafeDateTime(value) ? DBNull.Value : Convert.ToDateTime(value)))
-                    .Case(typeof(DateTime?), () => returnVal = (DateTime.MinValue == ConvertToSafeDateTime(value) ? DBNull.Value : Convert.ToDateTime(value)))
-                    .Case(typeof(Object), () => returnVal = (value ?? DBNull.Value))
-                    .Case(typeof(byte[]), () => returnVal = (value == null || ((byte[]) value).Length == 0 ? DBNull.Value : value));
+                    .Case(typeof(short), () => returnVal = short.MinValue == (short) value ? DBNull.Value : value)
+                    .Case(typeof(short?), () => returnVal = short.MinValue == (short) value ? DBNull.Value : value)
+                    .Case(typeof(int), () => returnVal = int.MinValue == (int) value ? DBNull.Value : value)
+                    .Case(typeof(int?), () => returnVal = int.MinValue == (int) value ? DBNull.Value : value)
+                    .Case(typeof(long), () => returnVal = long.MinValue == (long) value ? DBNull.Value : value)
+                    .Case(typeof(long?), () => returnVal = long.MinValue == (long) value ? DBNull.Value : value)
+                    .Case(typeof(bool), () => returnVal = value)
+                    .Case(typeof(bool?), () => returnVal = value)
+                    .Case(typeof(float), () => returnVal = float.MinValue == (float) value ? DBNull.Value : value)
+                    .Case(typeof(float?), () => returnVal = float.MinValue == (float) value ? DBNull.Value : value)
+                    .Case(typeof(double), () => returnVal = double.MinValue == (double) value ? DBNull.Value : value)
+                    .Case(typeof(double?), () => returnVal = double.MinValue == (double) value ? DBNull.Value : value)
+                    .Case(typeof(decimal), () => returnVal = decimal.MinValue == (decimal) value ? DBNull.Value : value)
+                    .Case(typeof(decimal?), () => returnVal = decimal.MinValue == (decimal) value ? DBNull.Value : value)
+                    .Case(typeof(string), () => returnVal = string.IsNullOrEmpty((string) value) ? DBNull.Value : value)
+                    .Case(typeof(char), () => returnVal = string.IsNullOrEmpty((string) value) ? DBNull.Value : value)
+                    .Case(typeof(char?), () => returnVal = string.IsNullOrEmpty((string) value) ? DBNull.Value : value)
+                    .Case(typeof(DateTime), () => returnVal = DateTime.MinValue == ConvertToSafeDateTime(value) ? DBNull.Value : Convert.ToDateTime(value))
+                    .Case(typeof(DateTime?), () => returnVal = DateTime.MinValue == ConvertToSafeDateTime(value) ? DBNull.Value : Convert.ToDateTime(value))
+                    .Case(typeof(object), () => returnVal = value ?? DBNull.Value)
+                    .Case(typeof(byte[]), () => returnVal = value == null || ((byte[]) value).Length == 0 ? DBNull.Value : value);
                 return returnVal;
             }
             catch (CodedThoughtException ex)
@@ -1969,17 +2006,17 @@ namespace CodedThought.Core.Data
         {
             object returnVal = null;
             CodedThought.Core.Switch.On(expectedType)
-                .Case(typeof(Int16), () => returnVal = Int16.MinValue)
-                .Case(typeof(Int32), () => returnVal = Int32.MinValue)
-                .Case(typeof(Int64), () => returnVal = Int64.MinValue)
+                .Case(typeof(short), () => returnVal = short.MinValue)
+                .Case(typeof(int), () => returnVal = int.MinValue)
+                .Case(typeof(long), () => returnVal = long.MinValue)
                 .Case(typeof(float), () => returnVal = float.MinValue)
-                .Case(typeof(Double), () => returnVal = Double.MinValue)
-                .Case(typeof(Decimal), () => returnVal = Decimal.MinValue)
-                .Case(typeof(String), () => returnVal = String.Empty)
-                .Case(typeof(Char), () => returnVal = String.Empty)
+                .Case(typeof(double), () => returnVal = double.MinValue)
+                .Case(typeof(decimal), () => returnVal = decimal.MinValue)
+                .Case(typeof(string), () => returnVal = string.Empty)
+                .Case(typeof(char), () => returnVal = string.Empty)
                 .Case(typeof(DateTime), () => returnVal = DateTime.MinValue)
                 .Case(typeof(DateTime?), () => returnVal = DateTime.MinValue)
-                .Case(typeof(Object), () => returnVal = null);
+                .Case(typeof(object), () => returnVal = null);
             return returnVal;
         }
 
@@ -2187,7 +2224,7 @@ namespace CodedThought.Core.Data
             try
             {
                 Type t = obj.GetType();
-                return ORM.ContainsKey(t.FullName) ? ((DataTableAttribute) ORM[t.FullName][t]).Key.ColumnName : String.Empty;
+                return ORM.ContainsKey(t.FullName) ? ((DataTableAttribute) ORM[t.FullName][t]).Key.ColumnName : string.Empty;
             }
             catch { return string.Empty; }
         }
