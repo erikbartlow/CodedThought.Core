@@ -24,7 +24,7 @@
 		public bool TestConnection() {
 			try {
 				return DataStore.TestConnection();
-			} catch (Exceptions.CodedThoughtApplicationException ctEx) {
+			} catch (CodedThoughtApplicationException ctEx) {
 				throw ctEx;
 			}
 		}

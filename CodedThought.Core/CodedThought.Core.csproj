@@ -8,10 +8,10 @@
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>8.0.1.6</AssemblyVersion>
-	<FileVersion>8.0.1.6</FileVersion>
+	<AssemblyVersion>8.0.1.17</AssemblyVersion>
+	<FileVersion>8.0.1.17</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>8.0.1.6</Version>
+	<Version>8.0.1.17</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>Erik Bartlow</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
@@ -23,7 +23,7 @@
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Copyright>Copyright (c) 2024 Erik Bartlow, All rights reserved</Copyright>
-	<PackageReleaseNotes>This version is compiled to work with .NET 8.0. It removes the System.Drawing dependency and replaces it with SkiaSharp to better support other non-windows platforms. It updates the GetMultiple methods to have nullable parameter collections.</PackageReleaseNotes>
+	<PackageReleaseNotes>Fixed CodedThought.Core.Security.Encryption Encyrpt/Decrypt String methods.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -35,6 +35,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<Compile Remove="Data\GenericApiDataStore.cs" />
+	<Compile Remove="Data\GenericApiDataStoreController.cs" />
 	<Compile Remove="Security\LDAPMembershipServices.cs" />
   </ItemGroup>
 

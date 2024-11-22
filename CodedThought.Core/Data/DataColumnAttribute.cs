@@ -195,7 +195,7 @@ namespace CodedThought.Core.Data
                     return DbTypeSupported.dbGUID;
 
                 default:
-                    throw new Exceptions.CodedThoughtApplicationException($"Can not convert DBType.{ColumnType} to an equivalent DbTypeSupported Enumeration value.");
+                    throw new CodedThoughtApplicationException($"Can not convert DBType.{ColumnType} to an equivalent DbTypeSupported Enumeration value.");
             }
         }
 
@@ -246,7 +246,7 @@ namespace CodedThought.Core.Data
                     return typeof(Guid);
 
                 default:
-                    throw new Exceptions.CodedThoughtApplicationException($"Can not convert DBType.{ColumnType} to an equivalent System Type.");
+                    throw new CodedThoughtApplicationException($"Can not convert DBType.{ColumnType} to an equivalent System Type.");
             }
         }
 

@@ -39,7 +39,7 @@ namespace CodedThought.Core.Security {
 			if (Url != String.Empty) {
 				return System.Net.CredentialCache.DefaultCredentials.GetCredential(new Uri(Url), "");
 			} else {
-				throw new Exceptions.CodedThoughtApplicationException("The Url parameter is missing.");
+				throw new CodedThoughtApplicationException("The Url parameter is missing.");
 			}
 		}
 
@@ -59,7 +59,7 @@ namespace CodedThought.Core.Security {
 			if (userName.IndexOf("\\") > 0) {
 				return new NetworkCredential(userName, password);
 			} else {
-				throw new Exceptions.CodedThoughtApplicationException("Your username does not contain the domain in the [domain\\username] format.");
+				throw new CodedThoughtApplicationException("Your username does not contain the domain in the [domain\\username] format.");
 			}
 		}
 

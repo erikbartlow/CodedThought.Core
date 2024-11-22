@@ -68,53 +68,45 @@ namespace CodedThought.Core.Data
         /// <param name="cache"><see cref="IMemoryCache"/></param>
         /// <param name="connection"><see cref="ConnectionSetting"/></param>
         /// <returns></returns>
-        /// <exception cref="Exceptions.MissingArguementException"></exception>
-        /// <exception cref="Exceptions.CodedThoughtApplicationException"></exception>
+        /// <exception cref="MissingArguementException"></exception>
+        /// <exception cref="CodedThoughtApplicationException"></exception>
         public static DatabaseObject DatabaseObjectFactory(IServiceProvider serviceProvider, IMemoryCache cache, ConnectionSetting connection)
         {
-            string objectCacheName = $"DATABASE_ASSEMBLY_{connection.ProviderType.ToUpper()}_{connection.Name.ToUpper()}";
             DatabaseObject retVal;
             try
             {
                 if (string.IsNullOrEmpty(connection.ConnectionString))
                 {
-                    throw new Exceptions.MissingArguementException("Connection is missing the connection string property.  Please check the CodedThought Settings json file.");
+                    throw new MissingArguementException("Connection is missing the connection string property.  Please check the CodedThought Settings json file.");
                 }
                 // Try to get the database object from the cache.
-                DatabaseObject dbo = (DatabaseObject) cache.GetFromHttpCache<IDatabaseObject>(objectCacheName);
+                DatabaseObject? dbo;
                 // If it isn't in the cache yet or has timed out then get it from dependency injection.
-                dbo ??= (DatabaseObject) GetDatabaseObjectFromService(serviceProvider, connection);
+                dbo = (DatabaseObject) GetDatabaseObjectFromService(serviceProvider, connection);
 
                 if (dbo != null)
                 {
-                    dbo.SetDatabaseObjectProperties(connection, connection.ConnectionString, connection.DefaultSchema);
                     if (dbo.SupportedDatabase != DBSupported.ApiServer)
                     {
-                        dbo.OpenConnection();
+                        if( dbo.Connection.State == ConnectionState.Closed) dbo.OpenConnection();
                         if (dbo.Connection.State != ConnectionState.Open)
                             throw new CodedThoughtDatabaseException("Unable to connect to the database with the passed connection string.");
                     }
                     else
                     {
-                        if( !dbo.TestConnection())
+                        if (!dbo.TestConnection())
                         {
-
                             throw new CodedThoughtApplicationException($"Unable to determine if the web service is online.  A Ping test was unsuccessfull.  Pleaes review connection string:  {dbo.CoreConnection.ConnectionString}.");
                         }
                     }
-                    cache.AddToHttpCache(objectCacheName, dbo);
-                    retVal = dbo;
+                    return dbo;
                 }
-                else
-                {
-                    throw new CodedThoughtApplicationException("Cannot obtain DB Object from the factory.");
-                }
+                throw new CodedThoughtApplicationException("Cannot obtain DB Object from the factory from the dependency injection ServiceProvider.");
             }
             catch (Exception ex)
             {
                 throw new CodedThoughtApplicationException($"Cannot obtain DB Connection [{connection.ConnectionString}]", ex);
             }
-            return retVal;
         }
         /// <summary>
         /// Gets the DatabaseObject from the DI Service Provider and stores it in the local Cache.
@@ -123,38 +115,25 @@ namespace CodedThought.Core.Data
         /// <param name="cache"><see cref="runtime.MemoryCache"/></param>
         /// <param name="connection"><see cref="ConnectionSetting"/></param>
         /// <returns></returns>
-        /// <exception cref="Exceptions.MissingArguementException"></exception>
-        /// <exception cref="Exceptions.CodedThoughtApplicationException"></exception>
+        /// <exception cref="MissingArguementException"></exception>
+        /// <exception cref="CodedThoughtApplicationException"></exception>
         public static DatabaseObject DatabaseObjectFactory(IServiceProvider serviceProvider, runtime.MemoryCache cache, ConnectionSetting connection)
         {
-            string objectCacheName = $"DATABASE_ASSEMBLY_{connection.ProviderType.ToUpper()}_{connection.Name.ToUpper()}";
             DatabaseObject retVal;
             try
             {
                 if (string.IsNullOrEmpty(connection.ConnectionString))
                 {
-                    throw new Exceptions.MissingArguementException("Connection is missing the connection string property.  Please check the CodedThought Settings json file.");
+                    throw new MissingArguementException("Connection is missing the connection string property.  Please check the CodedThought Settings json file.");
                 }
-                // Try to get the database object from the cache.
-                DatabaseObject dbo = (DatabaseObject) cache.GetFromLocalCache<IDatabaseObject>(objectCacheName);
-                // If it isn't in the cache yet or has timed out then get it from dependency injection.
-                dbo ??= (DatabaseObject) GetDatabaseObjectFromService(serviceProvider, connection);
-                if (dbo != null)
-                {
-                    dbo.SetDatabaseObjectProperties(connection, connection.ConnectionString, connection.DefaultSchema);
-                    cache.AddToLocalCache(objectCacheName, dbo);
-                    retVal = dbo;
-                }
-                else
-                {
-                    throw new CodedThoughtApplicationException("Cannot obtain DB Object from the factory.");
-                }
+                DatabaseObject? dbo;
+                dbo = (DatabaseObject) GetDatabaseObjectFromService(serviceProvider, connection);
+                return dbo != null ? dbo : throw new CodedThoughtApplicationException("Cannot obtain DB Object from the factory.");
             }
             catch (Exception ex)
             {
                 throw new CodedThoughtApplicationException($"Cannot obtain DB Connection [{connection.ConnectionString}]", ex);
             }
-            return retVal;
         }
         /// <summary>
         /// Gets the <see cref="IDatabaseObject"/> from the dependency injection services based on the connection key and provider type.
@@ -170,6 +149,7 @@ namespace CodedThought.Core.Data
                 {
                     if (dbo.SupportedDatabase == (DBSupported) Enum.Parse(typeof(DBSupported), connection.ProviderType))
                     {
+                        ((DatabaseObject) dbo).SetDatabaseObjectProperties(connection, connection.ConnectionString, connection.DefaultSchema);
                         return dbo;
                     }
                 }
@@ -898,7 +878,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw new Exceptions.CodedThoughtApplicationException("Failed to add retrieve data from: " + tableName, ex);
+                throw new CodedThoughtApplicationException("Failed to add retrieve data from: " + tableName, ex);
             }
             finally
             {
@@ -922,7 +902,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw new Exceptions.CodedThoughtApplicationException("Failed to add retrieve data from: " + sql, ex);
+                throw new CodedThoughtApplicationException("Failed to add retrieve data from: " + sql, ex);
             }
 
             return reader;
@@ -946,7 +926,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw new Exceptions.CodedThoughtApplicationException($"Failed to add retrieve data from: {GetApiSourceUrl()}", ex);
+                throw new CodedThoughtApplicationException($"Failed to add retrieve data from: {GetApiSourceUrl()}", ex);
             }
         }
         /// <summary>Returns an ApiDataReader object based on the action and parameters passed.</summary>
@@ -967,7 +947,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw new Exceptions.CodedThoughtApplicationException($"Failed to add retrieve data from: {GetApiSourceUrl()}", ex);
+                throw new CodedThoughtApplicationException($"Failed to add retrieve data from: {GetApiSourceUrl()}", ex);
             }
         }
         /// <summary>Gets an DataSet this creates a simple query where all parameters are joined by 'AND'</summary>
@@ -997,7 +977,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw new Exceptions.CodedThoughtApplicationException("Failed to retrieve data from: " + tableName, ex);
+                throw new CodedThoughtApplicationException("Failed to retrieve data from: " + tableName, ex);
             }
 
             return dataSet;
@@ -1047,7 +1027,7 @@ namespace CodedThought.Core.Data
             catch (Exception ex)
             {
                 RollbackTransaction();
-                throw new Exceptions.CodedThoughtApplicationException("Failed to delete record from: " + tableName, ex);
+                throw new CodedThoughtApplicationException("Failed to delete record from: " + tableName, ex);
             }
             finally
             {
@@ -1102,7 +1082,7 @@ namespace CodedThought.Core.Data
             catch (Exception ex)
             {
                 RollbackTransaction();
-                throw new Exceptions.CodedThoughtApplicationException("Failed to update record to: " + tableName, ex);
+                throw new CodedThoughtApplicationException("Failed to update record to: " + tableName, ex);
             }
             finally
             {
@@ -1162,6 +1142,9 @@ namespace CodedThought.Core.Data
         {
             try
             {
+                if (Connection.State == ConnectionState.Closed)
+                    OpenConnection();
+
                 using (IDbCommand cmd = Connection.CreateCommand())
                 {
                     cmd.CommandText = commandText;
@@ -1184,7 +1167,7 @@ namespace CodedThought.Core.Data
             catch (Exception ex)
             {
                 RollbackTransaction();
-                throw new Exceptions.CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
+                throw new CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
             }
             finally
             {
@@ -1267,7 +1250,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw new Exceptions.CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
+                throw new CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
             }
         }
 
@@ -1362,7 +1345,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw new Exceptions.CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
+                throw new CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
             }
         }
 
@@ -1402,7 +1385,7 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw new Exceptions.CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
+                throw new CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
             }
         }
 

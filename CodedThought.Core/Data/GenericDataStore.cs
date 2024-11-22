@@ -24,6 +24,7 @@ namespace CodedThought.Core.Data
         protected readonly IMemoryCache? _cache = null;
         protected readonly runtime.MemoryCache? _runtimeCache = null;
         protected string _defaultSchema;
+        protected readonly bool _useHttpCache;
 
         public event SqlRowsCopiedEventHandler? BulkCopySqlRowsCopied;
 
@@ -36,7 +37,7 @@ namespace CodedThought.Core.Data
 
         public DatabaseConnection? CurrentDatabaseConnection { get; set; }
         public ConnectionSetting? ConnectionSetting { get; private set; }
-        public bool UseHttpCache => _runtimeCache == null;
+        public bool UseHttpCache => _useHttpCache;
         /// <summary>Gets or sets the database object instance.</summary>
         /// <value>The database object instance.</value>
         protected DatabaseObject DatabaseObjectInstance { get; private set; }
@@ -109,22 +110,25 @@ namespace CodedThought.Core.Data
 
         #region Constructors
 
-        private GenericDataStore(runtime.MemoryCache cache)
+        private GenericDataStore()
         {
             _specifiedDatabaseConnection = null;
+            _cache = null;
+        }
+        private GenericDataStore(runtime.MemoryCache cache) : this()
+        {
             _runtimeCache = cache;
-
-            if (!_runtimeCache.TryGetValue<Dictionary<string, Dictionary<Type, Attribute>>>(ORM_KEY, out ORM))
+            _useHttpCache = false;
+            if (!_runtimeCache.TryGetValue(ORM_KEY, out ORM))
             {
                 ORM = [];
             }
         }
-        private GenericDataStore(IMemoryCache cache)
+        private GenericDataStore(IMemoryCache cache) : this()
         {
-            _specifiedDatabaseConnection = null;
             _cache = cache;
-
-            if (!_cache.TryGetValue<Dictionary<string, Dictionary<Type, Attribute>>>(ORM_KEY, out ORM))
+            _useHttpCache = true;
+            if (!_cache.TryGetValue(ORM_KEY, out ORM))
             {
                 ORM = [];
             }
@@ -497,7 +501,7 @@ namespace CodedThought.Core.Data
             //no primary key: throw error
             if (oParamWhere.Count == 0)
             {
-                throw new Exceptions.CodedThoughtApplicationException("Cannot perform an update when no where clause is specified.");
+                throw new CodedThoughtApplicationException("Cannot perform an update when no where clause is specified.");
             }
             DatabaseObjectInstance.Update(attrTable.TableName, oParamColumns, oParamWhere);
         }
@@ -528,26 +532,9 @@ namespace CodedThought.Core.Data
                         col.CorrespondingPropertyName = GetPropertyNameColumn<T>(col.Name);
                         return col;
                     }).ToList();
-                // Create the DataTable from the object. This allows changes to be made in the data object and flow to this controller.
-                foreach (TableColumn col in propertiedColumns)
-                {
-                    DataColumnAttribute colAttrib = GetColumnDataAttribute<T>(col.CorrespondingPropertyName);
-                    dt.Columns.Add(col.Name, colAttrib.PropertyType);
-                }
 
-                // Convert the list to a DataTable.
-                List<PropertyInfo> properties = typeof(T).GetProperties().ToList();
-                foreach (T obj in records)
-                {
-                    DataRow row = dt.NewRow();
-                    foreach (PropertyInfo prop in properties)
-                    {
-                        DataColumnAttribute dataColumn = prop.GetDataColumnAttributes();
-                        // Set the data column's value while handling nulls.
-                        row[dataColumn.ColumnName] = FormatValueForNull(prop.GetValue(obj, null), prop.PropertyType);
-                    }
-                    dt.Rows.Add(row);
-                }
+                dt = records.ToDataTable();
+
                 if (DatabaseToUse.DatabaseType != DBSupported.SqlServer)
                 {
                     throw new NotSupportedException("The current database type, " + DatabaseToUse.DatabaseType.ToString() + " is not supported by this bulk insert method.");
@@ -577,7 +564,7 @@ namespace CodedThought.Core.Data
                     // write the data in the dataTable write the data in the dataTable
                     bulkCopy.NotifyAfter = dt.Rows.Count < notifyAfter ? dt.Rows.Count : notifyAfter;
                     bulkCopy.BatchSize = bulkCopy.NotifyAfter;
-                    bulkCopy.SqlRowsCopied += bulkCopy_SqlRowsCopied;
+                    bulkCopy.SqlRowsCopied += BulkCopy_SqlRowsCopied;
                     try
                     {
                         bulkCopy.WriteToServer(dt);
@@ -654,7 +641,7 @@ namespace CodedThought.Core.Data
                     // write the data in the dataTable write the data in the dataTable
                     bulkCopy.NotifyAfter = dt.Rows.Count < notifyAfter ? dt.Rows.Count : notifyAfter;
                     bulkCopy.BatchSize = bulkCopy.NotifyAfter;
-                    bulkCopy.SqlRowsCopied += bulkCopy_SqlRowsCopied;
+                    bulkCopy.SqlRowsCopied += BulkCopy_SqlRowsCopied;
                     try
                     {
                         bulkCopy.WriteToServer(dt);
@@ -680,10 +667,6 @@ namespace CodedThought.Core.Data
                 throw;
             }
         }
-        [Obsolete("Due to naming violations from previous .NET versions this signature is obsolete.  Please use the one with the capitalized start.")]
-#pragma warning disable IDE1006 // Naming Styles
-        protected void bulkCopy_SqlRowsCopied(object sender, SqlRowsCopiedEventArgs e) => RowsInserted?.Invoke(this, e);
-#pragma warning restore IDE1006 // Naming Styles
 
         /// <summary>Handles the SqlRowsCopied event of the bulkCopy control.</summary>
         /// <param name="sender">The source of the event.</param>
@@ -1875,7 +1858,8 @@ namespace CodedThought.Core.Data
 
             try
             {
-                return Convert.ChangeType(value, nonNullableType);
+                // Since Guids are not handled by the Convert.ChangeType system method we have to handle it here.
+                return targetType == typeof(Guid) ? Guid.Parse(value.ToString()) : Convert.ChangeType(value, nonNullableType);
             }
             catch (InvalidCastException)
             {
@@ -1948,18 +1932,18 @@ namespace CodedThought.Core.Data
         /// <returns></returns>
         protected object FormatValueForNull(object value, Type valueType)
         {
-            object returnVal = null;
+            object returnVal = DBNull.Value;
             try
             {
-                CodedThought.Core.Switch.On(valueType)
+                Switch.On(valueType)
                     .Case(typeof(short), () => returnVal = short.MinValue == (short) value ? DBNull.Value : value)
                     .Case(typeof(short?), () => returnVal = short.MinValue == (short) value ? DBNull.Value : value)
                     .Case(typeof(int), () => returnVal = int.MinValue == (int) value ? DBNull.Value : value)
                     .Case(typeof(int?), () => returnVal = int.MinValue == (int) value ? DBNull.Value : value)
                     .Case(typeof(long), () => returnVal = long.MinValue == (long) value ? DBNull.Value : value)
                     .Case(typeof(long?), () => returnVal = long.MinValue == (long) value ? DBNull.Value : value)
-                    .Case(typeof(bool), () => returnVal = value)
-                    .Case(typeof(bool?), () => returnVal = value)
+                    .Case(typeof(bool), () => returnVal = value == null ? DBNull.Value : value)
+                    .Case(typeof(bool?), () => returnVal = value == null || !((bool?) Convert.ToBoolean(value)).HasValue ? DBNull.Value : value)
                     .Case(typeof(float), () => returnVal = float.MinValue == (float) value ? DBNull.Value : value)
                     .Case(typeof(float?), () => returnVal = float.MinValue == (float) value ? DBNull.Value : value)
                     .Case(typeof(double), () => returnVal = double.MinValue == (double) value ? DBNull.Value : value)
@@ -1972,7 +1956,9 @@ namespace CodedThought.Core.Data
                     .Case(typeof(DateTime), () => returnVal = DateTime.MinValue == ConvertToSafeDateTime(value) ? DBNull.Value : Convert.ToDateTime(value))
                     .Case(typeof(DateTime?), () => returnVal = DateTime.MinValue == ConvertToSafeDateTime(value) ? DBNull.Value : Convert.ToDateTime(value))
                     .Case(typeof(object), () => returnVal = value ?? DBNull.Value)
-                    .Case(typeof(byte[]), () => returnVal = value == null || ((byte[]) value).Length == 0 ? DBNull.Value : value);
+                    .Case(typeof(byte[]), () => returnVal = value == null || ((byte[]) value).Length == 0 ? DBNull.Value : value)
+                    .Case(typeof(Guid), () => returnVal = value == null || Guid.Empty == Guid.Parse(value.ToString()) ? DBNull.Value : Guid.Parse(value.ToString()))
+                    .Case(typeof(Guid?), () => returnVal = value == null || Guid.Empty == Guid.Parse(value.ToString()) ? DBNull.Value : Guid.Parse(value.ToString()));
                 return returnVal;
             }
             catch (CodedThoughtException ex)
