@@ -109,23 +109,13 @@ namespace CodedThought.Core.Data
             switch (_dbParam.DbType)
             {
                 case DbType.String:
-                    _dbParam.Value = $"'{_dbParam.Value}'";
-                    Parameter2.Value = $"'{Parameter2.Value}'";
-                    _dbParam.DbType = DbType.String;
-                    Parameter2.DbType = DbType.String;
-                    break;
-
-                case DbType.Date:
-                case DbType.DateTime:
-                case DbType.DateTime2:
-                    // Convert the values to string to match the to_date function.
-                    _dbParam.Value = $"'{Convert.ToDateTime(_dbParam.Value).ToString("MM/dd/yyyy")}'";
-                    Parameter2.Value = $"'{Convert.ToDateTime(Parameter2.Value).ToString("MM/dd/yyyy")}'";
+                    _dbParam.Value = _dbParam.Value;
+                    Parameter2.Value = Parameter2.Value;
                     _dbParam.DbType = DbType.String;
                     Parameter2.DbType = DbType.String;
                     break;
             }
-            return $" {(!firstInGroup ? _whereType.ToString() : "")} {_dbParam.SourceColumn} BETWEEN {_dbParam.Value} AND {Parameter2.Value}";
+            return $" {(!firstInGroup ? _whereType.ToString() : "")} {_dbParam.SourceColumn} BETWEEN {ParameterConnector}{_dbParam.ParameterName} AND {ParameterConnector}{Parameter2.ParameterName}";
         }
     }
 }

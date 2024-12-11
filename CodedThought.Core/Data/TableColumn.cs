@@ -66,7 +66,7 @@ namespace CodedThought.Core.Data
             IsPrimary = isPrimary;
             IsUpdateable = isPrimary == false;
             IsSortColumn = false;
-            IsInsertable = true;
+            IsInsertable = IsIdentity ? false : true;
             IsNullable = true;
         }
 
@@ -81,7 +81,7 @@ namespace CodedThought.Core.Data
             IsSortColumn = isSortColumn;
             IsInsertable = true;
             IsNullable = true;
-            SystemType = null;
+            SystemType = typeof(string);
         }
 
         /// <summary>Constructor</summary>

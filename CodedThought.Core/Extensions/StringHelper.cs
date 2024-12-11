@@ -308,5 +308,12 @@ namespace CodedThought.Core.Extensions {
             chars[0] = char.ToLower(chars[0]);
             return new string(chars);
         }
+		/// <summary>
+		/// Returns the currennt string with the first character in upper case.
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
+        public static string ToProperName(string input) => Regex.Replace(input, @"([a-z])([A-Z])", @"$1 $2", RegexOptions.None);
+
     }
 }
