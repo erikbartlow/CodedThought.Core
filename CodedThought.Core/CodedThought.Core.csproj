@@ -8,10 +8,10 @@
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>8.0.1.23</AssemblyVersion>
-	<FileVersion>8.0.1.23</FileVersion>
+	<AssemblyVersion>8.0.1.24</AssemblyVersion>
+	<FileVersion>8.0.1.24</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>8.0.1.23</Version>
+	<Version>8.0.1.24</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>Erik Bartlow</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
@@ -23,7 +23,7 @@
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Copyright>Copyright (c) 2024 Erik Bartlow, All rights reserved</Copyright>
-	<PackageReleaseNotes>Fixed CodedThought.Core.Security.Encryption Encyrpt/Decrypt String methods.</PackageReleaseNotes>
+	<PackageReleaseNotes>Added a new ILogger File Logging Provider.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
