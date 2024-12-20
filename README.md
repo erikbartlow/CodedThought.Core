@@ -2,7 +2,7 @@
 ## _A Custom ORM and .NET Utility Codebase_
 
 The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.  It has many other useful aspects:
-* Sql Server, Oracle, and REST Api Data Providers
+* SQL Server, Oracle, MySQL, OleDb, PostGreSQL, and REST API Data Providers
 * Email and Address Parsing
 * Excel Import and Generation
 * Extensions
@@ -10,33 +10,33 @@ The CodedThought.Core library is a custom entity framework used to primarily abs
 * SFTP and cURL Integration
 * ASP.NET WebControls
 * US Holiday Calculator
-* Validation Engine with highly customizable expression based language
+* Validation Engine with highly customizable expression-based language
 
 ### Installation
 
-CodedThought.Core requires several package dependencies, but these are easly done using the existing NuGet packages referenced.Installation is simply done by referencing the CodedThought.Core and Configuraion libraries and any of the source specific Core Provider libraries like CodedThought.Core.Data.SqlServer.
+CodedThought.Core requires several package dependencies, but these are easily done using the existing NuGet packages referenced. Installation is simply done by referencing the CodedThought.Core and Configuration libraries and any source-specific Core Provider libraries like CodedThought.Core.Data.SqlServer.
 
-A recommended approach to installation is by using the nuget package manager.  The path to all the packages is https://nuget.pkg.github.com/erikbartlow/index.json.
+A recommended approach to installation is by using the Nuget package manager.  The path to all the packages is https://nuget.pkg.github.com/erikbartlow/index.json.
 ## Usage
 
-Application Settings are accessed via .NET Core appsettings.json while database and/or API connection details are stored in a custom json settings file named ctSettings.json.  CodedThought.Core supports environment based settings.json implementations.
+Application Settings are accessed via .NET Core appsettings.json while database and/or API connection details are stored in a custom JSON settings file named ctSettings.json.  CodedThought.Core supports environment-based settings.json implementations.
 ### Core Settings Parameters
 ### CoreSettings/Settings
 |Property | Options | Description |
 | ------ | ------ | ------
-| WINFORM | boolean | The purpose of this setting is to tell the CodedThought.Core framework if it is being used in a web environment or not.  The reason for this is so that the framework can cache the discovered data aware classes and associated types properly.
+| WINFORM | boolean | The purpose of this setting is to tell the CodedThought.Core framework if it is being used in a web environment or not.  This is because the framework can properly cache the discovered data-aware classes and associated types.
 |ApplicationCookieName|Name of root application cookie|Provide a custom name for your application cookie.
 ### Connection Parameters
 ### CoreSettings/Connections
-The connections settings is an array of CoreSettings/Connections.  However, only one can have the Primary key set to true or false.
+The connection settings are an array of CoreSettings/Connections.  However, only one can have the Primary key set to true or false.
 | Property | Data Type | Description |
 | ------ | ------| ------
 | _Name_ | string | Enter a unique name for the connection here.  The CodedThought.Core framework supports multiple database connections on multiple platforms.
 | _Primary_ | boolean |  Specifies which connection the framework should use by default.
-| _ProviderType_ | string |Specifies which client provider you are expecting to use with this connection.  Accepted provider types: [ SqlServer | Oracle | MySql | OleDb | ApiServer ].  SqlServer is the default provider type.
-| _DefaultSchema_ | string |Enter the default schema to use with this connection.  **Note:  This feature allows the developer to create mulitple connections to the same database but pointing to different schemas within the database.  This useful when setting the default schema for a database user is not possible.**--The ApiServer provider does not require this
+| _ProviderType_ | string |Specifies which client provider you expect to use with this connection.  Accepted provider types: [ SqlServer | Oracle | MySql | OleDb | ApiServer ].  SqlServer is the default provider type.
+| _DefaultSchema_ | string |Enter the default schema to use with this connection.  **Note:  This feature allows the developer to create multiple connections to the same database but point to different schemas within the database.  This is useful when setting the default schema for a database user is not possible.**--The ApiServer provider does not require this
 | _ConnectionString_ | string |Enter the full connection string here for the database.  For Oracle connections you can enter the full TNS Names entry if necessary or just the TNSNAMES.ora entry name.  For Api connection use the Url endpoint.
-| _PoviderName_ | string | Enter the .NET System.Data allowed provider name for this connection.  This is not a substitute for the ProviderType setting, and is only required for as long as your .NET connection requires it.  The ApiServer provider does not require this.  Microsoft.Data.SqlClient is the default provider name.
+| _PoviderName_ | string | Enter the .NET System.Data allowed provider name for this connection.  This is not a substitute for the ProviderType setting and is only required for as long as your .NET connection requires it.  The ApiServer provider does not require this.  Microsoft.Data.SqlClient is the default provider name.
 
 ## Data Entity Management
 ### Custom Attributes
@@ -54,7 +54,7 @@ There are two custom attributes used by CodedThought.Core.Data.
 |_SchemaName_|Name of the database schema this entity resides in| Default is dbo|
 |_SourceName_|Gets the name of the source based on the UseView property and availability of the table and view name properties.|
 |_Properties_|A list of all bound properties in the entity|
-|_Key_|The specific DataColumnAttribute current set as the database key| The system currently only supports a single property to be a key and does not support.  **Multiple keys planned for a later release**
+|_Key_|The specific DataColumnAttribute currently set as the database key| The system currently only supports a single property to be a key.  **Multiple keys planned for a later release**
 ##### Sample Usage
 ```cs
 [DataTable( tblRegions )]
@@ -66,11 +66,11 @@ There are two custom attributes used by CodedThought.Core.Data.
 | _ColumnName_ | Physical name of the column in the table to get, save, or delete from. | Yes |
 | _IsPrimaryKey_ | Is this property/column the primary key in the table? true | false _Default: false_  |  Yes |
 | _IsUpdateable_ | Is this property/column considered updateable?  This is usually true unless it is also the primary key. true | false _Default: true_  |  No
-| _Size_ | Denotes the maximum size of data stored in the column.  _Note: This is only used for string based columns._ | No |
+| _Size_ | Denotes the maximum size of data stored in the column.  _Note: This is only used for string-based columns._ | No |
 | _ColumnType_ | Specifies the System.Data.DbType associated with the column.| Yes |
 | _PropertyType_ | Used by bulk copy procedures to dynamically ascertain the class to table column type mappings.|No|
 | _PropertyName_ | Used by bulk copy procedures to dynamically ascertain the class to table column name mappings.|No|
-| _ExtendedPropertyType_ | When setting this to another classes type the developer can set a property that is of an object type rather than a simple type.  This is very useful when a class property references an ENUM.  _Usage: typeof(MyNamespace.MyEnum)_|No|
+| _ExtendedPropertyType_ | When setting this to another class type, the developer can set a property of an object type rather than a simple type.  This is very useful when a class property references an ENUM.  _Usage: typeof(MyNamespace.MyEnum)_|No|
 | _ExtendedPropertyName_ | The property containing the data for the column.  _Note: Only used when the ExtendedPropertyType is set and is of type Object| No|
 |_LoadExtendedPropertyObject_|**Not Implemented**|No
 |_OverridesInherited_|true or false, When set to true causes the framework to prefer the current DataColumnAttribute over inherited properties.|No
@@ -91,11 +91,11 @@ There are two custom attributes used by CodedThought.Core.Data.
 |_ControllerName_|The endpoint controller name where the entity can be reached.|No
 |_Action_|The action name.|Yes
 |_Properties_|ApiDataPrameters: List of all bound action parameters found for the entity.|No
-|_Key_| Gets or sets the entity's key property.  This is used during Api calls that typically have an id=? parameter.|No
+|_Key_| Gets or sets the entity's key property.  This is used during API calls that typically have an id=? parameter.|No
 |_ClassType_| typeof()  | No
 |_ClassName_| Nullable full namespace for the entity|No
 ##### Create Data Aware classes
-A key component to the CodedThought.Core.Data framework are the custom tags designed to enable the framework to learn how to communicate with your database.  You can design them like any C# class, but it is key to understand that the framework is dynamically creating parameterized queries based on the custom attributes you set.
+A key component to the CodedThought.Core.Data framework is the custom tags designed to enable the framework to learn how to communicate with your database.  You can design them like any C# class, but it is key to understand that the framework is dynamically creating parameterized queries based on the custom attributes you set.
 
 
 ##### Create a Controller Class that inherits from the GenericDataStoreController with at least one constructor.
@@ -162,10 +162,10 @@ The ParameterCollection inherits from CollectionBase and implements the IList, I
 | _AddSubGroupParameterList()_ | ParameterCollection list
 | _AddXmlParameter()_ | string Column Name, string Value
 | _Remove()_ | int index
-| _SubParameterGroupWhereType_ | Using the DatabaseObject.WhereType enumerator this instructs the framework on how to handle any sub parameter groups if found._Note: Only used when the AddSubGroupParameterList() method is used._
+| _SubParameterGroupWhereType_ | Using the DatabaseObject.WhereType enumerator instructs the framework on how to handle any sub-parameter groups if found._Note: Only used when the AddSubGroupParameterList() method is used._
 #### Load and Access appSettings.json and ctSettings.json
-Using the configuration specific extension routines you can auto load the appSettings and any environment based json configurations.
->Note:  The name of the environment is used to locate any environment specific versions of the file. For example, if your environment is name dev then your settings file should be appsettings.dev.json.
+Using the configuration-specific extension routines you can auto-load the appSettings and any environment-based JSON configurations.
+>Note:  The name of the environment is used to locate any environment-specific versions of the file. For example, if your environment is named "development" then your settings file should be appsettings.development.json.
 ```cs
 builder.AddAppSettingsConfiguration(Optional: IConfigurationBuilder.Environment)
 builder.AddCoreSettingsConfiguration(Optional: IHostEnvironment.Environment)
