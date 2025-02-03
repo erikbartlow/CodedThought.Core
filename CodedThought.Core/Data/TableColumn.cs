@@ -34,7 +34,10 @@ namespace CodedThought.Core.Data
 
         /// <summary>This column is nullable or not.</summary>
         public Boolean IsNullable { get; set; }
-
+        /// <summary>
+        /// This column is managed by an object with a property that supports a nullable type.
+        /// </summary>
+        public Boolean IsNullableType {  get; set; }
         /// <summary>This column is an identity column.</summary>
         public Boolean IsIdentity { get; set; }
 

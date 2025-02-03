@@ -81,6 +81,11 @@ namespace CodedThought.Core.Data
         /// <value><c>true</c> if [use view]; otherwise, <c>false</c>.</value>
         /// <remarks>This is typically set with the <see cref="DataTableUsageAttribute" /> attribute and the <see cref="DataTableUsage.ViewPriority" /> enum flag.</remarks>
         public bool UseView { get; set; }
+        /// <summary>
+        /// If a Unique Identifier is being used as a key field the framework will autogenerate a new GUID if one is not provided.
+        /// </summary>
+        /// <remarks>This is typically set with the <see cref="DataTableUsageAttribute" /> attribute and the <see cref="DataTableUsage.AutoGenerateUniqueIdentifier" /> enum flag.</remarks>
+        public bool AutoGenerateUniqueIdentifier {  get; set; }
 
         #endregion Properties
 
@@ -99,6 +104,7 @@ namespace CodedThought.Core.Data
             IgnoreInherited = true;
             ReadOnly = false;
             UseView = false;
+            AutoGenerateUniqueIdentifier = false;
         }
 
         /// <summary>Initializes a new instance of the <see cref="DataTableAttribute" /> class.</summary>

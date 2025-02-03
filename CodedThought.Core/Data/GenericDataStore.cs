@@ -3,6 +3,9 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using CodedThought.Core.Data.Interfaces;
+using Org.BouncyCastle.Asn1.X509.Qualified;
+using Newtonsoft.Json.Linq;
+using System.Reflection.PortableExecutable;
 
 namespace CodedThought.Core.Data
 {
@@ -394,9 +397,17 @@ namespace CodedThought.Core.Data
             }
         }
 
-        /// <summary>Saves an object to the database. If the object has a non-zero primary key, an update is performed otherwise an insert is performed.</summary>
+        /// <summary>
+        /// Saves an object to the database. If the object has a non-zero primary key, an update is performed otherwise an insert is performed.
+        /// </summary>
         /// <typeparam name="T">The type of objects to save.</typeparam>
         /// <param name="obj">The object to save.</param>
+        /// <remarks>If the primary key is clear it assumed to be a new entry.
+        /// Different Kinds of Keys:
+        ///     Integer: Set to 0
+        ///     String: Set to Empty String
+        ///     Guid: Set to Guid minimum
+        /// </remarks>
         public void Save<T>(T obj)
         {
             bool bIsNew = true;
@@ -405,9 +416,29 @@ namespace CodedThought.Core.Data
             if (attrTable.Key != null)
             {
                 object oPrimaryKey = typeof(T).GetProperty(attrTable.Key.PropertyName).GetValue(obj, null);
-                if (((int) oPrimaryKey) > 0)
+                if (attrTable.Key.ColumnType == DbType.Guid && oPrimaryKey == null)
                 {
-                    bIsNew = false;
+                    bIsNew = true;
+                }
+                else
+                {
+                    if (oPrimaryKey.IsNumericType())
+                    {
+                        bIsNew = ((int) oPrimaryKey) > 0;
+                    }
+                    else
+                    {
+                        bIsNew = !string.IsNullOrEmpty(oPrimaryKey.ToString());
+                    }
+                }
+            }
+            // Determine if a new GUID needs to be generated based on the DataTableUsageAttributes.
+            if (attrTable.AutoGenerateUniqueIdentifier && bIsNew)
+            {
+                DataColumnAttribute keyAttribute = GetPrimaryKeyAttribute<T>();
+                if (keyAttribute.ColumnType == DbType.Guid)
+                {
+                    SetPrimaryKeyValue<T>(obj, keyAttribute.PropertyName, Guid.NewGuid());
                 }
             }
             if (bIsNew)
@@ -430,7 +461,7 @@ namespace CodedThought.Core.Data
             //insert
             DataTableAttribute attrTable = GetTableAttribute<T>();
             if (attrTable.ReadOnly)
-                throw new Exception($"This component, {typeof(T).Name}, is coded to be Read-Only.  Therefore no update or delete operations can be performed against it.");
+                throw new Exception($"This component, {typeof(T).Name}, is coded to be Read-Only.  Therefore no insert, update, or delete operations can be performed against it.");
 
             List<TableColumn> listColumns = [];
             foreach (DataColumnAttribute attrColumn in attrTable.Properties)
@@ -438,6 +469,7 @@ namespace CodedThought.Core.Data
                 TableColumn tc = new(attrColumn.ColumnName, attrColumn.ConvertTypeToDbTypeSupported(), attrColumn.Size, attrColumn.IsPrimaryKey);
                 tc.IsInsertable = tc.IsUpdateable;
                 tc.IsIdentity = attrColumn.IsIdentity;
+                tc.IsNullableType = attrColumn.IsNullableType;
                 listColumns.Add(tc);
             }
             DatabaseObjectInstance.Add(attrTable.TableName, obj, listColumns, this);
@@ -1455,7 +1487,29 @@ namespace CodedThought.Core.Data
             }
             return new DataColumnAttribute("", DbType.String);
         }
-
+        /// <summary>
+        /// Sets the primary key's value for the object passed.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <param name="val"></param>
+        public void SetPrimaryKeyValue<T>(Object obj, object val)
+        {
+            DataColumnAttribute keyProperty = GetPrimaryKeyAttribute<T>();
+            SetPrimaryKeyValue<T>(obj, keyProperty.PropertyName, val);
+        }
+        /// <summary>
+        /// Sets the primary key's value for the passed object and key property name.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <param name="keyPropertyName"></param>
+        /// <param name="val"></param>
+        public void SetPrimaryKeyValue<T>(Object obj, string keyPropertyName, object val)
+        {
+            PropertyInfo pi = typeof(T).GetProperty(keyPropertyName);
+            pi.SetValue(obj, val, null);
+        }
         /// <summary>Makes a parameter from the supplied object property with the given value</summary>
         /// <typeparam name="T">The type of object from which to make the parameter.</typeparam>
         /// <param name="propertyName">The property of the object from which to make the parameter.</param>
@@ -2038,6 +2092,8 @@ namespace CodedThought.Core.Data
                     attrTable.ReadOnly = attrUsage.UseAs.HasFlag(DataTableUsage.ReadOnly);
                     attrTable.IgnoreInherited = attrUsage.UseAs.HasFlag(DataTableUsage.IgnoreInherited);
                     attrTable.UseView = attrUsage.UseAs.HasFlag(DataTableUsage.ViewPriority);
+                    attrTable.AutoGenerateUniqueIdentifier = attrUsage.UseAs.HasFlag(DataTableUsage.AutoGenerateUniqueIdentifier);
+                    attrTable.ReadOnly = attrUsage.UseAs.HasFlag(DataTableUsage.ReadOnly);
                     MapTableColumns(type, attrTable);
                     Dictionary<Type, Attribute> dbDic = new() {
                         { type, attrTable }
@@ -2078,6 +2134,7 @@ namespace CodedThought.Core.Data
                         // Ignore properties not set up with the DataColumn Attribute.
                         attr.PropertyType = pi.PropertyType;
                         attr.PropertyName = pi.Name;
+                        attr.IsNullableType = Nullable.GetUnderlyingType(pi.PropertyType) != null;
                         attrTable.Properties.Add(attr);
                     }
                 }
@@ -2236,7 +2293,17 @@ namespace CodedThought.Core.Data
             else
                 return false;
         }
-
+        bool IDBStore.SetPrimaryKey(object obj, Guid value)
+        {
+            Type t = obj.GetType();
+            if (ORM.ContainsKey(t.FullName))
+            {
+                t.GetProperty(((DataTableAttribute) ORM[t.FullName][t]).Key.PropertyName).SetValue(obj, value, null);
+                return true;
+            }
+            else
+                return false;
+        }
         #endregion IDBStore Members
     }
 }

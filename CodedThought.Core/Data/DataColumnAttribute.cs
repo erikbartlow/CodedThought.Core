@@ -22,6 +22,10 @@ namespace CodedThought.Core.Data
 
         /// <summary>Informs the framework that this is configured as an Identity or Auto Increment column.</summary>
         IsIdentity = 32,
+        /// <summary>
+        /// Informs the framework that this is configured to be a nullable data type. This will automatically set <see cref="DataColumnOptions.AllowNull"/> to true as well.
+        /// </summary>
+        IsNullableType = 64
     }
 
     /// <summary>Maps a property to a Database Column or XML Element</summary>
@@ -66,6 +70,7 @@ namespace CodedThought.Core.Data
         public bool OverridesInherited { get; set; }
 
         public bool AllowNulls { get; set; }
+        public bool IsNullableType { get; set; }
 
         public DataColumnOptions Options { get; set; }
 
@@ -87,6 +92,7 @@ namespace CodedThought.Core.Data
             OverridesInherited = false;
             AllowNulls = true;
             LoadExtendedPropertyObject = false;
+            IsNullableType = false;
         }
 
         public DataColumnAttribute(string name, DbType type)
@@ -264,6 +270,7 @@ namespace CodedThought.Core.Data
             if (options.HasFlag(DataColumnOptions.IsIdentity))
             {
                 IsIdentity = true;
+                IsUpdateable = false;
             }
             if (options.HasFlag(DataColumnOptions.UpdateablePrimaryKey))
             {
@@ -279,6 +286,11 @@ namespace CodedThought.Core.Data
             }
             if (options.HasFlag(DataColumnOptions.AllowNull))
             {
+                AllowNulls = true;
+            }
+            if (options.HasFlag(DataColumnOptions.IsNullableType))
+            {
+                IsNullableType = true;
                 AllowNulls = true;
             }
         }

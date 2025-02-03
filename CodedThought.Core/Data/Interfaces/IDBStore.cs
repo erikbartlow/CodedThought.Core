@@ -31,7 +31,13 @@ namespace CodedThought.Core.Data.Interfaces {
 		/// <param name="value">The value.</param>
 		/// <returns></returns>
 		bool SetPrimaryKey(object obj, int value);
-
+		/// <summary>
+		/// Sets the primary key with a Guid value.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		bool SetPrimaryKey(object obj, Guid value);
 		/// <summary>Determines whether [has key column] [the specified obj].</summary>
 		/// <param name="obj">The obj.</param>
 		/// <returns><c>true</c> if [has key column] [the specified obj]; otherwise, <c>false</c>.</returns>

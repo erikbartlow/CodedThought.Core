@@ -20,20 +20,21 @@ A recommended approach to installation is by using the Nuget package manager.  T
 ## Usage
 
 Application Settings are accessed via .NET Core appsettings.json while database and/or API connection details are stored in a custom JSON settings file named ctSettings.json.  CodedThought.Core supports environment-based settings.json implementations.
-## Core Settings Parameters
-### CoreSettings/Settings
-|Property | Options | Description
+
+## CoreSettings/Settings
+| Property | Options | Description
 | ------ | ------ | ------
 | WINFORM | boolean | The purpose of this setting is to tell the CodedThought.Core framework if it is being used in a web environment or not.  This is because the framework can properly cache the discovered data-aware classes and associated types.
 |ApplicationCookieName|Name of root application cookie|Provide a custom name for your application cookie.
-## Connection Parameters
-### CoreSettings/Connections
+
+## CoreSettings/Connections
 The connection settings are an array of CoreSettings/Connections.  However, only one can have the Primary key set to true or false.
+
 | Property | Data Type | Description
 | ------ | ------| ------
 | _Name_ | string | Enter a unique name for the connection here.  The CodedThought.Core framework supports multiple database connections on multiple platforms.
 | _Primary_ | boolean |  Specifies which connection the framework should use by default.
-| _ProviderType_ | string |Specifies which client provider you expect to use with this connection.  Accepted provider types: [ SqlServer | Oracle | MySql | OleDb | ApiServer ].  SqlServer is the default provider type.
+| _ProviderType_ | string |Specifies which client provider you expect to use with this connection.  Accepted provider types: [ SqlServer \| Oracle \| MySql \| OleDb \| ApiServer ].  SqlServer is the default provider type.
 | _DefaultSchema_ | string |Enter the default schema to use with this connection.  **Note:  This feature allows the developer to create multiple connections to the same database but point to different schemas within the database.  This is useful when setting the default schema for a database user is not possible.**--The ApiServer provider does not require this
 | _ConnectionString_ | string |Enter the full connection string here for the database.  For Oracle connections you can enter the full TNS Names entry if necessary or just the TNSNAMES.ora entry name.  For Api connection use the Url endpoint.
 | _PoviderName_ | string | Enter the .NET System.Data allowed provider name for this connection.  This is not a substitute for the ProviderType setting and is only required for as long as your .NET connection requires it.  The ApiServer provider does not require this.  Microsoft.Data.SqlClient is the default provider name.
@@ -51,10 +52,10 @@ There are two custom attributes used by CodedThought.Core.Data.
 | ------ | ------| ------
 | _TableName_ | Physical name of the table to get, save, or delete from.
 | _ViewName_ |Physical name of a view to get from.<br />_Note: This is useful for developers when you have a particular set of data elements that need to be joined to display or report on._
-|_SchemaName_|Name of the database schema this entity resides in| Default is dbo
-|_SourceName_|Gets the name of the source based on the UseView property and availability of the table and view name properties.
-|_Properties_|A list of all bound properties in the entity
-|_Key_|The specific DataColumnAttribute currently set as the database key| The system currently only supports a single property to be a key.  **Multiple keys planned for a later release**
+| _SchemaName_|Name of the database schema this entity resides in| Default is dbo
+| _SourceName_|Gets the name of the source based on the UseView property and availability of the table and view name properties.
+| _Properties_|A list of all bound properties in the entity
+| _Key_|The specific DataColumnAttribute currently set as the database key| The system currently only supports a single property to be a key.  **Multiple keys planned for a later release**
 ##### Sample Usage
 ```cs
 [DataTable( tblRegions )]
