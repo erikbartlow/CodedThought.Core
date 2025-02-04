@@ -262,7 +262,30 @@ namespace CodedThought.Core.Data
             parameters.AddInt32Parameter(attrTable.Key.ColumnName, objectID);
             return Get<T>(parameters);
         }
-
+        public T Get<T>(object objectID) where T : class, new()
+        {
+            // Determine the data type from the passed object's primary key.
+            DataColumnAttribute attrib = GetPrimaryKeyAttribute<T>();
+            ParameterCollection parameters = [];
+            SetParameterCollectionDbObject(parameters);
+            switch (attrib.ColumnType)
+            {
+                case DbType.Guid:
+                    parameters.AddGuidParameter(attrib.ColumnName, (Guid) objectID);
+                    break;
+                case DbType.String:
+                    parameters.AddStringParameter(attrib.ColumnName, (string) objectID);
+                    break;
+                case DbType.Int16:
+                case DbType.Int32:
+                case DbType.Int64:
+                    parameters.AddInt32Parameter(attrib.ColumnName, (int) objectID);
+                    break;
+            }
+            return parameters.Count > 0
+                ? Get<T>(parameters)
+                : throw new NotSupportedException($"The DbType {attrib.ColumnType}, is not supported by this method. Only Guid, String, or Integer types are supported.");
+        }
         /// <summary>Retrieves an object based on the supplied Key-Value pair collection.</summary>
         /// <typeparam name="T">The type of object to retrieve.</typeparam>
         /// <param name="parameters">A collection of Key-Value pairs.</param>
