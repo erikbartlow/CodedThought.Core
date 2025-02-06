@@ -2,6 +2,10 @@ using System.Collections;
 
 using CodedThought.Core.Data.Interfaces;
 
+using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json.Linq;
+
 namespace CodedThought.Core.Data {
 
 	/// <summary>ParameterCollection provides a type safe collection of IDataParameter objects. It is not specif to any database.</summary>
@@ -179,7 +183,7 @@ namespace CodedThought.Core.Data {
 		/// <returns><see cref="IDataParameter" /></returns>
 		/// <remarks>Since a REST Api does not communicate with a database directly the Api Parameter is primarily holding the action and parameter of a Url request. For example, https://localhost/[controller]/[action]?parameter=value</remarks>
 		public void AddApiParameter(string parameterName, string parameterValue) {
-			IDataParameter parameter = this.DerivedDatabaseObject.CreateApiParameter(parameterName, parameterValue);
+			IDataParameter parameter = DerivedDatabaseObject.CreateApiParameter(parameterName, parameterValue);
 			if (!List.Contains(parameter)) { List.Add(parameter); }
 		}
 

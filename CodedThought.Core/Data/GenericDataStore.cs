@@ -1611,6 +1611,7 @@ namespace CodedThought.Core.Data
             return param;
         }
 
+        [Obsolete("This method is replaced by one that allows a specific column name to be passed. This method assumed the column name and parameter name to be the same.")]
         /// <summary>Make a parameter from the supplied data.</summary>
         /// <param name="parameterName">The name of the parameter.</param>
         /// <param name="parameterType">The DbType of the parameter.</param>
@@ -1628,7 +1629,61 @@ namespace CodedThought.Core.Data
 
             return param;
         }
+        /// <summary>Make a parameter from the supplied data.</summary>
+        /// <param name="parameterName">The name of the parameter. This is also used as the source data column name.</param>
+        /// <param name="dataColumnName">The corresponding column name for the parameter name.</param>
+        /// <param name="parameterType">The DbType of the parameter.</param>
+        /// <param name="paramterValue">The value of the parameter.</param>
+        /// <returns></returns>
+        public IDataParameter MakeParameter(string parameterName, string dataColumnName, DbType parameterType, object paramterValue)
+        {
+            //TODO: determine if this function needs to return null
+            IDataParameter param = DatabaseObjectInstance.CreateEmptyParameter();
+            param.DbType = parameterType;
+            param.Direction = ParameterDirection.Input;
+            param.ParameterName = parameterName;
+            param.SourceColumn = dataColumnName;
+            param.Value = paramterValue;
 
+            return param;
+        }
+        /// <summary>
+        /// Makes a special type of parameter called a BetweenParameter. This type of parameter enables the addition of
+        /// a BETWEEN clause in you database calls.
+        /// </summary>
+        /// <typeparam name="T">The type of DataAware class</typeparam>
+        /// <param name="propertyName"></param>
+        /// <param name="startVal"></param>
+        /// <param name="endVal"></param>
+        /// <returns></returns>
+        public IDataParameter MakeBetweenParameter<T>(string propertyName, object startVal, object endVal) where T : class
+        {
+
+            IDataParameter startRangeParam = DatabaseObjectInstance.CreateEmptyParameter();
+            IDataParameter endRangeParam = DatabaseObjectInstance.CreateEmptyParameter();
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
+            {
+                if (attrColumn.PropertyName == propertyName)
+                {
+                    startRangeParam.DbType = attrColumn.ColumnType;
+                    startRangeParam.Direction = ParameterDirection.Input;
+                    startRangeParam.ParameterName = attrColumn.ColumnName;
+                    startRangeParam.SourceColumn = attrColumn.ColumnName;
+                    startRangeParam.Value = startVal;
+
+                    endRangeParam.DbType = attrColumn.ColumnType;
+                    endRangeParam.Direction = ParameterDirection.Input;
+                    endRangeParam.ParameterName = attrColumn.ColumnName;
+                    endRangeParam.SourceColumn = attrColumn.ColumnName;
+                    endRangeParam.Value = endVal;
+                    
+                    break;
+                }
+            }
+
+            return new BetweenParameter(startRangeParam, endRangeParam);
+
+        }
         #endregion Public Methods
 
         #region Private Methods

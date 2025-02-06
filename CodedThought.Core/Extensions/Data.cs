@@ -1,5 +1,7 @@
 ﻿using CodedThought.Core.Data;
 
+using Microsoft.Extensions.Logging;
+
 namespace CodedThought.Core.Extensions {
 
 	public static class Data {

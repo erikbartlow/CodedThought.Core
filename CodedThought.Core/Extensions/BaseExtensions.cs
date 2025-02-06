@@ -133,5 +133,60 @@
 		/// <param name="ex">The ex.</param>
 		/// <returns></returns>
 		public static string GetAllMessages(this Exception ex, string separator = "\r\nInnerException: ") => ex.InnerException == null ? ex.Message : ex.Message + separator + GetAllMessages(ex.InnerException, separator);
-	}
+
+		/// <summary>
+		/// Converts the current date/time in UNIX format to a standard .NET DateTime.
+		/// </summary>
+		/// <param name="unixTimestamp"></param>
+		/// <param name="kind"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static DateTime ConvertFromUnixTimestamp(this long unixTimestamp, DateTimeKind kind = DateTimeKind.Local)
+        {
+            // Define the Unix epoch start time as UTC
+            DateTime utcDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(unixTimestamp);
+
+            // Adjust based on the specified DateTimeKind
+            return kind switch
+            {
+                DateTimeKind.Utc => utcDateTime, // Already UTC
+                DateTimeKind.Local => utcDateTime.ToLocalTime(), // Convert to local time
+                DateTimeKind.Unspecified => DateTime.SpecifyKind(utcDateTime, DateTimeKind.Unspecified), // Change kind to Unspecified
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), "Invalid DateTimeKind value"),
+            };
+        }
+        /// <summary>
+        /// Converts a standard DateTime to a UNIX timestamp (seconds since Unix epoch).
+        /// </summary>
+        /// <param name="dateTime">The DateTime to convert.</param>
+        /// <returns>The UNIX timestamp as a long.</returns>
+        public static long ConvertToUnixTimestamp(this DateTime dateTime)
+        {
+            // Ensure the DateTime is in UTC
+            DateTime utcDateTime;
+
+            switch (dateTime.Kind)
+            {
+                case DateTimeKind.Utc:
+                    utcDateTime = dateTime;
+                    break;
+                case DateTimeKind.Local:
+                    utcDateTime = dateTime.ToUniversalTime();
+                    break;
+                case DateTimeKind.Unspecified:
+                default:
+                    // Assuming Unspecified DateTime is local
+                    utcDateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Local).ToUniversalTime();
+                    break;
+            }
+
+            // Define the Unix epoch start time
+            DateTimeOffset unixEpoch = new(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+            // Calculate the total seconds elapsed since the Unix epoch
+            long unixTimestamp = (long) (utcDateTime - unixEpoch).TotalSeconds;
+
+            return unixTimestamp;
+        }
+    }
 }
