@@ -490,9 +490,14 @@ namespace CodedThought.Core.Data
             foreach (DataColumnAttribute attrColumn in attrTable.Properties)
             {
                 TableColumn tc = new(attrColumn.ColumnName, attrColumn.ConvertTypeToDbTypeSupported(), attrColumn.Size, attrColumn.IsPrimaryKey);
+                tc.DbType = attrColumn.ColumnType;
                 tc.IsInsertable = tc.IsUpdateable;
                 tc.IsIdentity = attrColumn.IsIdentity;
                 tc.IsNullableType = attrColumn.IsNullableType;
+                if( tc.IsPrimary && tc.Type == DbTypeSupported.dbGUID && attrTable.AutoGenerateUniqueIdentifier == true)
+                {
+                    tc.IsInsertable = true;
+                }
                 listColumns.Add(tc);
             }
             DatabaseObjectInstance.Add(attrTable.TableName, obj, listColumns, this);

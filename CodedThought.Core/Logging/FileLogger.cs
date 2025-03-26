@@ -26,7 +26,7 @@ namespace CodedThought.Core.Logging
             if (!IsEnabled(logLevel))
                 return;
 
-            string fullFilePath = $"{_provider.Options.FolderPath}/{_provider.Options.FileName.Replace("{date}", DateTimeOffset.UtcNow.ToString("yyyyMMdd"))}";
+            string fullFilePath = $"{_provider.Options.FolderPath}\\{_provider.Options.FileName.Replace("{date}", DateTimeOffset.UtcNow.ToString("yyyyMMdd"))}";
             string logEntryContent;
 
             int currentLogFileCount = CountLogFiles(fullFilePath);
@@ -39,17 +39,27 @@ namespace CodedThought.Core.Logging
                 if (currentLogFileCount > _provider.Options.MaxLogFileCount)
                     DeleteOldestFile(_provider.Options.FolderPath, _provider.Options.FileName.Replace("{date}", "*"));
 
-                string currentFile = GetCurrentFile(_provider.Options.FolderPath, _provider.Options.FileName.Replace("{data}", "*")) ?? fullFilePath;
-                // If the current file is greater than or equal to the max file size create a new file.
-                if (GetFileSize(currentFile) >= _provider.Options.MaxLogFileSize)
+                string filePattern = _provider.Options.FileName.Replace("{date}", "*");
+                string currentFile = GetCurrentFile(_provider.Options.FolderPath, filePattern) ?? fullFilePath;
+                if (String.IsNullOrEmpty(currentFile))
                 {
-                    // Create a new log file if max count is met.
+                    // Create a new log file since there isn't one already
                     string ext = Path.GetExtension(fullFilePath);
-                    fullFilePath = $"{Path.GetFileNameWithoutExtension(fullFilePath)}_{String.Format("{0:D2}", ++currentLogFileCount)}{ext}";
+                    fullFilePath = $"{_provider.Options.FolderPath}\\{Path.GetFileNameWithoutExtension(fullFilePath)}_{String.Format("{0:D2}", ++currentLogFileCount)}{ext}";
                 }
                 else
                 {
-                    fullFilePath = currentFile;
+                    // If the current file is greater than or equal to the max file size create a new file.
+                    if (GetFileSize(currentFile) >= _provider.Options.MaxLogFileSize)
+                    {
+                        // Create a new log file if max count is met.
+                        string ext = Path.GetExtension(fullFilePath);
+                        fullFilePath = $"{_provider.Options.FolderPath}\\{Path.GetFileNameWithoutExtension(fullFilePath)}_{String.Format("{0:D2}", ++currentLogFileCount)}{ext}";
+                    }
+                    else
+                    {
+                        fullFilePath = currentFile;
+                    }
                 }
             }
             // Write out the content
@@ -63,7 +73,7 @@ namespace CodedThought.Core.Logging
 
         }
 
-        private int CountLogFiles(string filePath) => Directory.GetFiles(filePath, $"*.{Path.GetExtension(filePath)}").Length;
+        private int CountLogFiles(string filePath) => Directory.GetFiles(Path.GetDirectoryName(filePath), $"*.{Path.GetExtension(filePath)}").Length;
 
         private static double GetFileSize(string filePath)
         {
@@ -94,8 +104,12 @@ namespace CodedThought.Core.Logging
                 .Select(f => new FileInfo(f))
                 .OrderByDescending(f => f.CreationTime)
                 .FirstOrDefault();
+            if(newestFile == null) return string.Empty;
 
-            return newestFile != null ? newestFile.FullName : string.Empty;
+            if (newestFile.LastWriteTime.ToString("MM/dd/yyyy") == DateTime.Now.ToString("MM/dd/yyyy"))
+                return newestFile != null ? newestFile.FullName : string.Empty;
+            else
+                return string.Empty;
         }
         private static void DeleteOldestFile(string directoryPath, string searchPattern)
         {
