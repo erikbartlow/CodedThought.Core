@@ -490,9 +490,14 @@ namespace CodedThought.Core.Data
             foreach (DataColumnAttribute attrColumn in attrTable.Properties)
             {
                 TableColumn tc = new(attrColumn.ColumnName, attrColumn.ConvertTypeToDbTypeSupported(), attrColumn.Size, attrColumn.IsPrimaryKey);
+                tc.DbType = attrColumn.ColumnType;
                 tc.IsInsertable = tc.IsUpdateable;
                 tc.IsIdentity = attrColumn.IsIdentity;
                 tc.IsNullableType = attrColumn.IsNullableType;
+                if( tc.IsPrimary && tc.Type == DbTypeSupported.dbGUID && attrTable.AutoGenerateUniqueIdentifier == true)
+                {
+                    tc.IsInsertable = true;
+                }
                 listColumns.Add(tc);
             }
             DatabaseObjectInstance.Add(attrTable.TableName, obj, listColumns, this);
@@ -1676,13 +1681,29 @@ namespace CodedThought.Core.Data
                     endRangeParam.ParameterName = attrColumn.ColumnName;
                     endRangeParam.SourceColumn = attrColumn.ColumnName;
                     endRangeParam.Value = endVal;
-                    
+
                     break;
                 }
             }
 
             return new BetweenParameter(startRangeParam, endRangeParam);
 
+        }
+        /// <summary>
+        /// Makes a special type of parameter called a ComparisonParameter. This type of parameter enables the addition of what type of comparison you want,
+        /// and if it is based on direct column names or a parameterized query. The default is Column Based (aka Parameterized).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="propertyName"></param>
+        /// <param name="comparison"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public IDataParameter MakeParameter<T>(string propertyName, ComparisonParameterType comparison, object value)
+        {
+
+            IDataParameter baseParam = MakeParameter<T>(propertyName, value);
+            ComparisonParameter comparisonParameter = new(baseParam, comparison, ComparisonOrigin.ValueBased);
+            return comparisonParameter;
         }
         #endregion Public Methods
 
