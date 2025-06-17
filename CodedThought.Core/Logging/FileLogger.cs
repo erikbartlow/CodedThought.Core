@@ -13,31 +13,17 @@ namespace CodedThought.Core.Logging
     {
         private static readonly object _lock = new();
         protected readonly FileLoggerProvider _provider;
-        protected const string DATEFORMAT = "yyyy-MM-dd HH:mm:ss+00:00";
+        protected const string DATEFORMAT = "yyyy-MM-dd HH:mm:ss";
         public FileLogger([NotNull] FileLoggerProvider provider)
         {
             _provider = provider;
-        }
-        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
-        public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
-
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-        {
-            if (!IsEnabled(logLevel))
-                return;
-
             string fullFilePath = $"{_provider.Options.FolderPath}\\{_provider.Options.FileName.Replace("{date}", DateTimeOffset.UtcNow.ToString("yyyyMMdd"))}";
-            string logEntryContent;
-
             int currentLogFileCount = CountLogFiles(fullFilePath);
-            if (_provider.Options.MaxLogFileCount == 1)
-            {
-            }
-            else
+            if (_provider.Options.MaxLogFileCount > 1)
             {
                 // Delete the oldest file to stay under the max log file count.
                 if (currentLogFileCount > _provider.Options.MaxLogFileCount)
-                    DeleteOldestFile(_provider.Options.FolderPath, _provider.Options.FileName.Replace("{date}", "*"));
+                    DeleteOldestFiles(_provider.Options.FolderPath, _provider.Options.FileName.Replace("{date}", "*"));
 
                 string filePattern = _provider.Options.FileName.Replace("{date}", "*");
                 string currentFile = GetCurrentFile(_provider.Options.FolderPath, filePattern) ?? fullFilePath;
@@ -62,12 +48,21 @@ namespace CodedThought.Core.Logging
                     }
                 }
             }
-            // Write out the content
-            if (!String.IsNullOrEmpty(_provider.Options.LeadingDateFormat) == null)
-                logEntryContent = $"[{DateTimeOffset.UtcNow.ToString(DATEFORMAT)}] {logLevel} {formatter(state, exception)} {(exception != null ? exception.StackTrace : "")}";
-            else
-                logEntryContent = $"{logLevel} {formatter(state, exception)} {(exception != null ? exception.StackTrace : "")}";
+        }
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
 
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            if (!IsEnabled(logLevel))
+                return;
+
+            string fullFilePath = $"{_provider.Options.FolderPath}\\{_provider.Options.FileName.Replace("{date}", DateTimeOffset.UtcNow.ToString("yyyyMMdd"))}";
+            string logEntryContent = !String.IsNullOrEmpty(_provider.Options.LeadingDateFormat)
+                ? $"[{DateTimeOffset.Now.ToString(_provider.Options.LeadingDateFormat)}] {logLevel} {formatter(state, exception)} {(exception != null ? exception.StackTrace : "")}"
+                : $"{logLevel} {formatter(state, exception)} {(exception != null ? exception.StackTrace : "")}";
+
+            // Write out the content
             using StreamWriter streamWriter = new(fullFilePath, true);
             streamWriter.WriteLine(logEntryContent);
 
@@ -111,20 +106,21 @@ namespace CodedThought.Core.Logging
             else
                 return string.Empty;
         }
-        private static void DeleteOldestFile(string directoryPath, string searchPattern)
+        private void DeleteOldestFiles(string directoryPath, string searchPattern)
         {
             if (!Directory.Exists(directoryPath))
                 return;
 
-            string[] files = Directory.GetFiles(directoryPath, searchPattern);
-
-            FileInfo? oldestFile = files
+            // Get all the files sorted by the oldest first.
+            List<FileInfo> logFiles = [.. Directory.GetFiles(directoryPath, searchPattern)
                 .Select(f => new FileInfo(f))
-                .OrderBy(f => f.CreationTime)
-                .FirstOrDefault();
+                .OrderBy(f => f.LastWriteTime)];
 
-            if (oldestFile != null)
-                File.Delete(oldestFile.FullName);
+            int? deleteCount = Math.Abs(_provider.Options.MaxLogFileCount ?? 5 - logFiles.Count);
+            for (int i = 0; i < deleteCount - 1; i++)
+            {
+                logFiles[i].Delete();
+            }
             return;
         }
     }

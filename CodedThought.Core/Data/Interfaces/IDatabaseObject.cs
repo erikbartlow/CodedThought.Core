@@ -38,7 +38,9 @@ namespace CodedThought.Core.Data.Interfaces {
 
 		void Add(string tableName, object obj, List<TableColumn> columns, IDBStore store);
 
-		DataSet GetDataSet(string tableName, string schemaName, List<string> selectColumns, ParameterCollection parameters);
+        void Add(string tableName, string schemaName, object obj, List<TableColumn> columns, IDBStore store);
+
+        DataSet GetDataSet(string tableName, string schemaName, List<string> selectColumns, ParameterCollection parameters);
 
 		IDbTransaction BeginTransaction();
 

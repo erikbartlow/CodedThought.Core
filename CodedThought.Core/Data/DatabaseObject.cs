@@ -833,7 +833,15 @@ namespace CodedThought.Core.Data
         /// <param name="columns">  The columns.</param>
         /// <param name="store">    The store.</param>
         public abstract void Add(string tableName, object obj, List<TableColumn> columns, IDBStore store);
-
+        /// <summary>
+        /// Adds data to the database (abstract method) this method is used when the table name and schema name are known.
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="schemaName"></param>
+        /// <param name="obj"></param>
+        /// <param name="columns"></param>
+        /// <param name="store"></param>
+        public abstract void Add(string tableName, string schemaName, object obj, List<TableColumn> columns, IDBStore store);
         #endregion Add Abstract Methods
 
         #region Get Methods

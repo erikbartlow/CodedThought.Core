@@ -7,15 +7,13 @@ using Org.BouncyCastle.Asn1.X509.Qualified;
 using Newtonsoft.Json.Linq;
 using System.Reflection.PortableExecutable;
 
-namespace CodedThought.Core.Data
-{
+namespace CodedThought.Core.Data {
 
     /// <summary>Reference Delegate for using the Transaction Method <see cref="TransactionInvoker" /></summary>
     public delegate void TransactionInvoker();
 
     /// <summary>DBStore implementation that uses attributes and reflection to map objects into tables</summary>
-    public class GenericDataStore : IDBStore
-    {
+    public class GenericDataStore : IDBStore {
 
         #region Declarations
 
@@ -48,10 +46,8 @@ namespace CodedThought.Core.Data
         /// <summary>Gets the connection.</summary>
         /// <value>The connection.</value>
         /// <exception cref="NullReferenceException">The database object has not been instantiated yet.</exception>
-        public virtual IDbConnection Connection
-        {
-            get
-            {
+        public virtual IDbConnection Connection {
+            get {
                 return DatabaseObjectInstance == null
                     ? throw new NullReferenceException("The database object has not been instantiated yet.")
                     : DatabaseObjectInstance.Connection;
@@ -61,20 +57,16 @@ namespace CodedThought.Core.Data
         /// <summary>Gets or sets the name of the database schema.</summary>
         /// <value>The name of the database schema.</value>
         [Obsolete("This property is obsolete.  Please use DefaultSchemaName.")]
-        public virtual string? DatabaseSchemaName
-        {
+        public virtual string? DatabaseSchemaName {
             get => DefaultSchemaName;
             set => DefaultSchemaName = value;
         }
         /// <summary>
         /// Gets or sets the default schema name to be used.  This can be overridden by using the <see cref="DataTableAttribute.SchemaName"/> property of a data object.
         /// </summary>
-        public virtual string? DefaultSchemaName
-        {
-            get
-            {
-                if (_defaultSchema == string.Empty)
-                {
+        public virtual string? DefaultSchemaName {
+            get {
+                if (_defaultSchema == string.Empty) {
                     _defaultSchema = DatabaseObjectInstance.GetSchemaName();
                 }
                 return _defaultSchema;
@@ -85,11 +77,9 @@ namespace CodedThought.Core.Data
 
         /// <summary>Gets or sets the database connection to use.</summary>
         /// <value>The database to use.</value>
-        public virtual DatabaseConnection DatabaseToUse
-        {
+        public virtual DatabaseConnection DatabaseToUse {
             get => _specifiedDatabaseConnection;
-            set
-            {
+            set {
                 _specifiedDatabaseConnection = value;
                 DefaultSchemaName = value.SchemaName;
                 CommandTimeout = value.CommandTimeout;
@@ -113,26 +103,21 @@ namespace CodedThought.Core.Data
 
         #region Constructors
 
-        private GenericDataStore()
-        {
+        private GenericDataStore() {
             _specifiedDatabaseConnection = null;
             _cache = null;
         }
-        private GenericDataStore(runtime.MemoryCache cache) : this()
-        {
+        private GenericDataStore(runtime.MemoryCache cache) : this() {
             _runtimeCache = cache;
             _useHttpCache = false;
-            if (!_runtimeCache.TryGetValue(ORM_KEY, out ORM))
-            {
+            if (!_runtimeCache.TryGetValue(ORM_KEY, out ORM)) {
                 ORM = [];
             }
         }
-        private GenericDataStore(IMemoryCache cache) : this()
-        {
+        private GenericDataStore(IMemoryCache cache) : this() {
             _cache = cache;
             _useHttpCache = true;
-            if (!_cache.TryGetValue(ORM_KEY, out ORM))
-            {
+            if (!_cache.TryGetValue(ORM_KEY, out ORM)) {
                 ORM = [];
             }
         }
@@ -142,11 +127,9 @@ namespace CodedThought.Core.Data
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="databaseToUse"></param>
-        public GenericDataStore(IServiceProvider serviceProvider, runtime.MemoryCache cache, ConnectionSetting databaseToUse) : this(cache)
-        {
+        public GenericDataStore(IServiceProvider serviceProvider, runtime.MemoryCache cache, ConnectionSetting databaseToUse) : this(cache) {
             // The calling assembly should be the assembly with the data aware classes to load into the ORM.
-            if (ORM.Count == 0)
-            {
+            if (ORM.Count == 0) {
                 LoadAssemblyAndORM(Assembly.GetCallingAssembly());
             }
             TransactionInProgress = false;
@@ -160,11 +143,9 @@ namespace CodedThought.Core.Data
         /// <param name="serviceProvider"></param>
         /// <param name="cache">Http Cache</param>
         /// <param name="databaseToUse"></param>
-        public GenericDataStore(IServiceProvider serviceProvider, IMemoryCache cache, ConnectionSetting databaseToUse) : this(cache)
-        {
+        public GenericDataStore(IServiceProvider serviceProvider, IMemoryCache cache, ConnectionSetting databaseToUse) : this(cache) {
             // The calling assembly should be the assembly with the data aware classes to load into the ORM.
-            if (ORM.Count == 0)
-            {
+            if (ORM.Count == 0) {
                 LoadAssemblyAndORM(Assembly.GetCallingAssembly());
             }
 
@@ -180,8 +161,7 @@ namespace CodedThought.Core.Data
 
         /// <summary>Creates a parameter collection.</summary>
         /// <returns></returns>
-        public ParameterCollection CreateParameterCollection()
-        {
+        public ParameterCollection CreateParameterCollection() {
             ParameterCollection param = [];
             SetParameterCollectionDbObject(param);
             return param;
@@ -191,18 +171,14 @@ namespace CodedThought.Core.Data
         /// Parses an assembly for ORM mappings.
         /// </summary>
         /// <param name="assembly">The assembly to parse.</param>
-        public virtual void LoadAssemblyAndORM(Assembly callingAssembly)
-        {
-            if (UseHttpCache)
-            {
+        public virtual void LoadAssemblyAndORM(Assembly callingAssembly) {
+            if (UseHttpCache) {
                 listLoadedAssemblies = _cache.GetFromHttpCache<List<string>>(ORM_ASSEMBLIES_KEY);
-                if (listLoadedAssemblies == null)
-                {
+                if (listLoadedAssemblies == null) {
                     // Load all data aware assemblies.
                     listLoadedAssemblies = [];
                     List<Assembly> dataAwareAssemblies = GetDataAwareAssemblies();
-                    dataAwareAssemblies.ForEach(a =>
-                    {
+                    dataAwareAssemblies.ForEach(a => {
                         listLoadedAssemblies.Add(a.GetName().Name);
                         GenerateMapCollection(ORM, a);
                         // Cache the objects for next time.
@@ -211,8 +187,7 @@ namespace CodedThought.Core.Data
                     });
                 }
                 listLoadedAssemblies ??= [];
-                if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name))
-                {
+                if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name)) {
                     listLoadedAssemblies.Add(callingAssembly.GetName().Name);
                     GenerateMapCollection(ORM, callingAssembly);
 
@@ -220,17 +195,13 @@ namespace CodedThought.Core.Data
                     _cache.AddToHttpCache(ORM_KEY, ORM);
                     _cache.AddToHttpCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
                 }
-            }
-            else
-            {
+            } else {
                 listLoadedAssemblies = _runtimeCache.GetFromLocalCache<List<string>>(ORM_ASSEMBLIES_KEY);
-                if (listLoadedAssemblies == null)
-                {
+                if (listLoadedAssemblies == null) {
                     // Load all data aware assemblies.
                     listLoadedAssemblies = [];
                     List<Assembly> dataAwareAssemblies = GetDataAwareAssemblies();
-                    dataAwareAssemblies.ForEach(a =>
-                    {
+                    dataAwareAssemblies.ForEach(a => {
                         listLoadedAssemblies.Add(a.GetName().Name);
                         GenerateMapCollection(ORM, a);
                         // Cache the objects for next time.
@@ -238,8 +209,7 @@ namespace CodedThought.Core.Data
                         _runtimeCache.AddToLocalCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
                     });
                 }
-                if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name))
-                {
+                if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name)) {
                     listLoadedAssemblies.Add(callingAssembly.GetName().Name);
                     GenerateMapCollection(ORM, callingAssembly);
 
@@ -254,22 +224,19 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T">The type of object to retrieve.</typeparam>
         /// <param name="objectID">The primary key of the object.</param>
         /// <returns>Returns an object of the type T.</returns>
-        public T Get<T>(int objectID) where T : class, new()
-        {
+        public T Get<T>(int objectID) where T : class, new() {
             ParameterCollection parameters = [];
             SetParameterCollectionDbObject(parameters);
             DataTableAttribute attrTable = GetTableAttribute<T>();
             parameters.AddInt32Parameter(attrTable.Key.ColumnName, objectID);
             return Get<T>(parameters);
         }
-        public T Get<T>(object objectID) where T : class, new()
-        {
+        public T Get<T>(object objectID) where T : class, new() {
             // Determine the data type from the passed object's primary key.
             DataColumnAttribute attrib = GetPrimaryKeyAttribute<T>();
             ParameterCollection parameters = [];
             SetParameterCollectionDbObject(parameters);
-            switch (attrib.ColumnType)
-            {
+            switch (attrib.ColumnType) {
                 case DbType.Guid:
                     parameters.AddGuidParameter(attrib.ColumnName, (Guid) objectID);
                     break;
@@ -290,37 +257,30 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T">The type of object to retrieve.</typeparam>
         /// <param name="parameters">A collection of Key-Value pairs.</param>
         /// <returns>Returns an object of the type T.</returns>
-        public T Get<T>(ParameterCollection parameters) where T : class, new()
-        {
+        public T Get<T>(ParameterCollection parameters) where T : class, new() {
             IDataReader reader = null;
             T entity = null;
             List<T> list = null;
-            try
-            {
+            try {
                 List<string> selectColumns = GetColumnNames<T>();
                 List<string> orderColumns = GetOrderByColumnNames<T>();
                 DataTableAttribute attrTable = GetTableAttribute<T>();
                 string schemaName = attrTable.SchemaName;
                 string sourceName = attrTable.UseView ? attrTable.ViewName : attrTable.TableName;
                 SetParameterCollectionDbObject(parameters);
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 reader = DatabaseObjectInstance.Get(sourceName, schemaName, selectColumns, parameters, orderColumns);
 
                 list = CreateBusinessEntity<T>(reader);
-                if (list.Count > 0)
-                {
+                if (list.Count > 0) {
                     entity = list[0];
                 }
             }
-            catch
-            {
+            catch {
                 throw;
             }
-            finally
-            {
-                if (reader != null && !reader.IsClosed)
-                {
+            finally {
+                if (reader != null && !reader.IsClosed) {
                     reader.Close();
                 }
             }
@@ -332,8 +292,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T">The type of objects to retrieve.</typeparam>
         /// <param name="parameters">A collection of Key-Value pairs.</param>
         /// <returns>Returns a List&lt;&gt; of type T</returns>
-        public List<T> GetMultiple<T>(ParameterCollection? parameters) where T : class, new()
-        {
+        public List<T> GetMultiple<T>(ParameterCollection? parameters) where T : class, new() {
             if (parameters != null)
                 SetParameterCollectionDbObject(parameters);
             IList<T> list = [];
@@ -345,37 +304,28 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T">The type of objects to retrieve.</typeparam>
         /// <param name="list">      A reference to the list in which the items are to be returned.</param>
         /// <param name="parameters">A collection of Key-Value pairs.</param>
-        public void GetMultiple<T>(ref IList<T> list, ParameterCollection? parameters) where T : class, new()
-        {
+        public void GetMultiple<T>(ref IList<T> list, ParameterCollection? parameters) where T : class, new() {
             IDataReader reader = null;
-            try
-            {
+            try {
                 DataTableAttribute attrTable = GetTableAttribute<T>();
                 string schemaName = attrTable.SchemaName;
                 string sourceName = attrTable.UseView ? attrTable.ViewName : attrTable.TableName;
                 List<string> selectColumns = GetColumnNames<T>();
                 List<string> orderColumns = GetOrderByColumnNames<T>();
-                if (parameters != null)
-                {
+                if (parameters != null) {
                     SetParameterCollectionDbObject(parameters);
-                }
-                else
-                {
+                } else {
                     parameters = [];
                 }
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 reader = DatabaseObjectInstance.Get(sourceName, schemaName, selectColumns, parameters, orderColumns);
                 CreateBusinessEntity(ref list, reader, true);
             }
-            catch
-            {
+            catch {
                 throw;
             }
-            finally
-            {
-                if (reader != null && !reader.IsClosed)
-                {
+            finally {
+                if (reader != null && !reader.IsClosed) {
                     reader.Close();
                 }
             }
@@ -386,19 +336,15 @@ namespace CodedThought.Core.Data
         /// <param name="list">         The list.</param>
         /// <param name="sortBy">       The property to sort by.</param>
         /// <param name="sortDirection">The direction to sort the list.</param>
-        public void Sort<T>(ref List<T> list, PropertyInfo sortBy, ListSortDirection sortDirection) where T : class, new()
-        {
-            try
-            {
+        public void Sort<T>(ref List<T> list, PropertyInfo sortBy, ListSortDirection sortDirection) where T : class, new() {
+            try {
                 string propertyName = sortBy.Name;
 
-                list.Sort(delegate (T obj1, T obj2)
-                {
+                list.Sort(delegate (T obj1, T obj2) {
                     return obj1.GetType().GetProperty(propertyName).MemberType.CompareTo(obj2.GetType().GetProperty(propertyName).MemberType);
                 });
             }
-            catch
-            {
+            catch {
                 throw;
             }
         }
@@ -408,14 +354,11 @@ namespace CodedThought.Core.Data
         /// <param name="list">         The list.</param>
         /// <param name="sortBy">       The property name to sort by.</param>
         /// <param name="sortDirection">The sort direction to sort.</param>
-        public void Sort<T>(ref List<T> list, string sortBy, ListSortDirection sortDirection) where T : class, new()
-        {
-            try
-            {
+        public void Sort<T>(ref List<T> list, string sortBy, ListSortDirection sortDirection) where T : class, new() {
+            try {
                 this.Sort(ref list, typeof(T).GetProperty(sortBy), sortDirection);
             }
-            catch
-            {
+            catch {
                 throw;
             }
         }
@@ -431,46 +374,33 @@ namespace CodedThought.Core.Data
         ///     String: Set to Empty String
         ///     Guid: Set to Guid minimum
         /// </remarks>
-        public void Save<T>(T obj)
-        {
+        public void Save<T>(T obj) {
             bool bIsNew = true;
             //determine if this is an insert or an update
             DataTableAttribute attrTable = GetTableAttribute<T>();
-            if (attrTable.Key != null)
-            {
+            if (attrTable.Key != null) {
                 object oPrimaryKey = typeof(T).GetProperty(attrTable.Key.PropertyName).GetValue(obj, null);
-                if (attrTable.Key.ColumnType == DbType.Guid && oPrimaryKey == null)
-                {
+                if (attrTable.Key.ColumnType == DbType.Guid && oPrimaryKey == null) {
                     bIsNew = true;
-                }
-                else
-                {
-                    if (oPrimaryKey.IsNumericType())
-                    {
-                        bIsNew = ((int) oPrimaryKey) > 0;
-                    }
-                    else
-                    {
+                } else {
+                    if (oPrimaryKey.IsNumericType()) {
+                        bIsNew = ((int) oPrimaryKey) <= 0;
+                    } else {
                         bIsNew = !string.IsNullOrEmpty(oPrimaryKey.ToString());
                     }
                 }
             }
             // Determine if a new GUID needs to be generated based on the DataTableUsageAttributes.
-            if (attrTable.AutoGenerateUniqueIdentifier && bIsNew)
-            {
+            if (attrTable.AutoGenerateUniqueIdentifier && bIsNew) {
                 DataColumnAttribute keyAttribute = GetPrimaryKeyAttribute<T>();
-                if (keyAttribute.ColumnType == DbType.Guid)
-                {
+                if (keyAttribute.ColumnType == DbType.Guid) {
                     SetPrimaryKeyValue<T>(obj, keyAttribute.PropertyName, Guid.NewGuid());
                 }
             }
-            if (bIsNew)
-            {
+            if (bIsNew) {
                 //insert
                 SaveNew(obj);
-            }
-            else
-            {
+            } else {
                 //update
                 SaveExisting(obj);
             }
@@ -479,35 +409,31 @@ namespace CodedThought.Core.Data
         /// <summary>Saves the specified obj as new.</summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="obj">The obj.</param>
-        public void SaveNew<T>(T obj)
-        {
+        public void SaveNew<T>(T obj) {
             //insert
             DataTableAttribute attrTable = GetTableAttribute<T>();
             if (attrTable.ReadOnly)
                 throw new Exception($"This component, {typeof(T).Name}, is coded to be Read-Only.  Therefore no insert, update, or delete operations can be performed against it.");
 
             List<TableColumn> listColumns = [];
-            foreach (DataColumnAttribute attrColumn in attrTable.Properties)
-            {
+            foreach (DataColumnAttribute attrColumn in attrTable.Properties) {
                 TableColumn tc = new(attrColumn.ColumnName, attrColumn.ConvertTypeToDbTypeSupported(), attrColumn.Size, attrColumn.IsPrimaryKey);
                 tc.DbType = attrColumn.ColumnType;
                 tc.IsInsertable = tc.IsUpdateable;
                 tc.IsIdentity = attrColumn.IsIdentity;
                 tc.IsNullableType = attrColumn.IsNullableType;
-                if( tc.IsPrimary && tc.Type == DbTypeSupported.dbGUID && attrTable.AutoGenerateUniqueIdentifier == true)
-                {
+                if (tc.IsPrimary && tc.Type == DbTypeSupported.dbGUID && attrTable.AutoGenerateUniqueIdentifier == true) {
                     tc.IsInsertable = true;
                 }
                 listColumns.Add(tc);
             }
-            DatabaseObjectInstance.Add(attrTable.TableName, obj, listColumns, this);
+            DatabaseObjectInstance.Add(attrTable.TableName, attrTable.SchemaName, obj, listColumns, this);
         }
 
         /// <summary>Saves an existing object.</summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="obj">The obj.</param>
-        public void SaveExisting<T>(T obj)
-        {
+        public void SaveExisting<T>(T obj) {
             //update
             DataTableAttribute attrTable = GetTableAttribute<T>();
             if (attrTable.ReadOnly)
@@ -518,8 +444,7 @@ namespace CodedThought.Core.Data
             SetParameterCollectionDbObject(oParamColumns);
             SetParameterCollectionDbObject(oParamWhere);
 
-            foreach (DataColumnAttribute attrColumn in attrTable.Properties)
-            {
+            foreach (DataColumnAttribute attrColumn in attrTable.Properties) {
                 IDataParameter param = DatabaseObjectInstance.CreateEmptyParameter();
                 param.DbType = attrColumn.ColumnType;
                 param.Direction = ParameterDirection.Input;
@@ -528,19 +453,13 @@ namespace CodedThought.Core.Data
 
                 // Check if we need to get the value from a sub object or from the local variable.
                 object value;
-                if (attrColumn.ExtendedPropertyType == null)
-                {
+                if (attrColumn.ExtendedPropertyType == null) {
                     value = typeof(T).GetProperty(attrColumn.PropertyName).GetValue(obj, null);
-                }
-                else
-                {
+                } else {
                     Type extendedType = attrColumn.ExtendedPropertyType;
-                    if (extendedType.IsEnum)
-                    {
+                    if (extendedType.IsEnum) {
                         value = (int) typeof(T).GetProperty(attrColumn.PropertyName).GetValue(obj, null);
-                    }
-                    else
-                    {
+                    } else {
                         object oExtendedObject = typeof(T).GetProperty(attrColumn.PropertyName).GetValue(obj, null);
                         value = oExtendedObject.GetType().GetProperty(attrColumn.ExtendedPropertyName).GetValue(oExtendedObject, null);
                     }
@@ -548,19 +467,15 @@ namespace CodedThought.Core.Data
                 param.Value = FormatValueForNull(value, attrColumn.PropertyType);
 
                 //set primary key as where clause
-                if (attrColumn == attrTable.Key)
-                {
+                if (attrColumn == attrTable.Key) {
                     oParamWhere.Add(param);
-                }
-                else
-                {
+                } else {
                     // This isn't the primary key so add it to the main parameter collection.
                     oParamColumns.Add(param);
                 }
             }
             //no primary key: throw error
-            if (oParamWhere.Count == 0)
-            {
+            if (oParamWhere.Count == 0) {
                 throw new CodedThoughtApplicationException("Cannot perform an update when no where clause is specified.");
             }
             DatabaseObjectInstance.Update(attrTable.TableName, oParamColumns, oParamWhere);
@@ -570,10 +485,8 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="records">The records.</param>
         /// <returns></returns>
-        public bool SaveBulk<T>(List<T> records, int notifyAfter = 2000)
-        {
-            try
-            {
+        public bool SaveBulk<T>(List<T> records, int notifyAfter = 2000) {
+            try {
                 DataTableAttribute attrTable = (DataTableAttribute) ORM[typeof(T).FullName][typeof(T)];
                 if (attrTable.ReadOnly)
                     throw new Exception($"This component, {typeof(T).Name}, is coded to be Read-Only.  Therefore no update or delete operations can be performed against it.");
@@ -581,37 +494,30 @@ namespace CodedThought.Core.Data
                 string tableName = attrTable.TableName;
                 DataTable dt = new(tableName);
                 List<TableColumn> tableColumns = DatabaseObjectInstance.GetTableDefinition(tableName);
-                tableColumns.Sort(delegate (TableColumn c1, TableColumn c2)
-                { return c1.OrdinalPosition.CompareTo(c2.OrdinalPosition); });
+                tableColumns.Sort(delegate (TableColumn c1, TableColumn c2) { return c1.OrdinalPosition.CompareTo(c2.OrdinalPosition); });
 
                 tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.Name) != string.Empty && col.IsIdentity != true).ToList();
                 // Propertied columns refers to columns in the table that indeed have a property assigned to them in the object.
                 List<TableColumn> propertiedColumns = tableColumns.Where(col => col.IsIdentity != true)
-                    .Select(col =>
-                    {
+                    .Select(col => {
                         col.CorrespondingPropertyName = GetPropertyNameColumn<T>(col.Name);
                         return col;
                     }).ToList();
 
                 dt = records.ToDataTable();
 
-                if (DatabaseToUse.DatabaseType != DBSupported.SqlServer)
-                {
+                if (DatabaseToUse.DatabaseType != DBSupported.SqlServer) {
                     throw new NotSupportedException("The current database type, " + DatabaseToUse.DatabaseType.ToString() + " is not supported by this bulk insert method.");
-                }
-                else
-                {
+                } else {
                     // make sure to enable triggers more on triggers in next post
                     SqlBulkCopy bulkCopy =
-                        new((SqlConnection) DatabaseObjectInstance.Connection)
-                        {
+                        new((SqlConnection) DatabaseObjectInstance.Connection) {
                             BulkCopyTimeout = DatabaseObjectInstance.CommandTimeout < 0 ? 0 : DatabaseObjectInstance.CommandTimeout
                         };
 
                     // Set up the bulk copy mappings
                     int x = 0;
-                    foreach (TableColumn col in propertiedColumns)
-                    {
+                    foreach (TableColumn col in propertiedColumns) {
                         //bulkCopy.ColumnMappings.Add( x, col.ordinalPosition ); // Part Number
                         bulkCopy.ColumnMappings.Add(x, col.OrdinalPosition);
                         x++;
@@ -625,71 +531,56 @@ namespace CodedThought.Core.Data
                     bulkCopy.NotifyAfter = dt.Rows.Count < notifyAfter ? dt.Rows.Count : notifyAfter;
                     bulkCopy.BatchSize = bulkCopy.NotifyAfter;
                     bulkCopy.SqlRowsCopied += BulkCopy_SqlRowsCopied;
-                    try
-                    {
+                    try {
                         bulkCopy.WriteToServer(dt);
                     }
-                    catch (Exception ex)
-                    {
-                        if (ex.Message.Contains("Received an invalid column length"))
-                        {
+                    catch (Exception ex) {
+                        if (ex.Message.Contains("Received an invalid column length")) {
                             string errorMessage = string.Empty;
                             errorMessage = GetBulkCopyColumnException(ex, bulkCopy);
                             throw new Exception(errorMessage, ex);
-                        }
-                        else
-                        {
+                        } else {
                             throw;
                         }
                     }
                 }
                 return true;
             }
-            catch (CodedThoughtException ex)
-            {
+            catch (CodedThoughtException ex) {
                 throw;
             }
         }
 
-        public bool SaveBulk<T>(DataTable records, int notifyAfter = 2000)
-        {
-            try
-            {
+        public bool SaveBulk<T>(DataTable records, int notifyAfter = 2000) {
+            try {
                 DataTableAttribute attrTable = (DataTableAttribute) ORM[typeof(T).FullName][typeof(T)];
                 if (attrTable.ReadOnly)
                     throw new Exception($"This component, {typeof(T).Name}, is coded to be Read-Only.  Therefore no update or delete operations can be performed against it.");
 
                 DataTable dt = records;
                 List<TableColumn> tableColumns = DatabaseObjectInstance.GetTableDefinition(attrTable.TableName);
-                tableColumns.Sort(delegate (TableColumn c1, TableColumn c2)
-                { return c1.OrdinalPosition.CompareTo(c2.OrdinalPosition); });
+                tableColumns.Sort(delegate (TableColumn c1, TableColumn c2) { return c1.OrdinalPosition.CompareTo(c2.OrdinalPosition); });
 
                 tableColumns = tableColumns.Where(col => GetPropertyNameColumn<T>(col.Name) != string.Empty && col.IsIdentity != true).ToList();
                 // Propertied columns refers to columns in the table that indeed have a property assigned to them in the object.
                 List<TableColumn> propertiedColumns = tableColumns.Where(col => col.IsIdentity != true)
-                    .Select(col =>
-                    {
+                    .Select(col => {
                         col.CorrespondingPropertyName = GetPropertyNameColumn<T>(col.Name);
                         return col;
                     }).ToList();
 
-                if (DatabaseToUse.DatabaseType != DBSupported.SqlServer)
-                {
+                if (DatabaseToUse.DatabaseType != DBSupported.SqlServer) {
                     throw new NotSupportedException("The current database type, " + DatabaseToUse.DatabaseType.ToString() + " is not supported by this bulk insert method.");
-                }
-                else
-                {
+                } else {
                     // make sure to enable triggers more on triggers in next post
                     SqlBulkCopy bulkCopy =
-                        new((SqlConnection) DatabaseObjectInstance.Connection)
-                        {
+                        new((SqlConnection) DatabaseObjectInstance.Connection) {
                             BulkCopyTimeout = DatabaseObjectInstance.CommandTimeout
                         };
 
                     // Set up the bulk copy mappings
                     int x = 0;
-                    foreach (TableColumn col in propertiedColumns)
-                    {
+                    foreach (TableColumn col in propertiedColumns) {
                         bulkCopy.ColumnMappings.Add(x, col.OrdinalPosition);
                         x++;
                     }
@@ -702,28 +593,22 @@ namespace CodedThought.Core.Data
                     bulkCopy.NotifyAfter = dt.Rows.Count < notifyAfter ? dt.Rows.Count : notifyAfter;
                     bulkCopy.BatchSize = bulkCopy.NotifyAfter;
                     bulkCopy.SqlRowsCopied += BulkCopy_SqlRowsCopied;
-                    try
-                    {
+                    try {
                         bulkCopy.WriteToServer(dt);
                     }
-                    catch (Exception ex)
-                    {
-                        if (ex.Message.Contains("Received an invalid column length"))
-                        {
+                    catch (Exception ex) {
+                        if (ex.Message.Contains("Received an invalid column length")) {
                             string errorMessage = string.Empty;
                             errorMessage = GetBulkCopyColumnException(ex, bulkCopy);
                             throw new Exception(errorMessage, ex);
-                        }
-                        else
-                        {
+                        } else {
                             throw;
                         }
                     }
                 }
                 return true;
             }
-            catch (CodedThoughtException ex)
-            {
+            catch (CodedThoughtException ex) {
                 throw;
             }
         }
@@ -733,11 +618,9 @@ namespace CodedThought.Core.Data
         /// <param name="e">     The <see cref="SqlRowsCopiedEventArgs" /> instance containing the event data.</param>
         protected void BulkCopy_SqlRowsCopied(object sender, SqlRowsCopiedEventArgs e) => RowsInserted?.Invoke(this, e);
 
-        protected string GetBulkCopyColumnException(Exception ex, SqlBulkCopy bulkcopy)
-        {
+        protected string GetBulkCopyColumnException(Exception ex, SqlBulkCopy bulkcopy) {
             string message = string.Empty;
-            if (ex.Message.Contains("Received an invalid column length from the bcp client for colid"))
-            {
+            if (ex.Message.Contains("Received an invalid column length from the bcp client for colid")) {
                 string pattern = @"\d+";
                 Match match = Regex.Match(ex.Message.ToString(), pattern);
                 int index = Convert.ToInt32(match.Value) - 1;
@@ -758,8 +641,7 @@ namespace CodedThought.Core.Data
         /// <summary>Removes an object from the database with the supplied primary key.</summary>
         /// <typeparam name="T">The type of object to remove.</typeparam>
         /// <param name="objectID">The primary key of the object.</param>
-        public void Remove<T>(int objectID) where T : class, new()
-        {
+        public void Remove<T>(int objectID) where T : class, new() {
             ParameterCollection parameters = [];
             DataTableAttribute attrTable = GetTableAttribute<T>();
             SetParameterCollectionDbObject(parameters);
@@ -770,10 +652,8 @@ namespace CodedThought.Core.Data
         /// <summary>Removes an object from the database with the specified parameters.</summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="parameters">The parameters.</param>
-        public void Remove<T>(ParameterCollection parameters) where T : class, new()
-        {
-            try
-            {
+        public void Remove<T>(ParameterCollection parameters) where T : class, new() {
+            try {
                 DataTableAttribute attrTable = GetTableAttribute<T>();
                 if (attrTable.ReadOnly)
                     throw new Exception($"This component, {typeof(T).Name}, is coded to be Read-Only.  Therefore no update or delete operations can be performed against it.");
@@ -787,12 +667,9 @@ namespace CodedThought.Core.Data
         /// <summary>Executes the reader.</summary>
         /// <param name="strSql">The string SQL.</param>
         /// <returns></returns>
-        public IDataReader ExecuteReader(string strSql)
-        {
-            try
-            {
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public IDataReader ExecuteReader(string strSql) {
+            try {
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 return DatabaseObjectInstance.ExecuteReader(strSql, CommandType.Text);
             }
             catch { throw; }
@@ -802,16 +679,12 @@ namespace CodedThought.Core.Data
         /// <param name="strSql">The string SQL.</param>
         /// <param name="type">  The type.</param>
         /// <returns></returns>
-        public IDataReader ExecuteReader(string strSql, CommandType type)
-        {
-            try
-            {
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public IDataReader ExecuteReader(string strSql, CommandType type) {
+            try {
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 return DatabaseObjectInstance.ExecuteReader(strSql, type);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 throw;
             }
         }
@@ -821,16 +694,12 @@ namespace CodedThought.Core.Data
         /// <param name="type">     The type.</param>
         /// <param name="paramColl">The parameter coll.</param>
         /// <returns></returns>
-        public IDataReader ExecuteReader(string strSql, CommandType type, ParameterCollection paramColl)
-        {
-            try
-            {
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public IDataReader ExecuteReader(string strSql, CommandType type, ParameterCollection paramColl) {
+            try {
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 return DatabaseObjectInstance.ExecuteReader(strSql, type, paramColl);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 throw;
             }
         }
@@ -841,16 +710,12 @@ namespace CodedThought.Core.Data
         /// <param name="paramColl">The parameter coll.</param>
         /// <param name="behavior"> The behavior.</param>
         /// <returns></returns>
-        public IDataReader ExecuteReader(string strSql, CommandType type, CommandBehavior behavior)
-        {
-            try
-            {
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public IDataReader ExecuteReader(string strSql, CommandType type, CommandBehavior behavior) {
+            try {
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 return DatabaseObjectInstance.ExecuteReader(strSql, type, [], behavior);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 throw;
             }
         }
@@ -861,17 +726,13 @@ namespace CodedThought.Core.Data
         /// <param name="paramColl">The parameter coll.</param>
         /// <param name="behavior"> The behavior.</param>
         /// <returns></returns>
-        public IDataReader ExecuteReader(string strSql, CommandType type, ParameterCollection paramColl, CommandBehavior behavior)
-        {
-            try
-            {
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public IDataReader ExecuteReader(string strSql, CommandType type, ParameterCollection paramColl, CommandBehavior behavior) {
+            try {
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 paramColl.DerivedDatabaseObject = DatabaseObjectInstance as DatabaseObject;
                 return DatabaseObjectInstance.ExecuteReader(strSql, type, paramColl, behavior);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 throw;
             }
         }
@@ -880,8 +741,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T">The type of object the stored procedure returns.</typeparam>
         /// <param name="storedProcedureName">The name of the stored procedure.</param>
         /// <returns>An object of type T.</returns>
-        public T ExecuteStoredProcedure<T>(string storedProcedureName) where T : class, new()
-        {
+        public T ExecuteStoredProcedure<T>(string storedProcedureName) where T : class, new() {
             List<T> list = ExecuteStoredProcedureForList<T>(storedProcedureName, []);
 
             return list.Count > 0 ? list[0] : null;
@@ -892,8 +752,7 @@ namespace CodedThought.Core.Data
         /// <param name="storedProcedureName">The name of the stored procedure.</param>
         /// <param name="parameters">         A collection of Key-Value pairs.</param>
         /// <returns>An object of type T.</returns>
-        public T ExecuteStoredProcedure<T>(string storedProcedureName, ParameterCollection parameters) where T : class, new()
-        {
+        public T ExecuteStoredProcedure<T>(string storedProcedureName, ParameterCollection parameters) where T : class, new() {
             SetParameterCollectionDbObject(parameters);
             List<T> list = ExecuteStoredProcedureForList<T>(storedProcedureName, parameters);
 
@@ -904,8 +763,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T">The type of object the stored procedure returns.</typeparam>
         /// <param name="storedProcedureName">The name of the stored procedure.</param>
         /// <returns>An List of type T.</returns>
-        public List<T> ExecuteStoredProcedureForList<T>(string storedProcedureName) where T : class, new()
-        {
+        public List<T> ExecuteStoredProcedureForList<T>(string storedProcedureName) where T : class, new() {
             IList<T> list = new List<T>();
             ExecuteStoredProcedureForList(ref list, storedProcedureName, []);
             return (List<T>) list;
@@ -916,8 +774,7 @@ namespace CodedThought.Core.Data
         /// <param name="storedProcedureName">The name of the stored procedure.</param>
         /// <param name="parameters">         A collection of Key-Value pairs.</param>
         /// <returns>An List of type T.</returns>
-        public List<T> ExecuteStoredProcedureForList<T>(string storedProcedureName, ParameterCollection parameters) where T : class, new()
-        {
+        public List<T> ExecuteStoredProcedureForList<T>(string storedProcedureName, ParameterCollection parameters) where T : class, new() {
             IList<T> list = new List<T>();
             SetParameterCollectionDbObject(parameters);
             ExecuteStoredProcedureForList(ref list, storedProcedureName, parameters);
@@ -929,24 +786,18 @@ namespace CodedThought.Core.Data
         /// <param name="list">               A reference to the list in which the items are to be returned.</param>
         /// <param name="storedProcedureName">The name of the stored procedure.</param>
         /// <param name="parameters">         A collection of Key-Value pairs.</param>
-        public void ExecuteStoredProcedureForList<T>(ref IList<T> list, string storedProcedureName) where T : class, new()
-        {
+        public void ExecuteStoredProcedureForList<T>(ref IList<T> list, string storedProcedureName) where T : class, new() {
             IDataReader reader = null;
-            try
-            {
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+            try {
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 reader = DatabaseObjectInstance.ExecuteReader(storedProcedureName, CommandType.StoredProcedure, []);
                 CreateBusinessEntity(ref list, reader);
             }
-            catch
-            {
+            catch {
                 throw;
             }
-            finally
-            {
-                if (reader != null && !reader.IsClosed)
-                {
+            finally {
+                if (reader != null && !reader.IsClosed) {
                     reader.Close();
                 }
             }
@@ -957,25 +808,19 @@ namespace CodedThought.Core.Data
         /// <param name="list">               A reference to the list in which the items are to be returned.</param>
         /// <param name="storedProcedureName">The name of the stored procedure.</param>
         /// <param name="parameters">         A collection of Key-Value pairs.</param>
-        public void ExecuteStoredProcedureForList<T>(ref IList<T> list, string storedProcedureName, ParameterCollection parameters) where T : class, new()
-        {
+        public void ExecuteStoredProcedureForList<T>(ref IList<T> list, string storedProcedureName, ParameterCollection parameters) where T : class, new() {
             IDataReader reader = null;
-            try
-            {
+            try {
                 SetParameterCollectionDbObject(parameters);
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 reader = DatabaseObjectInstance.ExecuteReader(storedProcedureName, CommandType.StoredProcedure, parameters);
                 CreateBusinessEntity(ref list, reader);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 throw;
             }
-            finally
-            {
-                if (reader != null && !reader.IsClosed)
-                {
+            finally {
+                if (reader != null && !reader.IsClosed) {
                     reader.Close();
                 }
             }
@@ -986,8 +831,7 @@ namespace CodedThought.Core.Data
         /// <param name="strSql">    The STR SQL.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public List<T> ExecuteNonQueryForList<T>(string strSql) where T : class, new()
-        {
+        public List<T> ExecuteNonQueryForList<T>(string strSql) where T : class, new() {
             IList<T> list = new List<T>();
             ExecuteNonQueryForList(ref list, strSql, []);
             return (List<T>) list;
@@ -998,8 +842,7 @@ namespace CodedThought.Core.Data
         /// <param name="strSql">    The STR SQL.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public List<T> ExecuteNonQueryForList<T>(string strSql, ParameterCollection? parameters) where T : class, new()
-        {
+        public List<T> ExecuteNonQueryForList<T>(string strSql, ParameterCollection? parameters) where T : class, new() {
             IList<T> list = new List<T>();
             if (parameters != null)
                 SetParameterCollectionDbObject(parameters);
@@ -1012,24 +855,18 @@ namespace CodedThought.Core.Data
         /// <param name="list">      The list.</param>
         /// <param name="strSql">    The STR SQL.</param>
         /// <param name="parameters">The parameters.</param>
-        public void ExecuteNonQueryForList<T>(ref IList<T> list, string strSql) where T : class, new()
-        {
+        public void ExecuteNonQueryForList<T>(ref IList<T> list, string strSql) where T : class, new() {
             IDataReader reader = null;
-            try
-            {
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+            try {
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 reader = DatabaseObjectInstance.ExecuteReader(strSql, CommandType.Text, []);
                 CreateBusinessEntity(ref list, reader, true);
             }
-            catch
-            {
+            catch {
                 throw;
             }
-            finally
-            {
-                if (reader != null && !reader.IsClosed)
-                {
+            finally {
+                if (reader != null && !reader.IsClosed) {
                     reader.Close();
                 }
             }
@@ -1040,25 +877,19 @@ namespace CodedThought.Core.Data
         /// <param name="list">      The list.</param>
         /// <param name="strSql">    The STR SQL.</param>
         /// <param name="parameters">The parameters.</param>
-        public void ExecuteNonQueryForList<T>(ref IList<T> list, string strSql, ParameterCollection parameters) where T : class, new()
-        {
+        public void ExecuteNonQueryForList<T>(ref IList<T> list, string strSql, ParameterCollection parameters) where T : class, new() {
             IDataReader reader = null;
-            try
-            {
-                if (CommandTimeout > -1)
-                { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+            try {
+                if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
                 SetParameterCollectionDbObject(parameters);
                 reader = DatabaseObjectInstance.ExecuteReader(strSql, CommandType.Text, parameters);
                 CreateBusinessEntity(ref list, reader, true);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 throw;
             }
-            finally
-            {
-                if (reader != null && !reader.IsClosed)
-                {
+            finally {
+                if (reader != null && !reader.IsClosed) {
                     reader.Close();
                 }
             }
@@ -1067,10 +898,8 @@ namespace CodedThought.Core.Data
         /// <summary>Executes the SQL scaler.</summary>
         /// <param name="strSQL">The string SQL.</param>
         /// <returns></returns>
-        public object ExecuteSQLScaler(string strSQL)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public object ExecuteSQLScaler(string strSQL) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             return DatabaseObjectInstance.ExecuteScalar(strSQL, CommandType.Text, null);
         }
 
@@ -1078,10 +907,8 @@ namespace CodedThought.Core.Data
         /// <param name="strSQL">    The STR SQL.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public object ExecuteSQLScaler(string strSQL, CommandType commandType)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public object ExecuteSQLScaler(string strSQL, CommandType commandType) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             return DatabaseObjectInstance.ExecuteScalar(strSQL, commandType, []);
         }
 
@@ -1089,20 +916,16 @@ namespace CodedThought.Core.Data
         /// <param name="strSQL">    The STR SQL.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public object ExecuteSQLScaler(string strSQL, CommandType commandType, ParameterCollection parameters)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public object ExecuteSQLScaler(string strSQL, CommandType commandType, ParameterCollection parameters) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             SetParameterCollectionDbObject(parameters);
             return DatabaseObjectInstance.ExecuteScalar(strSQL, commandType, parameters);
         }
 
         /// <summary>Executes the non query.</summary>
         /// <param name="strSQL">The string SQL.</param>
-        public int ExecuteNonQuery(string strSQL)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public int ExecuteNonQuery(string strSQL) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             return DatabaseObjectInstance.ExecuteNonQuery(strSQL, CommandType.Text);
         }
 
@@ -1110,10 +933,8 @@ namespace CodedThought.Core.Data
         /// <param name="strSQL">     The STR SQL.</param>
         /// <param name="commandType">Type of the command.</param>
         /// <param name="parameters"> The parameters.</param>
-        public int ExecuteNonQuery(string strSQL, CommandType commandType)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public int ExecuteNonQuery(string strSQL, CommandType commandType) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             return DatabaseObjectInstance.ExecuteNonQuery(strSQL, commandType);
         }
 
@@ -1121,10 +942,8 @@ namespace CodedThought.Core.Data
         /// <param name="strSQL">     The STR SQL.</param>
         /// <param name="commandType">Type of the command.</param>
         /// <param name="parameters"> The parameters.</param>
-        public int ExecuteNonQuery(string strSQL, CommandType commandType, ParameterCollection parameters)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public int ExecuteNonQuery(string strSQL, CommandType commandType, ParameterCollection parameters) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             SetParameterCollectionDbObject(parameters);
             return DatabaseObjectInstance.ExecuteNonQuery(strSQL, commandType, parameters);
         }
@@ -1132,30 +951,24 @@ namespace CodedThought.Core.Data
         /// <summary>Executes the query and returns as a DataTable.</summary>
         /// <param name="strSQL">The STR SQL.</param>
         /// <returns></returns>
-        public DataTable ExecuteDataTable(string strSQL)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public DataTable ExecuteDataTable(string strSQL) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             return DatabaseObjectInstance.ExecuteDataTable(strSQL);
         }
 
         /// <summary>Executes the query and returns as a DataTable.</summary>
         /// <param name="strSQL">The STR SQL.</param>
         /// <returns></returns>
-        public DataTable ExecuteDataTable(string strSQL, CommandType commandType)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public DataTable ExecuteDataTable(string strSQL, CommandType commandType) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             return DatabaseObjectInstance.ExecuteDataTable(strSQL);
         }
 
         /// <summary>Executes the query and returns as a DataSet.</summary>
         /// <param name="strSQL">The STR SQL.</param>
         /// <returns></returns>
-        public DataSet ExecuteDataSet(string strSQL)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public DataSet ExecuteDataSet(string strSQL) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             return DatabaseObjectInstance.ExecuteDataSet(strSQL);
         }
 
@@ -1163,10 +976,8 @@ namespace CodedThought.Core.Data
         /// <param name="strSQL">     The STR SQL.</param>
         /// <param name="commandType">Type of the command.</param>
         /// <returns></returns>
-        public DataSet ExecuteDataSet(string strSQL, CommandType commandType)
-        {
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+        public DataSet ExecuteDataSet(string strSQL, CommandType commandType) {
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             return DatabaseObjectInstance.ExecuteDataSet(strSQL, commandType);
         }
 
@@ -1175,11 +986,9 @@ namespace CodedThought.Core.Data
         /// <param name="cmd">   <see cref="Microsoft.Data.CommandType" /></param>
         /// <param name="param"> The param.</param>
         /// <returns></returns>
-        public DataSet ExecuteDataSet(string strSQL, CommandType commandType, ParameterCollection? param)
-        {
+        public DataSet ExecuteDataSet(string strSQL, CommandType commandType, ParameterCollection? param) {
             param.DerivedDatabaseObject = DatabaseObjectInstance as DatabaseObject;
-            if (CommandTimeout > -1)
-            { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
+            if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }
             return param != null
                 ? DatabaseObjectInstance.ExecuteDataSet(strSQL, commandType, param)
                 : DatabaseObjectInstance.ExecuteDataSet(strSQL, commandType);
@@ -1191,8 +1000,7 @@ namespace CodedThought.Core.Data
         /// <exception cref="ArgumentNullException">The table name wasn't found. If the destinationTable is not passed it must be passed as the DataTable TableName property.</exception>
         /// <exception cref="NotSupportedException">The current database type, " + SupportedDatabase.ToString() + " is not supported by this bulk insert method.</exception>
         /// <returns></returns>
-        public bool ExecuteBulkCopy(DataTable records, int notificationRecordInterval, string? destinationTable)
-        {
+        public bool ExecuteBulkCopy(DataTable records, int notificationRecordInterval, string? destinationTable) {
             DatabaseObjectInstance.BulkCopySqlRowsCopied += ExecuteBulkCopy_SqlRowsCopied;
             return DatabaseObjectInstance.ExecuteBulkCopy(records, notificationRecordInterval, destinationTable);
         }
@@ -1205,29 +1013,23 @@ namespace CodedThought.Core.Data
 
         /// <summary>Performs a sequence of database calls using the same transaction. Commits or Rollback automatically at the end depending on whether the code completed successfully.</summary>
         /// <param name="workToDo">Anonymous method or a delegate containing the code to wrap in a transaction</param>
-        public void Transaction(Action workToDo)
-        {
-            try
-            {
+        public void Transaction(Action workToDo) {
+            try {
                 BeginTransaction();
                 workToDo();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Rollback();
                 throw;
             }
-            finally
-            {
+            finally {
                 Commit();
             }
         }
 
         /// <summary>Commits the operation.</summary>
-        public void CommitOperation()
-        {
-            if (TransactionInProgress)
-            {
+        public void CommitOperation() {
+            if (TransactionInProgress) {
                 TransactionInProgress = false;
                 DatabaseObjectInstance.CommitTransaction();
             }
@@ -1235,17 +1037,14 @@ namespace CodedThought.Core.Data
 
         /// <summary>Begins the transaction.</summary>
         /// <returns></returns>
-        public IDbTransaction BeginTransaction()
-        {
+        public IDbTransaction BeginTransaction() {
             TransactionInProgress = true;
             return DatabaseObjectInstance.BeginTransaction();
         }
 
         /// <summary>Commits a transaction inside of the <see cref="Transaction" /> method.</summary>
-        public void Commit()
-        {
-            if (TransactionInProgress)
-            {
+        public void Commit() {
+            if (TransactionInProgress) {
                 TransactionInProgress = false;
                 DatabaseObjectInstance.CommitTransaction();
             }
@@ -1256,10 +1055,8 @@ namespace CodedThought.Core.Data
         public bool TestConnection() => DatabaseObjectInstance.TestConnection();
 
         /// <summary>Rollback a transaction inside of the <see cref="Transaction" /> method.</summary>
-        public void Rollback()
-        {
-            if (TransactionInProgress)
-            {
+        public void Rollback() {
+            if (TransactionInProgress) {
                 TransactionInProgress = false;
                 DatabaseObjectInstance.RollbackTransaction();
             }
@@ -1269,8 +1066,7 @@ namespace CodedThought.Core.Data
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public string GetTableNameFromObject<T>()
-        {
+        public string GetTableNameFromObject<T>() {
             DataTableAttribute table = GetTableAttribute<T>();
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the pass generic type, {nameof(T)}.")
@@ -1282,8 +1078,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
 
-        public string GetTableNameFromObject(string typeName)
-        {
+        public string GetTableNameFromObject(string typeName) {
             DataTableAttribute table = GetTableAttribute(typeName);
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the pass generic type, {typeName}.")
@@ -1295,8 +1090,7 @@ namespace CodedThought.Core.Data
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns><see cref="string"/></returns>
-        public string? GetSchemaNameFromObject<T>()
-        {
+        public string? GetSchemaNameFromObject<T>() {
             DataTableAttribute table = GetTableAttribute<T>();
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the passed type, {nameof(T)}.")
@@ -1308,8 +1102,7 @@ namespace CodedThought.Core.Data
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns><see cref="string"/></returns>
-        public string? GetSchemaNameFromObject(string typeName)
-        {
+        public string? GetSchemaNameFromObject(string typeName) {
             DataTableAttribute table = GetTableAttribute(typeName);
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the pass generic type, {typeName}.")
@@ -1319,8 +1112,7 @@ namespace CodedThought.Core.Data
         /// <summary>Gets the view name from object type.</summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public string? GetViewNameFromObject<T>()
-        {
+        public string? GetViewNameFromObject<T>() {
             DataTableAttribute table = GetTableAttribute<T>();
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the passed type, {nameof(T)}.")
@@ -1330,8 +1122,7 @@ namespace CodedThought.Core.Data
         /// <summary>Gets the view name from the object's name.</summary>
         /// <param name="typeName"></param>
         /// <returns></returns>
-        public string? GetViewNameFromObject(string typeName)
-        {
+        public string? GetViewNameFromObject(string typeName) {
             DataTableAttribute table = GetTableAttribute(typeName);
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the pass generic type, {typeName}.")
@@ -1342,8 +1133,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         [Obsolete("The method is obsolete.  The full source name should be pulled from the inheriting provider's methods of GetTableName and GetSchemaName.")]
-        public string GetSourceNameFromObject<T>()
-        {
+        public string GetSourceNameFromObject<T>() {
             DataTableAttribute table = GetTableAttribute<T>();
             return DatabaseObjectInstance.GetTableName(DefaultSchemaName, table.SourceName);
         }
@@ -1352,8 +1142,7 @@ namespace CodedThought.Core.Data
         /// <param name="typeName">Name of the type.</param>
         /// <returns></returns>
         [Obsolete("The method is obsolete.  The full source name should be pulled from the inheriting provider's methods of GetTableName and GetSchemaName.")]
-        public string GetSourceNameFromObject(string typeName)
-        {
+        public string GetSourceNameFromObject(string typeName) {
             DataTableAttribute table = GetTableAttribute(typeName);
             return DatabaseObjectInstance.GetTableName(DefaultSchemaName, table.SourceName);
         }
@@ -1362,13 +1151,10 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="propertyName">Name of the property.</param>
         /// <returns></returns>
-        public string GetColumnNameFromProperty<T>(string propertyName)
-        {
+        public string GetColumnNameFromProperty<T>(string propertyName) {
             string columName = string.Empty;
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
-                if (attrColumn.PropertyName == propertyName)
-                {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
+                if (attrColumn.PropertyName == propertyName) {
                     columName = attrColumn.ColumnName;
                     break;
                 }
@@ -1380,13 +1166,10 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="columnName">Name of the column.</param>
         /// <returns></returns>
-        public string GetPropertyNameColumn<T>(string columnName)
-        {
+        public string GetPropertyNameColumn<T>(string columnName) {
             string propertyName = string.Empty;
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
-                if (attrColumn.ColumnName == columnName)
-                {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
+                if (attrColumn.ColumnName == columnName) {
                     propertyName = attrColumn.PropertyName;
                     break;
                 }
@@ -1399,8 +1182,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public DataTableAttribute GetTableAttribute<T>()
-        {
+        public DataTableAttribute GetTableAttribute<T>() {
             DataTableAttribute table = (DataTableAttribute) ORM[typeof(T).FullName][typeof(T)];
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the pass generic type, {nameof(T)}.")
@@ -1412,8 +1194,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public DataTableAttribute GetTableAttribute(string typeName)
-        {
+        public DataTableAttribute GetTableAttribute(string typeName) {
             DataTableAttribute table = (DataTableAttribute) ORM[typeName][Type.GetType(typeName)];
             return table == null
                 ? throw new Exception($"The DataTable table attribute could not be found based on the pass generic type, {typeName}.")
@@ -1423,18 +1204,14 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="propertyName">Name of the property.</param>
         /// <returns></returns>
-        public DataColumnAttribute GetColumnDataAttribute<T>(string propertyName)
-        {
+        public DataColumnAttribute GetColumnDataAttribute<T>(string propertyName) {
             DataColumnAttribute propAttr = null;
             object[] arrColumnAttributes;
 
-            foreach (PropertyInfo pi in typeof(T).GetProperties())
-            {
-                if (pi.Name == propertyName)
-                {
+            foreach (PropertyInfo pi in typeof(T).GetProperties()) {
+                if (pi.Name == propertyName) {
                     arrColumnAttributes = pi.GetCustomAttributes(typeof(DataColumnAttribute), true);
-                    if (arrColumnAttributes.Length > 0)
-                    {
+                    if (arrColumnAttributes.Length > 0) {
                         propAttr = (DataColumnAttribute) arrColumnAttributes[0];
                         break;
                     }
@@ -1448,23 +1225,18 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="includeIdentityColumns">The include identity columns.</param>
         /// <returns></returns>
-        public List<TableColumn> GetTableDefinition<T>(bool includeIdentityColumns)
-        {
-            try
-            {
+        public List<TableColumn> GetTableDefinition<T>(bool includeIdentityColumns) {
+            try {
                 List<TableColumn> tableDefinition = DatabaseObjectInstance.GetTableDefinition(GetTableNameFromObject<T>());
 
-                foreach (TableColumn col in tableDefinition)
-                {
+                foreach (TableColumn col in tableDefinition) {
                     col.CorrespondingPropertyName = GetPropertyNameColumn<T>(col.Name);
                 }
                 return !includeIdentityColumns
-                    ? tableDefinition.FindAll(delegate (TableColumn c)
-                    { return c.IsIdentity == false; })
+                    ? tableDefinition.FindAll(delegate (TableColumn c) { return c.IsIdentity == false; })
                     : tableDefinition;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 throw new Exception(ex.Message, ex);
             }
         }
@@ -1473,12 +1245,9 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="propertyName">Name of the property.</param>
         /// <returns><c>true</c> if [is property key] [the specified property name]; otherwise, <c>false</c>.</returns>
-        public bool IsPropertyKey<T>(string propertyName)
-        {
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
-                if (attrColumn.PropertyName == propertyName)
-                {
+        public bool IsPropertyKey<T>(string propertyName) {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
+                if (attrColumn.PropertyName == propertyName) {
                     return attrColumn.IsPrimaryKey;
                 }
             }
@@ -1489,12 +1258,9 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         [Obsolete("This method is obsolete due to the naming.  Please use GetPrimaryKeyAttribute().")]
-        public DataColumnAttribute GetKeyPropertyName<T>()
-        {
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
-                if (attrColumn.IsPrimaryKey)
-                {
+        public DataColumnAttribute GetKeyPropertyName<T>() {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
+                if (attrColumn.IsPrimaryKey) {
                     return attrColumn;
                 }
             }
@@ -1504,12 +1270,9 @@ namespace CodedThought.Core.Data
         /// <summary>Gets the <see cref="DataColumnAttribute" /> marked with the primary key flag.</summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public DataColumnAttribute GetPrimaryKeyAttribute<T>()
-        {
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
-                if (attrColumn.IsPrimaryKey)
-                {
+        public DataColumnAttribute GetPrimaryKeyAttribute<T>() {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
+                if (attrColumn.IsPrimaryKey) {
                     return attrColumn;
                 }
             }
@@ -1521,8 +1284,7 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="obj"></param>
         /// <param name="val"></param>
-        public void SetPrimaryKeyValue<T>(Object obj, object val)
-        {
+        public void SetPrimaryKeyValue<T>(Object obj, object val) {
             DataColumnAttribute keyProperty = GetPrimaryKeyAttribute<T>();
             SetPrimaryKeyValue<T>(obj, keyProperty.PropertyName, val);
         }
@@ -1533,8 +1295,7 @@ namespace CodedThought.Core.Data
         /// <param name="obj"></param>
         /// <param name="keyPropertyName"></param>
         /// <param name="val"></param>
-        public void SetPrimaryKeyValue<T>(Object obj, string keyPropertyName, object val)
-        {
+        public void SetPrimaryKeyValue<T>(Object obj, string keyPropertyName, object val) {
             PropertyInfo pi = typeof(T).GetProperty(keyPropertyName);
             pi.SetValue(obj, val, null);
         }
@@ -1543,14 +1304,11 @@ namespace CodedThought.Core.Data
         /// <param name="propertyName">The property of the object from which to make the parameter.</param>
         /// <param name="value">       The value to which the parameter should be set.</param>
         /// <returns></returns>
-        public IDataParameter MakeParameter<T>(string propertyName, object value)
-        {
+        public IDataParameter MakeParameter<T>(string propertyName, object value) {
             //TODO: determine if this function needs to return null
             IDataParameter param = DatabaseObjectInstance.CreateEmptyParameter();
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
-                if (attrColumn.PropertyName == propertyName)
-                {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
+                if (attrColumn.PropertyName == propertyName) {
                     param.DbType = attrColumn.ColumnType;
                     param.Direction = ParameterDirection.Input;
                     param.ParameterName = attrColumn.ColumnName;
@@ -1567,14 +1325,11 @@ namespace CodedThought.Core.Data
         /// <param name="propertyName">The property of the object from which to make the parameter.</param>
         /// <param name="obj">         The object who's property should be used</param>
         /// <returns></returns>
-        public IDataParameter MakeParameter<T>(string propertyName, T obj)
-        {
+        public IDataParameter MakeParameter<T>(string propertyName, T obj) {
             //TODO: determine if this function needs to return null
             IDataParameter param = DatabaseObjectInstance.CreateEmptyParameter();
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
-                if (attrColumn.PropertyName == propertyName)
-                {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
+                if (attrColumn.PropertyName == propertyName) {
                     param.DbType = attrColumn.ColumnType;
                     param.Direction = ParameterDirection.Input;
                     param.ParameterName = attrColumn.ColumnName;
@@ -1593,17 +1348,13 @@ namespace CodedThought.Core.Data
         /// <param name="value">       the value to set the parameter</param>
         /// <param name="whereType">   The where type operator to apply.</param>
         /// <returns></returns>
-        public Parameter MakeParameter<T, U>(string propertyName, object value, WhereType whereType = WhereType.AND) where U : Parameter, new()
-        {
+        public Parameter MakeParameter<T, U>(string propertyName, object value, WhereType whereType = WhereType.AND) where U : Parameter, new() {
             // Convert the parameter to the type that was requested.
-            U param = new()
-            {
+            U param = new() {
                 BaseParameter = DatabaseObjectInstance.CreateEmptyParameter()
             };
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
-                if (attrColumn.PropertyName == propertyName)
-                {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
+                if (attrColumn.PropertyName == propertyName) {
                     param.DbType = attrColumn.ColumnType;
                     param.Direction = ParameterDirection.Input;
                     param.ParameterName = attrColumn.ColumnName;
@@ -1622,8 +1373,7 @@ namespace CodedThought.Core.Data
         /// <param name="parameterType">The DbType of the parameter.</param>
         /// <param name="paramterValue">The value of the parameter.</param>
         /// <returns></returns>
-        public IDataParameter MakeParameter(string parameterName, DbType parameterType, object paramterValue)
-        {
+        public IDataParameter MakeParameter(string parameterName, DbType parameterType, object paramterValue) {
             //TODO: determine if this function needs to return null
             IDataParameter param = DatabaseObjectInstance.CreateEmptyParameter();
             param.DbType = parameterType;
@@ -1640,8 +1390,7 @@ namespace CodedThought.Core.Data
         /// <param name="parameterType">The DbType of the parameter.</param>
         /// <param name="paramterValue">The value of the parameter.</param>
         /// <returns></returns>
-        public IDataParameter MakeParameter(string parameterName, string dataColumnName, DbType parameterType, object paramterValue)
-        {
+        public IDataParameter MakeParameter(string parameterName, string dataColumnName, DbType parameterType, object paramterValue) {
             //TODO: determine if this function needs to return null
             IDataParameter param = DatabaseObjectInstance.CreateEmptyParameter();
             param.DbType = parameterType;
@@ -1661,15 +1410,12 @@ namespace CodedThought.Core.Data
         /// <param name="startVal"></param>
         /// <param name="endVal"></param>
         /// <returns></returns>
-        public IDataParameter MakeBetweenParameter<T>(string propertyName, object startVal, object endVal) where T : class
-        {
+        public IDataParameter MakeBetweenParameter<T>(string propertyName, object startVal, object endVal) where T : class {
 
             IDataParameter startRangeParam = DatabaseObjectInstance.CreateEmptyParameter();
             IDataParameter endRangeParam = DatabaseObjectInstance.CreateEmptyParameter();
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
-                if (attrColumn.PropertyName == propertyName)
-                {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
+                if (attrColumn.PropertyName == propertyName) {
                     startRangeParam.DbType = attrColumn.ColumnType;
                     startRangeParam.Direction = ParameterDirection.Input;
                     startRangeParam.ParameterName = attrColumn.ColumnName;
@@ -1698,8 +1444,7 @@ namespace CodedThought.Core.Data
         /// <param name="comparison"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public IDataParameter MakeParameter<T>(string propertyName, ComparisonParameterType comparison, object value)
-        {
+        public IDataParameter MakeParameter<T>(string propertyName, ComparisonParameterType comparison, object value) {
 
             IDataParameter baseParam = MakeParameter<T>(propertyName, value);
             ComparisonParameter comparisonParameter = new(baseParam, comparison, ComparisonOrigin.ValueBased);
@@ -1712,28 +1457,23 @@ namespace CodedThought.Core.Data
         /// <summary>Gets the column names from the passed data object.</summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<string> GetColumnNames<T>()
-        {
+        public List<string> GetColumnNames<T>() {
             List<string> listColumns = [];
-            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
+            foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
                 listColumns.Add(attrColumn.ColumnName);
             }
             return listColumns;
         }
 
-        public List<string> GetApiParameters<T>()
-        {
+        public List<string> GetApiParameters<T>() {
             List<string> listParameters = [];
-            foreach (ApiDataParameterAttribute attrParam in ((ApiDataControllerAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties)
-            {
+            foreach (ApiDataParameterAttribute attrParam in ((ApiDataControllerAttribute) ORM[typeof(T).FullName][typeof(T)]).Properties) {
                 listParameters.Add(attrParam.ParameterName);
             }
             return listParameters;
         }
 
-        protected List<string> GetOrderByColumnNames<T>()
-        {
+        protected List<string> GetOrderByColumnNames<T>() {
             List<string> listColumns = [];
             //not supported at the moment
             //foreach (DataColumnAttribute attrColumn in ORM[typeof(T).FullName][typeof(T)].Properties)
@@ -1743,59 +1483,46 @@ namespace CodedThought.Core.Data
             return listColumns;
         }
 
-        protected List<T> CreateBusinessEntity<T>(IDataReader reader, bool useOrdinal = false) where T : class, new()
-        {
+        protected List<T> CreateBusinessEntity<T>(IDataReader reader, bool useOrdinal = false) where T : class, new() {
             IList<T> list = new List<T>();
             CreateBusinessEntity(ref list, reader, useOrdinal);
             return (List<T>) list;
         }
 
-        protected List<T> CreateBusinessEntity<T>(DataTable dt, bool useOrdinal = false) where T : class, new()
-        {
+        protected List<T> CreateBusinessEntity<T>(DataTable dt, bool useOrdinal = false) where T : class, new() {
             IList<T> list = new List<T>();
             CreateBusinessEntity(ref list, dt, useOrdinal);
             return (List<T>) list;
         }
 
-        protected void CreateBusinessEntity<T>(ref IList<T> list, IDataReader reader) where T : class, new()
-        {
+        protected void CreateBusinessEntity<T>(ref IList<T> list, IDataReader reader) where T : class, new() {
             T entity;
             DataTableAttribute attrTable = (DataTableAttribute) ORM[typeof(T).FullName][typeof(T)];
-            while (reader.Read())
-            {
+            while (reader.Read()) {
                 entity = new T();
-                for (int i = 0; i < reader.FieldCount; i++)
-                {
-                    foreach (DataColumnAttribute attrColumn in attrTable.Properties)
-                    {
-                        if (attrColumn.ColumnName.ToLower() == reader.GetName(i).ToLower())
-                        {
+                for (int i = 0; i < reader.FieldCount; i++) {
+                    foreach (DataColumnAttribute attrColumn in attrTable.Properties) {
+                        if (attrColumn.ColumnName.ToLower() == reader.GetName(i).ToLower()) {
                             //extended object defined:
                             // - create an instance of the extended object (must have a parameterless constructor
                             // - set the extended object's value with the data from the database
                             // - set the mapped property value to the etended object
-                            if (attrColumn.ExtendedPropertyType != null)
-                            {
+                            if (attrColumn.ExtendedPropertyType != null) {
                                 object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
 
                                 //type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                                if (extendedObj.GetType().IsEnum)
-                                {
+                                if (extendedObj.GetType().IsEnum) {
                                     PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
                                     object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
                                     Type enumUnderlyingType = System.Enum.GetUnderlyingType(extendedObj.GetType());
                                     object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
                                     pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int) enumValue), null);
-                                }
-                                else
-                                {
+                                } else {
                                     PropertyInfo pi = attrColumn.ExtendedPropertyType.GetProperty(attrColumn.ExtendedPropertyName);
                                     object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
                                     pi.SetValue(extendedObj, objValue, null);
                                 }
-                            }
-                            else
-                            {//normal property - set it directly
+                            } else {//normal property - set it directly
                                 PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
                                 object obj = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
                                 pi.SetValue(entity, obj, null);
@@ -1808,45 +1535,34 @@ namespace CodedThought.Core.Data
             }
         }
 
-        protected void CreateBusinessEntity<T>(ref IList<T> list, DataTable dt) where T : class, new()
-        {
+        protected void CreateBusinessEntity<T>(ref IList<T> list, DataTable dt) where T : class, new() {
             T entity;
             DataTableAttribute attrTable = (DataTableAttribute) ORM[typeof(T).FullName][typeof(T)];
-            foreach (DataRow row in dt.Rows)
-            {
+            foreach (DataRow row in dt.Rows) {
                 entity = new T();
-                for (int i = 0; i < dt.Columns.Count; i++)
-                {
-                    foreach (DataColumnAttribute attrColumn in attrTable.Properties)
-                    {
-                        if (attrColumn.ColumnName.ToLower() == dt.Columns[i].ColumnName.ToLower())
-                        {
+                for (int i = 0; i < dt.Columns.Count; i++) {
+                    foreach (DataColumnAttribute attrColumn in attrTable.Properties) {
+                        if (attrColumn.ColumnName.ToLower() == dt.Columns[i].ColumnName.ToLower()) {
                             //extended object defined:
                             // - create an instance of the extended object (must have a parameterless constructor
                             // - set the extended object's value with the data from the database
                             // - set the mapped property value to the etended object
-                            if (attrColumn.ExtendedPropertyType != null)
-                            {
+                            if (attrColumn.ExtendedPropertyType != null) {
                                 object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
 
                                 //type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                                if (extendedObj.GetType().IsEnum)
-                                {
+                                if (extendedObj.GetType().IsEnum) {
                                     PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
                                     object objValue = GetReaderValueAs(row[i], pi.PropertyType);
                                     Type enumUnderlyingType = System.Enum.GetUnderlyingType(extendedObj.GetType());
                                     object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
                                     pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int) enumValue), null);
-                                }
-                                else
-                                {
+                                } else {
                                     PropertyInfo pi = attrColumn.ExtendedPropertyType.GetProperty(attrColumn.ExtendedPropertyName);
                                     object objValue = GetReaderValueAs(row[i], pi.PropertyType);
                                     pi.SetValue(extendedObj, objValue, null);
                                 }
-                            }
-                            else
-                            {//normal property - set it directly
+                            } else {//normal property - set it directly
                                 PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
                                 object obj = GetReaderValueAs(row[i], pi.PropertyType);
                                 pi.SetValue(entity, obj, null);
@@ -1864,50 +1580,37 @@ namespace CodedThought.Core.Data
         /// <param name="list">      The list.</param>
         /// <param name="reader">    The reader.</param>
         /// <param name="useOrdinal">if set to <c>true</c> this process will use a process using ordinal positions.</param>
-        protected void CreateBusinessEntity<T>(ref IList<T> list, IDataReader reader, bool useOrdinal = true) where T : class, new()
-        {
-            if (!useOrdinal)
-            {
+        protected void CreateBusinessEntity<T>(ref IList<T> list, IDataReader reader, bool useOrdinal = true) where T : class, new() {
+            if (!useOrdinal) {
                 CreateBusinessEntity(ref list, reader);
-            }
-            else
-            {
+            } else {
                 T entity;
                 DataTableAttribute attrTable = (DataTableAttribute) ORM[typeof(T).FullName][typeof(T)];
-                while (reader.Read())
-                {
+                while (reader.Read()) {
                     entity = new T();
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
+                    for (int i = 0; i < reader.FieldCount; i++) {
                         DataColumnAttribute attrColumn = attrTable.Properties.SingleOrDefault(p => p.ColumnName.ToLower() == reader.GetName(i).ToLower());
-                        if (attrColumn != null)
-                        {
+                        if (attrColumn != null) {
                             //extended object defined:
                             // - create an instance of the extended object (must have a parameterless constructor
                             // - set the extended object's value with the data from the database
                             // - set the mapped property value to the etended object
-                            if (attrColumn.ExtendedPropertyType != null)
-                            {
+                            if (attrColumn.ExtendedPropertyType != null) {
                                 object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
 
                                 //type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                                if (extendedObj.GetType().IsEnum)
-                                {
+                                if (extendedObj.GetType().IsEnum) {
                                     PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
                                     object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
                                     Type enumUnderlyingType = System.Enum.GetUnderlyingType(extendedObj.GetType());
                                     object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
                                     pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int) enumValue), null);
-                                }
-                                else
-                                {
+                                } else {
                                     PropertyInfo pi = attrColumn.ExtendedPropertyType.GetProperty(attrColumn.ExtendedPropertyName);
                                     object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
                                     pi.SetValue(extendedObj, objValue, null);
                                 }
-                            }
-                            else
-                            {//normal property - set it directly
+                            } else {//normal property - set it directly
                                 PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
                                 object obj = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
                                 pi.SetValue(entity, obj, null);
@@ -1919,50 +1622,37 @@ namespace CodedThought.Core.Data
             }
         }
 
-        protected void CreateBusinessEntity<T>(ref IList<T> list, DataTable dt, bool useOrdinal = true) where T : class, new()
-        {
-            if (!useOrdinal)
-            {
+        protected void CreateBusinessEntity<T>(ref IList<T> list, DataTable dt, bool useOrdinal = true) where T : class, new() {
+            if (!useOrdinal) {
                 CreateBusinessEntity(ref list, dt);
-            }
-            else
-            {
+            } else {
                 T entity;
                 DataTableAttribute attrTable = (DataTableAttribute) ORM[typeof(T).FullName][typeof(T)];
-                foreach (DataRow row in dt.Rows)
-                {
+                foreach (DataRow row in dt.Rows) {
                     entity = new T();
-                    for (int i = 0; i < dt.Columns.Count; i++)
-                    {
+                    for (int i = 0; i < dt.Columns.Count; i++) {
                         DataColumnAttribute attrColumn = attrTable.Properties.SingleOrDefault(p => p.ColumnName.ToLower() == dt.Columns[i].ColumnName.ToLower());
-                        if (attrColumn != null)
-                        {
+                        if (attrColumn != null) {
                             //extended object defined:
                             // - create an instance of the extended object (must have a parameterless constructor
                             // - set the extended object's value with the data from the database
                             // - set the mapped property value to the etended object
-                            if (attrColumn.ExtendedPropertyType != null)
-                            {
+                            if (attrColumn.ExtendedPropertyType != null) {
                                 object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
 
                                 //type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                                if (extendedObj.GetType().IsEnum)
-                                {
+                                if (extendedObj.GetType().IsEnum) {
                                     PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
                                     object objValue = GetReaderValueAs(row[i], pi.PropertyType);
                                     Type enumUnderlyingType = System.Enum.GetUnderlyingType(extendedObj.GetType());
                                     object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
                                     pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int) enumValue), null);
-                                }
-                                else
-                                {
+                                } else {
                                     PropertyInfo pi = attrColumn.ExtendedPropertyType.GetProperty(attrColumn.ExtendedPropertyName);
                                     object objValue = GetReaderValueAs(row[i], pi.PropertyType);
                                     pi.SetValue(extendedObj, objValue, null);
                                 }
-                            }
-                            else
-                            {//normal property - set it directly
+                            } else {//normal property - set it directly
                                 PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
                                 object obj = GetReaderValueAs(row[i], pi.PropertyType);
                                 pi.SetValue(entity, obj, null);
@@ -1978,15 +1668,12 @@ namespace CodedThought.Core.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="dt">The dt.</param>
         /// <returns></returns>
-        public List<T> ConvertDataTableToList<T>(DataTable dt) where T : class, new()
-        {
-            try
-            {
+        public List<T> ConvertDataTableToList<T>(DataTable dt) where T : class, new() {
+            try {
                 List<T> list = [];
                 return CreateBusinessEntity<T>(dt);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 throw;
             }
         }
@@ -1995,35 +1682,29 @@ namespace CodedThought.Core.Data
         /// <param name="value">       The value.</param>
         /// <param name="expectedType">The expected type.</param>
         /// <returns></returns>
-        protected object? GetReaderValueAs(object value, Type targetType)
-        {
+        protected object? GetReaderValueAs(object value, Type targetType) {
             if (value == DBNull.Value)
                 return null;
 
             // Handle null values for nullable types
-            if (value == null && targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
+            if (value == null && targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
                 return null;
             }
 
             // Get the underlying type if it's nullable
             Type nonNullableType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
-            try
-            {
+            try {
                 // Since Guids are not handled by the Convert.ChangeType system method we have to handle it here.
                 return targetType == typeof(Guid) ? Guid.Parse(value.ToString()) : Convert.ChangeType(value, nonNullableType);
             }
-            catch (InvalidCastException)
-            {
+            catch (InvalidCastException) {
                 throw new InvalidCastException($"Cannot convert value '{value}' to type {targetType.Name}");
             }
-            catch (FormatException)
-            {
+            catch (FormatException) {
                 throw new FormatException($"Value '{value}' is not in a format suitable for type {targetType.Name}");
             }
-            catch (OverflowException)
-            {
+            catch (OverflowException) {
                 throw new OverflowException($"Value '{value}' is outside the range for type {targetType.Name}");
             }
 
@@ -2073,8 +1754,7 @@ namespace CodedThought.Core.Data
         /// <summary>Formats the value for null based on the determined type of the value.</summary>
         /// <param name="value">The value.</param>
         /// <returns></returns>
-        protected object FormatValueForNull(object value)
-        {
+        protected object FormatValueForNull(object value) {
             if (value.Equals(null))
                 return DBNull.Value;
             return FormatValueForNull(value, value.GetType());
@@ -2083,11 +1763,9 @@ namespace CodedThought.Core.Data
         /// <summary>Formats the value for null based on the value type passed.</summary>
         /// <param name="value">The value.</param>
         /// <returns></returns>
-        protected object FormatValueForNull(object value, Type valueType)
-        {
+        protected object FormatValueForNull(object value, Type valueType) {
             object returnVal = DBNull.Value;
-            try
-            {
+            try {
                 Switch.On(valueType)
                     .Case(typeof(short), () => returnVal = short.MinValue == (short) value ? DBNull.Value : value)
                     .Case(typeof(short?), () => returnVal = short.MinValue == (short) value ? DBNull.Value : value)
@@ -2114,22 +1792,18 @@ namespace CodedThought.Core.Data
                     .Case(typeof(Guid?), () => returnVal = value == null || Guid.Empty == Guid.Parse(value.ToString()) ? DBNull.Value : Guid.Parse(value.ToString()));
                 return returnVal;
             }
-            catch (CodedThoughtException ex)
-            {
+            catch (CodedThoughtException ex) {
                 throw;
             }
         }
 
-        protected DateTime ConvertToSafeDateTime(object value)
-        {
+        protected DateTime ConvertToSafeDateTime(object value) {
             DateTime.TryParse(value.ToString(), out DateTime dateTime);
             return dateTime;
         }
 
-        protected void SetParameterCollectionDbObject(ParameterCollection param)
-        {
-            if (param != null)
-            {
+        protected void SetParameterCollectionDbObject(ParameterCollection param) {
+            if (param != null) {
                 param.DerivedDatabaseObject ??= DatabaseObjectInstance as DatabaseObject;
             }
         }
@@ -2141,8 +1815,7 @@ namespace CodedThought.Core.Data
         /// <summary>Gets the type minimum value.</summary>
         /// <param name="expectedType">The expected type.</param>
         /// <returns></returns>
-        protected static object GetTypeMinValue(Type expectedType)
-        {
+        protected static object GetTypeMinValue(Type expectedType) {
             object returnVal = null;
             CodedThought.Core.Switch.On(expectedType)
                 .Case(typeof(short), () => returnVal = short.MinValue)
@@ -2168,20 +1841,16 @@ namespace CodedThought.Core.Data
         /// DataTableAttribute) and generates a DictionaryCollection of each type and its DB mappings
         /// </summary>
         /// <returns></returns>
-        protected void GenerateMapCollection(Dictionary<string, Dictionary<Type, Attribute>> mapCollection, Assembly assembly)
-        {
+        protected void GenerateMapCollection(Dictionary<string, Dictionary<Type, Attribute>> mapCollection, Assembly assembly) {
             mapCollection ??= [];
 
-            foreach (Type type in assembly.GetTypes())
-            {
-                if (mapCollection.ContainsKey(type.FullName) || mapCollection.ContainsKey($"{type.FullName}.api"))
-                {
+            foreach (Type type in assembly.GetTypes()) {
+                if (mapCollection.ContainsKey(type.FullName) || mapCollection.ContainsKey($"{type.FullName}.api")) {
                     continue;
                 }
 
                 DataTableAttribute attrTable = type.GetDataTableAttribute(false);
-                if (attrTable != null)
-                {
+                if (attrTable != null) {
                     DataTableUsageAttribute attrUsage = type.GetDataTableUsageAttribute(attrTable.IgnoreInherited);
                     attrUsage ??= new DataTableUsageAttribute();
                     if (mapCollection.ContainsKey(type.FullName))
@@ -2202,8 +1871,7 @@ namespace CodedThought.Core.Data
 
                 // Look for API Attributes
                 ApiDataControllerAttribute paramTable = type.GetApiDataControllerAttribute(false);
-                if (paramTable != null)
-                {
+                if (paramTable != null) {
                     if (mapCollection.ContainsKey($"{type.FullName}.api"))
                         throw new CodedThoughtException($"The type, {type.FullName}.api, already exists in the mapping.");
                     MapApiColumns(type, paramTable);
@@ -2218,18 +1886,14 @@ namespace CodedThought.Core.Data
         /// <summary>Finds and loads all <see cref="DataColumnAttribute" /> attributes into the passed <see cref="DataTableAttribute" /> attribute.</summary>
         /// <param name="type">     </param>
         /// <param name="attrTable"></param>
-        protected void MapTableColumns(Type type, DataTableAttribute attrTable)
-        {
+        protected void MapTableColumns(Type type, DataTableAttribute attrTable) {
             List<PropertyInfo> properties = !attrTable.IgnoreInherited
                 ? type.GetProperties().ToList()
                 : type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public).ToList();
-            try
-            {
-                foreach (PropertyInfo pi in properties)
-                {
+            try {
+                foreach (PropertyInfo pi in properties) {
                     DataColumnAttribute attr = pi.GetDataColumnAttributes(false);
-                    if (attr != null)
-                    {
+                    if (attr != null) {
                         // Ignore properties not set up with the DataColumn Attribute.
                         attr.PropertyType = pi.PropertyType;
                         attr.PropertyName = pi.Name;
@@ -2244,38 +1908,26 @@ namespace CodedThought.Core.Data
         /// <summary>Finds and loads all <see cref="ApiDataParameterAttribute" /> attributes into the passed <see cref="ApiDataControllerAttribute" /> attribute.</summary>
         /// <param name="type">   </param>
         /// <param name="attrApi"></param>
-        protected void MapApiColumns(Type type, ApiDataControllerAttribute attrApi)
-        {
+        protected void MapApiColumns(Type type, ApiDataControllerAttribute attrApi) {
             List<PropertyInfo> properties = type.GetProperties().ToList();
-            try
-            {
-                foreach (PropertyInfo pi in properties)
-                {
+            try {
+                foreach (PropertyInfo pi in properties) {
                     ApiDataParameterAttribute param = pi.GetApiDataParametersAttributes(false);
-                    if (param != null)
-                    {
+                    if (param != null) {
                         if (attrApi.Properties == null)
                             attrApi.Properties = [];
                         // Determine if this attribute should override any others.
-                        if (attrApi.Properties.Count(p => p.ParameterName.ToLower() == param.ParameterName.ToLower()) > 0 && param.Options.HasFlag(ApiDataParameterOptions.OverridesInherited))
-                        {
-                            attrApi.Properties.ToList().ForEach(a =>
-                            {
-                                if (a.ParameterName.ToLower() == param.ParameterName.ToLower())
-                                {
-                                    if (!a.Options.HasFlag(ApiDataParameterOptions.OverridesInherited))
-                                    {
+                        if (attrApi.Properties.Count(p => p.ParameterName.ToLower() == param.ParameterName.ToLower()) > 0 && param.Options.HasFlag(ApiDataParameterOptions.OverridesInherited)) {
+                            attrApi.Properties.ToList().ForEach(a => {
+                                if (a.ParameterName.ToLower() == param.ParameterName.ToLower()) {
+                                    if (!a.Options.HasFlag(ApiDataParameterOptions.OverridesInherited)) {
                                         attrApi.Properties.Remove(a);
                                     }
-                                }
-                                else
-                                {
+                                } else {
                                     attrApi.Properties.Add(param);
                                 }
                             });
-                        }
-                        else
-                        {
+                        } else {
                             attrApi.Properties.Add(param);
                         }
                     }
@@ -2283,16 +1935,12 @@ namespace CodedThought.Core.Data
             }
             catch { throw; }
         }
-        protected List<Assembly> GetDataAwareAssemblies()
-        {
-            try
-            {
+        protected List<Assembly> GetDataAwareAssemblies() {
+            try {
                 List<Assembly> dataAwareAssemblies = [];
                 List<Assembly> allAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
-                foreach (Assembly assembly in allAssemblies)
-                {
-                    if (Attribute.GetCustomAttribute(assembly, typeof(DataAwareAssemblyAttribute)) is DataAwareAssemblyAttribute isDataAware)
-                    { dataAwareAssemblies.Add(assembly); }
+                foreach (Assembly assembly in allAssemblies) {
+                    if (Attribute.GetCustomAttribute(assembly, typeof(DataAwareAssemblyAttribute)) is DataAwareAssemblyAttribute isDataAware) { dataAwareAssemblies.Add(assembly); }
                 }
                 return dataAwareAssemblies;
             }
@@ -2302,27 +1950,20 @@ namespace CodedThought.Core.Data
 
         #region IDBStore Members
 
-        object IDBStore.Extract(object businessEntity, string columnName)
-        {
+        object IDBStore.Extract(object businessEntity, string columnName) {
             Type t = businessEntity.GetType();
-            if (ORM.ContainsKey(t.FullName))
-            {
-                foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[t.FullName][t]).Properties)
-                {
-                    if (attrColumn.ColumnName == columnName)
-                    {
+            if (ORM.ContainsKey(t.FullName)) {
+                foreach (DataColumnAttribute attrColumn in ((DataTableAttribute) ORM[t.FullName][t]).Properties) {
+                    if (attrColumn.ColumnName == columnName) {
                         //original function body
                         //return t.GetProperty(attrColumn.PropertyName).GetValue(businessEntity, null);
 
-                        if (attrColumn.ExtendedPropertyType != null)
-                        {
+                        if (attrColumn.ExtendedPropertyType != null) {
                             //the property is an extended object, so get the object first, then get the extended property from the extended object
                             object oExtendedObject = t.GetProperty(attrColumn.PropertyName).GetValue(businessEntity, null);
                             t = oExtendedObject.GetType();
                             return t.GetProperty(attrColumn.ExtendedPropertyName).GetValue(oExtendedObject, null);
-                        }
-                        else
-                        {
+                        } else {
                             return t.GetProperty(attrColumn.PropertyName).GetValue(businessEntity, null);
                         }
                     }
@@ -2331,14 +1972,11 @@ namespace CodedThought.Core.Data
             return null;
         }
 
-        int IDBStore.GetPrimaryKey(object obj)
-        {
-            try
-            {
+        int IDBStore.GetPrimaryKey(object obj) {
+            try {
                 Type t = obj.GetType();
                 return ORM.ContainsKey(t.FullName)
-                    ? ((DataTableAttribute) ORM[t.FullName][t]).Key.ColumnType switch
-                    {
+                    ? ((DataTableAttribute) ORM[t.FullName][t]).Key.ColumnType switch {
                         DbType.Int16 or DbType.Int32 or DbType.Int64 or DbType.Decimal => Convert.ToInt32(t.GetProperty(((DataTableAttribute) ORM[t.FullName][t]).Key.PropertyName).GetValue(obj, null)),
                         _ => 0,
                     }
@@ -2347,60 +1985,47 @@ namespace CodedThought.Core.Data
             catch { return 0; }
 
         }
-        DataColumnAttribute IDBStore.GetPrimaryKeyColumnAttribute(object obj)
-        {
-            try
-            {
+        DataColumnAttribute IDBStore.GetPrimaryKeyColumnAttribute(object obj) {
+            try {
                 Type t = obj.GetType();
                 DataColumnAttribute dca = null;
-                if (ORM.ContainsKey(t.FullName))
-                {
+                if (ORM.ContainsKey(t.FullName)) {
                     dca = ((DataTableAttribute) ORM[t.FullName][t]).Key;
                 }
                 return dca;
             }
             catch { return null; }
         }
-        string IDBStore.GetPrimaryKeyName(object obj)
-        {
-            try
-            {
+        string IDBStore.GetPrimaryKeyName(object obj) {
+            try {
                 Type t = obj.GetType();
                 return ORM.ContainsKey(t.FullName) ? ((DataTableAttribute) ORM[t.FullName][t]).Key.ColumnName : string.Empty;
             }
             catch { return string.Empty; }
         }
 
-        bool IDBStore.HasKeyColumn(object obj)
-        {
-            try
-            {
+        bool IDBStore.HasKeyColumn(object obj) {
+            try {
                 Type t = obj.GetType();
                 return ORM.ContainsKey(t.FullName) && ((DataTableAttribute) ORM[t.FullName][t]).Key != null;
             }
             catch { return false; }
         }
 
-        bool IDBStore.SetPrimaryKey(object obj, int value)
-        {
+        bool IDBStore.SetPrimaryKey(object obj, int value) {
             Type t = obj.GetType();
-            if (ORM.ContainsKey(t.FullName))
-            {
+            if (ORM.ContainsKey(t.FullName)) {
                 t.GetProperty(((DataTableAttribute) ORM[t.FullName][t]).Key.PropertyName).SetValue(obj, value, null);
                 return true;
-            }
-            else
+            } else
                 return false;
         }
-        bool IDBStore.SetPrimaryKey(object obj, Guid value)
-        {
+        bool IDBStore.SetPrimaryKey(object obj, Guid value) {
             Type t = obj.GetType();
-            if (ORM.ContainsKey(t.FullName))
-            {
+            if (ORM.ContainsKey(t.FullName)) {
                 t.GetProperty(((DataTableAttribute) ORM[t.FullName][t]).Key.PropertyName).SetValue(obj, value, null);
                 return true;
-            }
-            else
+            } else
                 return false;
         }
         #endregion IDBStore Members
