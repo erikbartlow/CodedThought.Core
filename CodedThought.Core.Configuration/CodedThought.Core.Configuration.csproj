@@ -7,11 +7,11 @@
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core Configuration</Title>
-	<AssemblyVersion>8.0.1.1</AssemblyVersion>
-	<FileVersion>8.0.1.1</FileVersion>
+	<AssemblyVersion>8.0.1.2</AssemblyVersion>
+	<FileVersion>8.0.1.2</FileVersion>
 	<Description>The CodedThought.Core.Configuration library is a custom settings provider for the CodedThought.Core library.</Description>
 	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-	<Version>8.0.1.1</Version>
+	<Version>8.0.1.2</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>CodedThought</Company>
 	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
@@ -23,8 +23,8 @@
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
 	<PackageLicenseFile>Licenses/LICENSE.txt</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<Copyright>Copyright (c) 2024 Erik Bartlow, All rights reserved</Copyright>
-	<PackageReleaseNotes>Upgraded Microsoft.Etensions to 9.0.3</PackageReleaseNotes>
+	<Copyright>Copyright (c) 2024 CodedThought, LLC, All rights reserved</Copyright>
+	<PackageReleaseNotes>Upgraded Microsoft.Extensions to 9.0.8</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -36,10 +36,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.3" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
-	<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
-	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.3" />
+	<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
+	<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
 	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 

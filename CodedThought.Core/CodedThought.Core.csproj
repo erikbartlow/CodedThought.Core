@@ -8,10 +8,10 @@
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>8.0.1.38</AssemblyVersion>
-	<FileVersion>8.0.1.38</FileVersion>
+	<AssemblyVersion>8.0.1.39</AssemblyVersion>
+	<FileVersion>8.0.1.39</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>8.0.1.38</Version>
+	<Version>8.0.1.39</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>Erik Bartlow</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
@@ -22,8 +22,8 @@
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<Copyright>Copyright (c) 2025 Erik Bartlow, All rights reserved</Copyright>
-	<PackageReleaseNotes>Minor fix to GenericDataStore.Save to determine if a record is new based on the passed primary key.</PackageReleaseNotes>
+	<Copyright>Copyright (c) 2025 CodedThought, LLC, All rights reserved</Copyright>
+	<PackageReleaseNotes>Minor fix to GenericDataStore to use OrdinalIgnoreCase when comparing ORM keys to requested values.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
