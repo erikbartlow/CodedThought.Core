@@ -1,10 +1,8 @@
-namespace CodedThought.Core.Data
-{
+namespace CodedThought.Core.Data {
 
     /// <summary>Maps a class to a Database Table or XML Element</summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-    public class DataTableAttribute : Attribute
-    {
+    public class DataTableAttribute : Attribute {
 
         #region Declarations
 
@@ -15,8 +13,7 @@ namespace CodedThought.Core.Data
 
         #region Properties
 
-        public string TableName
-        {
+        public string TableName {
             get => String.IsNullOrEmpty(_tableName) && (!UseView && String.IsNullOrEmpty(_viewName))
                     ? throw new MissingArguementException("The table name is not set for this object.")
                     : _tableName;
@@ -29,12 +26,10 @@ namespace CodedThought.Core.Data
         /// This is typically used when custom queries are needed to occur before the results are returned to the object for instantiation.
         /// Important:  The column names must match those in the table. To force the framework to use the view name see the <see cref="UseView" /> property.
         /// </remarks>
-        public string ViewName
-        {
+        public string ViewName {
             get => String.IsNullOrEmpty(_viewName)
-        ? throw new MissingArguementException("The view name is not set.  If the table name is not set then a view name must be set.")
-        : _viewName;
-
+                ? String.IsNullOrEmpty(_tableName) ? throw new MissingArguementException("The view name is not set.  If the table name is not set then a view name must be set.") : string.Empty
+                : _viewName;
             set => _viewName = value;
         }
 
@@ -44,10 +39,8 @@ namespace CodedThought.Core.Data
         /// <summary>Gets the name of the source based on the <see cref="UseView" /> property and availability of the table and view name properties.</summary>
         /// <value>The name of the source.</value>
         /// <exception cref="MissingArguementException">An exception will be thrown if both the table and view name are empty. At least one is required.</exception>
-        public string SourceName
-        {
-            get
-            {
+        public string SourceName {
+            get {
                 string source = UseView ? ViewName : TableName;
                 return String.IsNullOrEmpty(source)
                     ? throw new MissingArguementException("The source name for the data object is not set in either the table or view names.")
@@ -85,14 +78,13 @@ namespace CodedThought.Core.Data
         /// If a Unique Identifier is being used as a key field the framework will autogenerate a new GUID if one is not provided.
         /// </summary>
         /// <remarks>This is typically set with the <see cref="DataTableUsageAttribute" /> attribute and the <see cref="DataTableUsage.AutoGenerateUniqueIdentifier" /> enum flag.</remarks>
-        public bool AutoGenerateUniqueIdentifier {  get; set; }
+        public bool AutoGenerateUniqueIdentifier { get; set; }
 
         #endregion Properties
 
         #region Constructors
 
-        private DataTableAttribute()
-        {
+        private DataTableAttribute() {
             TableName = string.Empty;
             ClassName = string.Empty;
             ViewName = string.Empty;
@@ -116,16 +108,12 @@ namespace CodedThought.Core.Data
         /// <param name="containerName">Name of the container.</param>
         /// <param name="useView">      if set to <c>true</c> then container will be set as a view.</param>
         public DataTableAttribute(string containerName, bool useView = true)
-            : this()
-        {
+            : this() {
             UseView = useView;
-            if (UseView)
-            {
+            if (UseView) {
                 _viewName = containerName;
                 ReadOnly = true;
-            }
-            else
-            {
+            } else {
                 _tableName = containerName;
             }
         }
@@ -135,8 +123,7 @@ namespace CodedThought.Core.Data
         /// <param name="viewName">     Name of the view container.</param>
         /// <remarks>If a view is set then it will be used during all Get methods. All columns in the view must match those in the DataColumn attributes of the data entity.</remarks>
         public DataTableAttribute(string containerName, string viewName)
-            : this(containerName)
-        {
+            : this(containerName) {
             _tableName = containerName;
             _viewName = viewName;
         }
@@ -157,17 +144,12 @@ namespace CodedThought.Core.Data
 
         #region Instance Methods
 
-        private void _properties_ListChanged(object sender, ListChangedEventArgs e)
-        {
-            if (e.ListChangedType == ListChangedType.ItemAdded)
-            {
+        private void _properties_ListChanged(object sender, ListChangedEventArgs e) {
+            if (e.ListChangedType == ListChangedType.ItemAdded) {
                 // Check if this new column should be overridden by a previously added column.
-                for (int i = 0; i <= Properties.Count - 1; i++)
-                {
-                    if (Properties[i].ColumnName == Properties[e.NewIndex].ColumnName && i != e.NewIndex)
-                    {
-                        if (Properties[i].OverridesInherited)
-                        {
+                for (int i = 0; i <= Properties.Count - 1; i++) {
+                    if (Properties[i].ColumnName == Properties[e.NewIndex].ColumnName && i != e.NewIndex) {
+                        if (Properties[i].OverridesInherited) {
                             // There is already column with the same name set to override inherited attributes. So remove this newly added one.
                             Properties.RemoveAt(e.NewIndex);
                         }
@@ -175,16 +157,11 @@ namespace CodedThought.Core.Data
                 }
 
                 // Verify only one key is set.
-                if (Properties[e.NewIndex].IsPrimaryKey)
-                {
-                    if (Key == null)
-                    {
+                if (Properties[e.NewIndex].IsPrimaryKey) {
+                    if (Key == null) {
                         Key = Properties[e.NewIndex];
-                    }
-                    else
-                    {
-                        if (Key.OverridesInherited == false)
-                        {
+                    } else {
+                        if (Key.OverridesInherited == false) {
                             // Override the current key with the one.
                             Key.IsPrimaryKey = false;
                             Key.Options = Key.Options & ~DataColumnOptions.PrimaryKey;
@@ -195,15 +172,11 @@ namespace CodedThought.Core.Data
             }
         }
 
-        private void _properties_ColumnAdded(object sender, AddingNewEventArgs e)
-        {
+        private void _properties_ColumnAdded(object sender, AddingNewEventArgs e) {
             // Check if this new column should be overridden by a previously added column.
-            for (int i = 0; i <= Properties.Count - 1; i++)
-            {
-                if (Properties[i].ColumnName == ((DataColumnAttribute) e.NewObject).ColumnName)
-                {
-                    if (!Properties[i].OverridesInherited)
-                    {
+            for (int i = 0; i <= Properties.Count - 1; i++) {
+                if (Properties[i].ColumnName == ((DataColumnAttribute) e.NewObject).ColumnName) {
+                    if (!Properties[i].OverridesInherited) {
                         // There is already column with the same name set to override inherited attributes. So remove this newly added one.
                         e.NewObject = null;
                     }

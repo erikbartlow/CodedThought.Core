@@ -8,10 +8,10 @@
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>8.0.1.40</AssemblyVersion>
-	<FileVersion>8.0.1.40</FileVersion>
+	<AssemblyVersion>8.0.1.41</AssemblyVersion>
+	<FileVersion>8.0.1.41</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>8.0.1.40</Version>
+	<Version>8.0.1.41</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>Erik Bartlow</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
@@ -23,7 +23,7 @@
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Copyright>Copyright (c) 2025 CodedThought, LLC, All rights reserved</Copyright>
-	<PackageReleaseNotes>Minor fix to GenericDataStore to use OrdinalIgnoreCase when comparing ORM keys to requested values.</PackageReleaseNotes>
+	<PackageReleaseNotes>Minor fix to GenericDataStore to use return the proper error when a view name isn't used and the table name is also missing.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
