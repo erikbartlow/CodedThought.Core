@@ -746,7 +746,7 @@ namespace CodedThought.Core.Data {
         public T? ExecuteStoredProcedure<T>(string storedProcedureName, ParameterCollection parameters) where T : class, new() {
             SetParameterCollectionDbObject(parameters);
             List<T> list = ExecuteStoredProcedureForList<T>(storedProcedureName, parameters);
-            return list == null ?  null : list.Count > 0 ? list[0] : null;
+            return list == null ? null : list.Count > 0 ? list[0] : null;
         }
 
         /// <summary>Executes a stored procedure using the supplied Key-Value pair. Returns a List&lt;&gt;</summary>
@@ -1674,7 +1674,9 @@ namespace CodedThought.Core.Data {
 
             try {
                 // Since Guids are not handled by the Convert.ChangeType system method we have to handle it here.
-                return targetType == typeof(Guid) ? Guid.Parse(value.ToString()) : Convert.ChangeType(value, nonNullableType);
+                return targetType.IsEnum
+                    ? Enum.ToObject(targetType, value)
+                    : targetType == typeof(Guid) ? Guid.Parse(value.ToString()) : Convert.ChangeType(value, nonNullableType);
             }
             catch (InvalidCastException) {
                 throw new InvalidCastException($"Cannot convert value '{value}' to type {targetType.Name}");
