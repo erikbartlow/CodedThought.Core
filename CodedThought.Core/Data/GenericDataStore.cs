@@ -265,7 +265,7 @@ namespace CodedThought.Core.Data {
                 List<string> selectColumns = GetColumnNames<T>();
                 List<string> orderColumns = GetOrderByColumnNames<T>();
                 DataTableAttribute attrTable = GetTableAttribute<T>();
-                string schemaName = attrTable.SchemaName;
+                string schemaName = attrTable.SchemaName ?? DefaultSchemaName;
                 string sourceName = attrTable.UseView ? attrTable.ViewName : attrTable.TableName;
                 SetParameterCollectionDbObject(parameters);
                 if (CommandTimeout > -1) { DatabaseObjectInstance.CommandTimeout = CommandTimeout; }

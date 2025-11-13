@@ -8,6 +8,7 @@ namespace CodedThought.Core.Data {
 
         private string _tableName;
         private string _viewName;
+        private bool _useView;
 
         #endregion Declarations
 
@@ -73,7 +74,11 @@ namespace CodedThought.Core.Data {
         /// <summary>Gets or sets a value indicating whether to use a view instead of the table.</summary>
         /// <value><c>true</c> if [use view]; otherwise, <c>false</c>.</value>
         /// <remarks>This is typically set with the <see cref="DataTableUsageAttribute" /> attribute and the <see cref="DataTableUsage.ViewPriority" /> enum flag.</remarks>
-        public bool UseView { get; set; }
+        public bool UseView { get =>
+                                  // If a view name is set then we will use the view even if the UseView property is false.
+                                  _useView == false && !String.IsNullOrEmpty(_viewName) && string.IsNullOrEmpty(_tableName) ? true : _useView;
+            set => _useView = value;
+        }
         /// <summary>
         /// If a Unique Identifier is being used as a key field the framework will autogenerate a new GUID if one is not provided.
         /// </summary>
