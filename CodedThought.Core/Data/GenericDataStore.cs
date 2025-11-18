@@ -380,15 +380,9 @@ namespace CodedThought.Core.Data {
             DataTableAttribute attrTable = GetTableAttribute<T>();
             if (attrTable.Key != null) {
                 object oPrimaryKey = typeof(T).GetProperty(attrTable.Key.PropertyName).GetValue(obj, null);
-                if (attrTable.Key.ColumnType == DbType.Guid && oPrimaryKey == null) {
-                    bIsNew = true;
-                } else {
-                    if (oPrimaryKey.IsNumericType()) {
-                        bIsNew = ((int) oPrimaryKey) <= 0;
-                    } else {
-                        bIsNew = !string.IsNullOrEmpty(oPrimaryKey.ToString());
-                    }
-                }
+                bIsNew = attrTable.Key.ColumnType == DbType.Guid
+                    ? oPrimaryKey.ToString() == string.Empty
+                    : oPrimaryKey.IsNumericType() ? ((int) oPrimaryKey) <= 0 : !string.IsNullOrEmpty(oPrimaryKey.ToString());
             }
             // Determine if a new GUID needs to be generated based on the DataTableUsageAttributes.
             if (attrTable.AutoGenerateUniqueIdentifier && bIsNew) {

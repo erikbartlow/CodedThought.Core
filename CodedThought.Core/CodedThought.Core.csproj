@@ -11,7 +11,7 @@
 	<AssemblyVersion>8.0.1.43</AssemblyVersion>
 	<FileVersion>8.0.1.43</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>8.0.1.43</Version>
+	<Version>8.0.1.44</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>Erik Bartlow</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
@@ -23,7 +23,7 @@
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Copyright>Copyright (c) 2025 CodedThought, LLC, All rights reserved</Copyright>
-	<PackageReleaseNotes>Minor fixes to GenericDataStore properly handle DataColumn of type Enum and properly determine a data source's name between a view and a table.</PackageReleaseNotes>
+	<PackageReleaseNotes>Minor fixes to GenericDataStore to properly handle if a Guid based primary key needs to be auto generated if the key value is empty.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
