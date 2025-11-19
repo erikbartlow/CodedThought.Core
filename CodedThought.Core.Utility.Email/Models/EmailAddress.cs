@@ -184,14 +184,14 @@
 		/// <returns></returns>
 		public System.Collections.Generic.List<String> ParseAddress(String address) {
 			if (Validate(address)) {
-				System.Collections.Generic.List<String> parts = new();
+				System.Collections.Generic.List<String> parts = [];
 				String[] simpleParts = address.Split("@".ToCharArray());
 				parts.Add(simpleParts[0]);
 				parts.Add(simpleParts[1].Split(".".ToCharArray())[0]);
 				parts.Add(simpleParts[1].Split(".".ToCharArray())[1]);
 				return parts;
 			} else {
-				return new List<string>();
+				return [];
 			}
 		}
 
@@ -200,7 +200,7 @@
 		public System.Collections.Generic.List<String> ParseAddress() {
 			List<String> emailParts = ParseAddress(_address);
 			if (emailParts.Count == 0)
-				return new List<String>();
+				return [];
 			_name = emailParts[0];
 			_computerName = emailParts[1];
 			try {

@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net8.0</TargetFramework>
+	<TargetFramework>net10.0</TargetFramework>
 	<Nullable>enable</Nullable>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>8.0.1.43</AssemblyVersion>
-	<FileVersion>8.0.1.43</FileVersion>
+	<AssemblyVersion>10.0.0</AssemblyVersion>
+	<FileVersion>10.0.0</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>8.0.1.44</Version>
+	<Version>10.0.0-alpha-1</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>Erik Bartlow</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
@@ -23,7 +23,7 @@
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Copyright>Copyright (c) 2025 CodedThought, LLC, All rights reserved</Copyright>
-	<PackageReleaseNotes>Minor fixes to GenericDataStore to properly handle if a Guid based primary key needs to be auto generated if the key value is empty.</PackageReleaseNotes>
+	<PackageReleaseNotes>Initial upgrade to .NET 10.</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -44,7 +44,7 @@
 	<PackageReference Include="BouncyCastle.NetCore" Version="2.2.1" />
 	<PackageReference Include="ChoPGP.Core" Version="1.0.1.2" />
 	<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
-	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
 	<PackageReference Include="Microsoft.Net.Http.Headers" Version="[2.1.14]" />
 	<PackageReference Include="SkiaSharp" Version="2.88.8" />

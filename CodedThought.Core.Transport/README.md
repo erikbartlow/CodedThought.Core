@@ -9,7 +9,7 @@
 
 #### WinScp
 ```c sharp
-Currently Support Version:  >= 6.3.5
+Currently Support Version:  >= 6.5.5
 
     WinSCPWrapper ftp = new() {
         FTPHost = settingsManager.SFTPHostAddress,
