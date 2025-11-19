@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net8.0</TargetFramework>
+	<TargetFramework>net10.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core Transport</Title>
-	<VersionPrefix>8.0.0.0</VersionPrefix>
-	<AssemblyVersion>8.0.0.0</AssemblyVersion>
-	<FileVersion>8.0.0.0</FileVersion>
+	<VersionPrefix>10.0.0</VersionPrefix>
+	<AssemblyVersion>10.0.0.0</AssemblyVersion>
+	<FileVersion>10.0.0</FileVersion>
 	<Description>The CodedThought.Core.Transport library is a custom wrapper for various file transport methods like WinSCP.  Currently this version only support WinSCP.</Description>
 	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/main</RepositoryUrl>
-	<Version>$(AssemblyPrefix)</Version>
+	<Version>10.0.0-alpha-1</Version>
 	<Authors>Erik Bartlow</Authors>
-	<Company>Erik Bartlow</Company>
+	<Company>CodedThought, LLC.</Company>
 	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
 	<RepositoryType>git</RepositoryType>
 	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core</RepositoryUrl>
@@ -26,10 +26,12 @@
 	<IncludeReferencedProjects>true</IncludeReferencedProjects>
 	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<PackageReleaseNotes>Upgraded to .NET 10 and WinSCP to >= 6.5.5</PackageReleaseNotes>
+	<Copyright>Copyright (c) 2025 CodedThought, LLC., All rights reserved</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="WinSCP" Version="6.3.5" />
+	<PackageReference Include="WinSCP" Version="6.5.5" />
   </ItemGroup>
 
   <ItemGroup>

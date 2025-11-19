@@ -1,20 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net8.0</TargetFramework>
+	<TargetFramework>net10.0</TargetFramework>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>enable</Nullable>
-	<AssemblyVersion>8.0.0.0</AssemblyVersion>
-	<FileVersion>8.0.0.0</FileVersion>
-	<VersionPrefix>8.0.0.0</VersionPrefix>
+	<AssemblyVersion>10.0.0.0</AssemblyVersion>
+	<FileVersion>10.0.0</FileVersion>
+	<VersionPrefix>10.0.0</VersionPrefix>
+	<Version>10.0.0-alpha-1</Version>
 	<Title>CodedThought.Core.Validation</Title>
 	<Copyright>CodedThought (c) 2024, Erik Bartlow, All Rights Reserved</Copyright>
 	<Authors>Erik Bartlow</Authors>
 	<Description>The CodedThought.Core.Validation package is a custom validation provider to use with imported files or data sets.</Description>
 	<Authors>Erik Bartlow</Authors>
-	<Company>CodedThought</Company>
-	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core</RepositoryUrl>
+	<Company>CodedThought, LLC.</Company>
+	<PackageProjectUrl>https://github.com/erikbartlow/CodedThought.Core/tree/original/CodedThought.Core.Validation</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/erikbartlow/CodedThought.Core/tree/original/CodedThought.Core.Validation</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<IncludeSymbols>true</IncludeSymbols>
 	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -25,10 +26,16 @@
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<IncludeReferencedProjects>true</IncludeReferencedProjects>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageReleaseNotes>Upgraded to .NET 10</PackageReleaseNotes>
+	<Copyright>Copyright (c) 2025 CodedThought, LLC., All rights reserved</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CodedThought.Core\CodedThought.Core.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\CodedThought.Core\CodedThought.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
