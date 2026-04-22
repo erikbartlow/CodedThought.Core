@@ -163,10 +163,13 @@ The ParameterCollection inherits from CollectionBase and implements the IList, I
 | _AddXmlParameter()_ | string Column Name, string Value
 | _Remove()_ | int index
 | _SubParameterGroupWhereType_ | Using the DatabaseObject.WhereType enumerator instructs the framework on how to handle any sub-parameter groups if found._Note: Only used when the AddSubGroupParameterList() method is used._
-#### Load and Access appSettings.json and ctSettings.json
+#### Dependency Injection Setup
+
 Using the configuration-specific extension routines you can auto-load the appSettings and any environment-based JSON configurations.
->Note:  The name of the environment is used to locate any environment-specific versions of the file. For example, if your environment is named "development" then your settings file should be appsettings.development.json.
+>Note:  You can add any additional Core Data Providers like SQL Server, Oracle, or PostgreSQL. The connection configuration contains the provider type.
 ```cs
-builder.AddAppSettingsConfiguration(Optional: IConfigurationBuilder.Environment)
-builder.AddCoreSettingsConfiguration(Optional: IHostEnvironment.Environment)
+// Inject the data provider to be used in later data controllers.
+builder.Services.AddCoreDataProvider<MySqlDatabaseObject>();
+builder.Configuration.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+builder.Configuration.AddCoreSettingsConfiguration(env: builder.Environment, "Settings/appsettings.json", optional: false, reloadOnChange: true);
 ```
