@@ -46,9 +46,6 @@ namespace CodedThought.Core.Security {
 				search.Filter = userName.Contains("@") ? "(uid=" + userName + ")" : "(ntUserDomainId=" + FixUsername(userName) + ")";
 				search.PropertiesToLoad.Add("uid");
 				search.PropertiesToLoad.Add("cn");
-				search.PropertiesToLoad.Add("hpLegalName");
-				search.PropertiesToLoad.Add("hpPictureOneHpURI");
-				search.PropertiesToLoad.Add("hpPictureThumbnailURI");
 				if (extraProperties != null) {
 					foreach (string prop in extraProperties) {
 						search.PropertiesToLoad.Add(prop);
@@ -61,11 +58,11 @@ namespace CodedThought.Core.Security {
 				if (result.Path != null || result.Path != string.Empty) {
 					string email = (string)result.Properties["uid"][0];
 
-					string fullname = ((result.Properties.Contains("hpLegalName"))) ? (string)result.Properties["hpLegalName"][0] : String.Empty;
+					string fullname = ((result.Properties.Contains("LegalName"))) ? (string)result.Properties["hpLegalName"][0] : String.Empty;
 					string cn = (result.Properties.Contains("cn")) ? (string)result.Properties["cn"][0] : String.Empty;
 
-					string portraitLarge = (result.Properties.Contains("hpPictureOneHpURI")) ? (string)result.Properties["hpPictureOneHpURI"][0] : String.Empty;
-					string portraitThumbnail = (result.Properties.Contains("hpPictureThumbnailURI")) ? (string)result.Properties["hpPictureThumbnailURI"][0] : String.Empty;
+					string portraitLarge = (result.Properties.Contains("PictureURI")) ? (string)result.Properties["PictureURI"][0] : String.Empty;
+					string portraitThumbnail = (result.Properties.Contains("PictureThumbnailURI")) ? (string)result.Properties["hpPictureThumbnailURI"][0] : String.Empty;
 					LDAPMember user = new();
 					user.FullName = fullname;
 					user.Email = email;
