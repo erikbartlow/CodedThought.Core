@@ -56,7 +56,7 @@
   <Choose>
 	<When Condition="'$(Configuration)' == 'Release'">
 	  <ItemGroup>
-		<PackageReference Include="CodedThought.Core.Configuration" Version="10.0.0-alpha-1" />
+		<PackageReference Include="CodedThought.Core.Configuration" Version="10.0.1" />
 	  </ItemGroup>
 	</When>
   </Choose>
