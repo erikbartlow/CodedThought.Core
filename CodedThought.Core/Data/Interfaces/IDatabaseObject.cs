@@ -24,6 +24,8 @@ namespace CodedThought.Core.Data.Interfaces {
 
 		CommandBehavior DataReaderBehavior { get; set; }
 
+		bool EnableRowLocking { get; set; }
+
 		string ParameterConnector { get; set; }
 
 		DBSupported SupportedDatabase { get; }

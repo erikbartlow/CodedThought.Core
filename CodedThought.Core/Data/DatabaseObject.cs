@@ -223,6 +223,12 @@ namespace CodedThought.Core.Data
         /// <value>The command timeout.</value>
         public Int32 CommandTimeout { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether CRUD statements should request row-level locks when supported by the database provider.
+        /// </summary>
+        /// <value><c>true</c> to add row-lock table hints to generated CRUD SQL; otherwise, <c>false</c>.</value>
+        public virtual bool EnableRowLocking { get; set; }
+
         /// <summary>Gets the supported database.</summary>
         /// <value>The supported database for this instance. See the <see cref="DBSupported"/> enum.</value>
         public virtual DBSupported SupportedDatabase { get; set; }
@@ -874,8 +880,7 @@ namespace CodedThought.Core.Data
                 StringBuilder sql = new("SELECT ");
                 sql.Append(GenerateColumnList(selectColumns));
                 sql.Append($" FROM {tableName}");
-                if (SupportedDatabase == DBSupported.SqlServer)
-                    sql.Append(" WITH (READPAST)");
+                sql.Append(GenerateReadTableHint());
                 if (parameters != null && parameters.Count > 0)
                 {
                     sql.Append(" WHERE " + GenerateWhereClauseFromParams(parameters));
@@ -973,8 +978,7 @@ namespace CodedThought.Core.Data
                 StringBuilder sql = new("SELECT ");
                 sql.Append(GenerateColumnList(selectColumns));
                 sql.Append($" FROM {GetTableName(schemaName, tableName)} ");
-                if (SupportedDatabase == DBSupported.SqlServer)
-                    sql.Append("WITH (READPAST) ");
+                sql.Append(GenerateReadTableHint());
 
                 if (parameters != null && parameters.Count > 0)
                 {
@@ -1022,7 +1026,7 @@ namespace CodedThought.Core.Data
                 BeginTransaction();
                 string sql;
 
-                sql = $"DELETE FROM {GetTableName(schemaName, tableName)} ";
+                sql = $"DELETE FROM {GetTableName(schemaName, tableName)}{GenerateWriteTableHint()} ";
                 //ParameterCollection deleteParameters=new ParameterCollection();
 
                 if (parameters != null && parameters.Count > 0)
@@ -1072,7 +1076,7 @@ namespace CodedThought.Core.Data
             {
                 BeginTransaction();
                 StringBuilder sql = new();
-                sql.Append($"UPDATE {GetTableName(schemaName, tableName)} SET ");
+                sql.Append($"UPDATE {GetTableName(schemaName, tableName)}{GenerateWriteTableHint()} SET ");
                 sql.Append(GenerateUpdateList(parameters));
 
                 if (whereParamCollection != null && whereParamCollection.Count > 0)
@@ -1100,6 +1104,36 @@ namespace CodedThought.Core.Data
         #endregion Update Methods
 
         #endregion CRUD Methods
+
+        #region CRUD Locking
+
+        /// <summary>
+        /// Generates a provider-specific table hint for read statements created by the CRUD helpers.
+        /// </summary>
+        /// <returns>A table hint string including the leading space, or an empty string when no hint is supported.</returns>
+        protected virtual string GenerateReadTableHint()
+        {
+            if (SupportedDatabase != DBSupported.SqlServer)
+                return string.Empty;
+
+            return EnableRowLocking
+                ? " WITH (ROWLOCK, UPDLOCK, READPAST) "
+                : " WITH (READPAST) ";
+        }
+
+        /// <summary>
+        /// Generates a provider-specific table hint for write statements created by the CRUD helpers.
+        /// </summary>
+        /// <returns>A table hint string including the leading space, or an empty string when no hint is supported.</returns>
+        protected virtual string GenerateWriteTableHint()
+        {
+            if (SupportedDatabase != DBSupported.SqlServer || !EnableRowLocking)
+                return string.Empty;
+
+            return " WITH (ROWLOCK)";
+        }
+
+        #endregion CRUD Locking
 
         #region Connection Methods
 
