@@ -24,7 +24,6 @@ Application Settings are accessed via .NET Core appsettings.json while database 
 ### CoreSettings/Settings
 |Property | Options | Description |
 | ------ | ------ | ------
-| WINFORM | boolean | The purpose of this setting is to tell the CodedThought.Core framework if it is being used in a web environment or not.  This is because the framework can properly cache the discovered data-aware classes and associated types.
 |ApplicationCookieName|Name of root application cookie|Provide a custom name for your application cookie.
 ### Connection Parameters
 ### CoreSettings/Connections
