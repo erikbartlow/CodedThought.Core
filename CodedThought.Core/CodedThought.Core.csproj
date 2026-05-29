@@ -24,6 +24,7 @@
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Copyright>Copyright (c) 2026 CodedThought, LLC, All rights reserved</Copyright>
 	<PackageReleaseNotes>Updated Microsoft Logging package.</PackageReleaseNotes>
+	<WarningsNotAsErrors>$(WarningsNotAsErrors);CA2022;CA2200;CS0168;CS0618;CS0628;CS8600;CS8602;CS8603;CS8604;CS8605;CS8618;CS8622;CS8625;CS8767;CS8981;SYSLIB0007;SYSLIB0014;SYSLIB0051</WarningsNotAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
