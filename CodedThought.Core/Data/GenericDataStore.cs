@@ -22,6 +22,7 @@ namespace CodedThought.Core.Data {
         protected readonly runtime.MemoryCache? _runtimeCache = null;
         protected string _defaultSchema;
         protected readonly bool _useHttpCache;
+        private bool _enableRowLocking;
 
         public event SqlRowsCopiedEventHandler? BulkCopySqlRowsCopied;
 
@@ -91,6 +92,19 @@ namespace CodedThought.Core.Data {
         /// <value>The timeout override. If the value is not set then the default timeout of the connection set in the connection string will be used.</value>
         public virtual int CommandTimeout { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether generated CRUD statements should request row-level locks when supported by the database provider.
+        /// </summary>
+        public virtual bool EnableRowLocking {
+            get => DatabaseObjectInstance == null ? _enableRowLocking : DatabaseObjectInstance.EnableRowLocking;
+            set {
+                _enableRowLocking = value;
+                if (DatabaseObjectInstance != null) {
+                    DatabaseObjectInstance.EnableRowLocking = value;
+                }
+            }
+        }
+
         /// <summary>Gets the wildcard character.</summary>
         /// <value>The wildcard character.</value>
         public virtual string WildcardCharacter => DatabaseObjectInstance.WildCardCharacter;
@@ -131,6 +145,7 @@ namespace CodedThought.Core.Data {
             TransactionInProgress = false;
             DatabaseObjectInstance = DatabaseObject.DatabaseObjectFactory(serviceProvider, cache, databaseToUse);
             DatabaseObjectInstance.CommandTimeout = 0;
+            DatabaseObjectInstance.EnableRowLocking = _enableRowLocking;
             DatabaseToUse = new(databaseToUse);
         }
         /// <summary>
@@ -148,6 +163,7 @@ namespace CodedThought.Core.Data {
             TransactionInProgress = false;
             DatabaseObjectInstance = DatabaseObject.DatabaseObjectFactory(serviceProvider, cache, databaseToUse);
             DatabaseObjectInstance.CommandTimeout = 0;
+            DatabaseObjectInstance.EnableRowLocking = _enableRowLocking;
             DatabaseToUse = new(databaseToUse);
         }
 
