@@ -17,16 +17,18 @@ The CodedThought.Core library is a custom entity framework used to primarily abs
 CodedThought.Core requires several package dependencies, but these are easily done using the existing NuGet packages referenced. Installation is simply done by referencing the CodedThought.Core and Configuration libraries and any source-specific Core Provider libraries like CodedThought.Core.Data.SqlServer.
 
 A recommended approach to installation is by using the Nuget package manager.  The path to all the packages is https://nuget.pkg.github.com/erikbartlow/index.json.
-## Usage
 
+## Usage
 Application Settings are accessed via .NET Core appsettings.json while database and/or API connection details are stored in a custom JSON settings file named ctSettings.json.  CodedThought.Core supports environment-based settings.json implementations.
+
 ### Core Settings Parameters
-### CoreSettings/Settings
+#### CoreSettings/Settings
 |Property | Options | Description |
 | ------ | ------ | ------
 |ApplicationCookieName|Name of root application cookie|Provide a custom name for your application cookie.
-### Connection Parameters
-### CoreSettings/Connections
+
+#### Connection Parameters
+#### CoreSettings/Connections
 The connection settings are an array of CoreSettings/Connections.  However, only one can have the Primary key set to true or false.
 | Property | Data Type | Description |
 | ------ | ------| ------
@@ -54,6 +56,7 @@ There are two custom attributes used by CodedThought.Core.Data.
 |_SourceName_|Gets the name of the source based on the UseView property and availability of the table and view name properties.|
 |_Properties_|A list of all bound properties in the entity|
 |_Key_|The specific DataColumnAttribute currently set as the database key| The system currently only supports a single property to be a key.  **Multiple keys planned for a later release**
+
 ##### Sample Usage
 ```cs
 [DataTable( tblRegions )]
@@ -99,7 +102,7 @@ A key component to the CodedThought.Core.Data framework is the custom tags desig
 
 ##### Create a Controller Class that inherits from the GenericDataStoreController with at least one constructor.
 > Important: The GenericDataStoreController class provides your controller with all the necessary methods for CRUD through the DataStore object.  The DataStore is the derived instance of the DatabaseObject.
-    
+```cs
     public DbController(IMemoryCache memoryCache, CoreConnectionString connectionString) {
       // Connection to database.
       DatabaseConnection cn = new DatabaseConnection( *Connection Name* );
@@ -162,8 +165,8 @@ The ParameterCollection inherits from CollectionBase and implements the IList, I
 | _AddXmlParameter()_ | string Column Name, string Value
 | _Remove()_ | int index
 | _SubParameterGroupWhereType_ | Using the DatabaseObject.WhereType enumerator instructs the framework on how to handle any sub-parameter groups if found._Note: Only used when the AddSubGroupParameterList() method is used._
-#### Dependency Injection Setup
 
+#### Dependency Injection Setup
 Using the configuration-specific extension routines you can auto-load the appSettings and any environment-based JSON configurations.
 >Note:  You can add any additional Core Data Providers like SQL Server, Oracle, or PostgreSQL. The connection configuration contains the provider type.
 ```cs
@@ -171,4 +174,49 @@ Using the configuration-specific extension routines you can auto-load the appSet
 builder.Services.AddCoreDataProvider<MySqlDatabaseObject>();
 builder.Configuration.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 builder.Configuration.AddCoreSettingsConfiguration(env: builder.Environment, "Settings/appsettings.json", optional: false, reloadOnChange: true);
+```
+
+##Release Notes
+| Feature | Description &amp; Remarks
+| ------ | ------
+| .NET 10 | CodedThought.Core now supports up to .NET 10
+| Row Locking | The DatabaseObject in the Data namespace now supports row locking if the referenced provider supports it. Currently SQLServer, MySQL, and PostgreSQL do support this feature. Look for the EnableRowLocking property in the DatabaseObject and GenericDataStores. See usage below.
+
+###Row Locking Usage
+```cs
+public class DataController : GenericDataStoreController {
+
+
+        #region Declarations
+
+        private readonly IConfiguration _configuration;
+        private readonly DatabaseObject _databaseObject;
+        private readonly IMemoryCache _memoryCache;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ConnectionSetting _dbConnection;
+
+        #endregion Declarations
+
+        #region Constructors
+
+        public DataController(IServiceProvider serviceProvider, IMemoryCache cache, IConfiguration configuration) {
+            try {
+                _serviceProvider = serviceProvider;
+                _memoryCache = cache;
+                _configuration = configuration;
+                _dbConnection = configuration.GetCorePrimaryConnection();
+                _dbConnection.ConnectionString = Core.Security.Encryption.DecryptString(_dbConnection.ConnectionString, _encryptionKey);
+                _databaseObject = DatabaseObject.DatabaseObjectFactory(_serviceProvider, _memoryCache, _dbConnection);
+                DataStore = new GenericDataStore(serviceProvider, cache, _dbConnection);
+                
+                // ============================================================================
+                // Setting the EnableRowLocking at the GenericDataStoreController base class is preferred. This allows the framework
+                // to apply it to whichever datastore provider you are using as long as it supports it.
+                DataStore.EnableRowLocking = true;
+            }
+            catch { throw; }
+        }
+
+        #endregion Constructors  
+}
 ```
