@@ -176,13 +176,12 @@ builder.Configuration.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembl
 builder.Configuration.AddCoreSettingsConfiguration(env: builder.Environment, "Settings/appsettings.json", optional: false, reloadOnChange: true);
 ```
 
-##Release Notes
+## Release Notes
 | Feature | Description &amp; Remarks
 | ------ | ------
 | .NET 10 | CodedThought.Core now supports up to .NET 10
 | Row Locking | The DatabaseObject in the Data namespace now supports row locking if the referenced provider supports it. Currently SQLServer, MySQL, and PostgreSQL do support this feature. Look for the EnableRowLocking property in the DatabaseObject and GenericDataStores. See usage below.
-
-###Row Locking Usage
+| | #### Row Locking Usage
 ```cs
 public class DataController : GenericDataStoreController {
 
