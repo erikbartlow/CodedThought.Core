@@ -8,10 +8,10 @@
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>10.0.1.1</AssemblyVersion>
-	<FileVersion>10.0.1.1</FileVersion>
+	<AssemblyVersion>10.0.1.2</AssemblyVersion>
+	<FileVersion>10.0.1.2</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>10.0.1.1</Version>
+	<Version>10.0.1.2</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>CodedThought</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
@@ -23,7 +23,7 @@
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<Copyright>Copyright (c) 2026 CodedThought, LLC, All rights reserved</Copyright>
-	<PackageReleaseNotes>Updated Microsoft Logging package.</PackageReleaseNotes>
+	<PackageReleaseNotes>Updated GenericDataStore.Save to properly handle an empty GUID to determine if it is new or existing.</PackageReleaseNotes>
 	<WarningsNotAsErrors>$(WarningsNotAsErrors);CA2022;CA2200;CS0168;CS0618;CS0628;CS8600;CS8602;CS8603;CS8604;CS8605;CS8618;CS8622;CS8625;CS8767;CS8981;SYSLIB0007;SYSLIB0014;SYSLIB0051</WarningsNotAsErrors>
   </PropertyGroup>
 
