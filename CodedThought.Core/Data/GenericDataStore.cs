@@ -392,13 +392,6 @@ namespace CodedThought.Core.Data {
 						? (Guid)oPrimaryKey == Guid.Empty
 						: oPrimaryKey.IsNumericType() ? Convert.ToDecimal(oPrimaryKey) <= 0 : string.IsNullOrEmpty(oPrimaryKey.ToString());
 			}
-            // Determine if a new GUID needs to be generated based on the DataTableUsageAttributes.
-            if (attrTable.AutoGenerateUniqueIdentifier && bIsNew) {
-                DataColumnAttribute keyAttribute = GetPrimaryKeyAttribute<T>();
-                if (keyAttribute.ColumnType == DbType.Guid) {
-                    SetPrimaryKeyValue<T>(obj, keyAttribute.PropertyName, Guid.NewGuid());
-                }
-            }
             if (bIsNew) {
                 //insert
                 SaveNew(obj);
@@ -417,6 +410,16 @@ namespace CodedThought.Core.Data {
             if (attrTable.ReadOnly)
                 throw new Exception($"This component, {typeof(T).Name}, is coded to be Read-Only.  Therefore no insert, update, or delete operations can be performed against it.");
 
+            // GUID identity keys are generated client-side before the insert is constructed.
+            bool autoGenerateGuidKey = attrTable.Key?.ColumnType == DbType.Guid
+                && (attrTable.AutoGenerateUniqueIdentifier || attrTable.Key.IsIdentity);
+            if (autoGenerateGuidKey) {
+                object? primaryKey = typeof(T).GetProperty(attrTable.Key.PropertyName)?.GetValue(obj, null);
+                if (primaryKey is null || (Guid) primaryKey == Guid.Empty) {
+                    SetPrimaryKeyValue<T>(obj, attrTable.Key.PropertyName, Guid.NewGuid());
+                }
+            }
+
             List<TableColumn> listColumns = [];
             foreach (DataColumnAttribute attrColumn in attrTable.Properties) {
                 TableColumn tc = new(attrColumn.ColumnName, attrColumn.ConvertTypeToDbTypeSupported(), attrColumn.Size, attrColumn.IsPrimaryKey);
@@ -424,7 +427,7 @@ namespace CodedThought.Core.Data {
                 tc.IsInsertable = tc.IsUpdateable;
                 tc.IsIdentity = attrColumn.IsIdentity;
                 tc.IsNullableType = attrColumn.IsNullableType;
-                if (tc.IsPrimary && tc.Type == DbTypeSupported.dbGUID && attrTable.AutoGenerateUniqueIdentifier == true) {
+                if (tc.IsPrimary && tc.Type == DbTypeSupported.dbGUID && autoGenerateGuidKey) {
                     tc.IsInsertable = true;
                 }
                 listColumns.Add(tc);

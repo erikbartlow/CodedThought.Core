@@ -8,10 +8,10 @@
 	<PackageId>$(AssemblyName)</PackageId>
 	<Title>CodedThought Core</Title>
 	<ProjectName>CodedThought Core</ProjectName>
-	<AssemblyVersion>10.0.1.2</AssemblyVersion>
-	<FileVersion>10.0.1.2</FileVersion>
+	<AssemblyVersion>10.0.1.3</AssemblyVersion>
+	<FileVersion>10.0.1.3</FileVersion>
 	<Description>The CodedThought.Core library is a custom entity framework used to primarily abstract the database away from consuming components or clients.</Description>
-	<Version>10.0.1.2</Version>
+	<Version>10.0.1.3</Version>
 	<Authors>Erik Bartlow</Authors>
 	<Company>CodedThought</Company>
 	<PackageProjectUrl>https://www.nuget.org/packages/CodedThought.Core</PackageProjectUrl>
