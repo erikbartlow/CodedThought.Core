@@ -1,0 +1,14 @@
+services:
+  calendar:
+    build: .
+    image: ${DOCKERHUB_USERNAME:-local}/google-calendar-pi:${IMAGE_TAG:-latest}
+    ports:
+      - "8080:8080"
+    environment:
+      Google__ClientId: ${GOOGLE_CLIENT_ID:-}
+      Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
+    restart: unless-stopped
+    volumes:
+      - calendar-data:/app/data
+volumes:
+  calendar-data:
