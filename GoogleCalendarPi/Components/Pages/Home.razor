@@ -1,0 +1,180 @@
+@page "/"
+@using GoogleCalendarPi.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject CalendarService Calendar
+@inject AuthenticationStateProvider Authentication
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+<PageTitle>Daylight · Your calendar, a little clearer</PageTitle>
+<div class="app-shell">
+<aside class="sidebar">
+<button class="primary create" @onclick="OpenEditor" disabled="@busy">＋ Create event</button>
+<div class="mini-heading"><strong>@selected.ToString("MMMM yyyy")</strong><div><button aria-label="Previous month" @onclick="() => MoveMonth(-1)" disabled="@busy">‹</button><button aria-label="Next month" @onclick="() => MoveMonth(1)" disabled="@busy">›</button></div></div>
+<div class="mini-calendar">
+@foreach (var day in DayNames) { <span>@day[0]</span> }
+@for (var i = 0; i < 42; i++) {
+var date = CalendarDates.WeekStart(new DateTime(selected.Year, selected.Month, 1)).AddDays(i);
+<button class="@DayClass(date)" disabled="@busy" @onclick="() => SelectDate(date)" aria-label="@date.ToString("D")">@date.Day</button>
+}
+</div>
+<details class="calendar-list">
+<summary>MY CALENDARS <span class="calendar-list-chevron" aria-hidden="true">›</span></summary>
+<div class="calendar-list-options">
+@foreach (var source in sources) {
+<label class="calendar-filter"><input type="checkbox" checked="@enabled.Contains(source.Id)" @onchange="() => Toggle(source.Id)" /><span class="color-dot @source.Color"></span>@source.Name @if (!source.Writable) { <small>view only</small> }</label>
+}
+</div>
+</details>
+<div class="connection-card"><span class="connection-symbol">@(connected ? "✓" : "G")</span><strong>@(connected ? "Google connected" : "Make room for everything")</strong><p>Bring your calendars into one simple view.</p><a href="/auth/google" data-enhance-nav="false">@(connected ? "Reconnect account ↗" : "Connect Google Calendar ↗")</a>
+@if (connected) { <form action="/auth/logout" method="post" data-enhance="false"><AntiforgeryToken /><button class="text-button" type="submit">Disconnect</button></form> }
+</div><div class="sidebar-footer">A clearer day starts here. ☀</div>
+</aside>
+<main>
+@if (Navigation.Uri.Contains("setup=true")) { <div class="notice">Set Google:ClientId and Google:ClientSecret using user secrets or environment variables to connect. See README.md.</div> }
+@if (Navigation.Uri.Contains("authError=true")) { <div class="notice">Google sign-in was cancelled or failed. Please try connecting again.</div> }
+@if (!editing && !string.IsNullOrEmpty(error)) { <div class="notice" role="alert">@error <button @onclick="Reload" disabled="@busy">Retry</button></div> }
+@if (!string.IsNullOrEmpty(message)) { <div class="success" role="status">@message</div> }
+<section class="calendar-toolbar" aria-label="Calendar controls">
+<div class="period"><h2>@selected.ToString("MMMM") <span>@selected.Year</span></h2><span class="count-pill">@VisibleEvents.Count() events</span></div>
+<div class="navigation"><button @onclick="Today" disabled="@busy">Today</button><button aria-label="Previous period" @onclick="() => Move(-1)" disabled="@busy">‹</button><button aria-label="Next period" @onclick="() => Move(1)" disabled="@busy">›</button></div>
+<div class="view-switch"><button class="@(!week ? "active" : "")" aria-pressed="@(!week)" @onclick="() => SetView(false)" disabled="@busy">Month</button><button class="@(week ? "active" : "")" aria-pressed="@week" @onclick="() => SetView(true)" disabled="@busy">Week</button></div>
+</section>
+<div class="date-controls"><label>Jump to <input type="date" value="@selected.ToString("yyyy-MM-dd")" @onchange="JumpDate" disabled="@busy" /></label><label>Year <input class="year-input" type="number" min="1900" max="2100" value="@selected.Year" @onchange="JumpYear" disabled="@busy" /></label><span>@(week ? $"{RangeStart:MMM d} – {RangeStart.AddDays(6):MMM d, yyyy}" : selected.ToString("MMMM yyyy"))</span><button class="text-button" @onclick="Reload" disabled="@busy">↻ Refresh</button></div>
+@if (editing) {
+<dialog @ref="eventDialog" class="event-editor event-dialog" aria-labelledby="event-dialog-title" aria-describedby="event-dialog-description">
+<svg class="event-watermark" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+<rect x="24" y="44" width="176" height="164" rx="24" />
+<path d="M24 94h176M68 24v42M156 24v42M62 128h12m28 0h12m-52 34h12" />
+<circle cx="180" cy="178" r="44" fill="var(--dialog-surface)" />
+<path d="M180 158v40m-20-20h40" />
+</svg>
+<div class="editor-content">
+<div class="editor-title"><div><p class="eyebrow">MAKE A LITTLE TIME</p><h3 id="event-dialog-title">Create an event</h3></div><button type="button" data-dialog-close aria-label="Close event form" @onclick="CloseEditor" disabled="@busy">×</button></div>
+<p id="event-dialog-description" class="editor-description">A new plan. Something to look forward to.</p>
+@if (!string.IsNullOrEmpty(error)) { <div class="notice" role="alert">@error</div> }
+<form @onsubmit="Save" @onsubmit:preventDefault>
+<div class="editor-fields">
+<label class="event-title-field">Event title<input autofocus @bind="eventTitle" @bind:event="oninput" required maxlength="200" placeholder="What's on your mind?" /></label>
+<label>Calendar<select @bind="eventCalendar" required>@foreach (var c in sources.Where(c => c.Writable)) { <option value="@c.Id">@c.Name</option> }</select></label>
+<label>Start<input type="datetime-local" @bind="eventStart" required /></label>
+<label>@(allDay ? "End (exclusive date)" : "End")<input type="datetime-local" @bind="eventEnd" required /></label>
+<label class="event-location-field">Location<input @bind="eventLocation" placeholder="Somewhere nice" maxlength="300" /></label>
+</div>
+<div class="editor-bottom"><label><input type="checkbox" @bind="allDay" /> All-day event</label><small>Times in @zone.Id. All-day events use dates only.</small><button class="primary" type="submit" disabled="@(busy || !sources.Any(c => c.Writable))">@(busy ? "Saving…" : connected ? "Save to Google" : "Save demo event")</button></div>
+</form></div></dialog>
+}
+<div class="calendar-surface @(week ? "week-view" : "")" aria-busy="@busy">
+<div class="weekday-row">@foreach (var day in DayNames) { <div>@day</div> }</div>
+<div class="calendar-grid">
+@for (var i = 0; i < (week ? 7 : 42); i++) {
+var date = RangeStart.AddDays(i); var items = EventsFor(date).ToList();
+<section class="day-cell @(date.Month != selected.Month ? "outside" : "") @(date.Date == selected.Date ? "selected-cell" : "")" @onclick="() => SelectDate(date)">
+<button class="day-number @DayClass(date)" aria-label="Select @date.ToString("D")" @onclick="() => SelectDate(date)" @onclick:stopPropagation disabled="@busy">@date.Day @if (date == today) { <span class="today-label">TODAY</span> }</button>
+@foreach (var item in items.Take(week ? 100 : 3)) {
+<button class="event-chip @Color(item)" title="@($"{item.Title} · {item.Start:g} – {item.End:g}")" @onclick="() => SelectEvent(item, date)" @onclick:stopPropagation disabled="@busy">
+<span class="event-time">@(item.AllDay ? "All day" : item.Start.ToString("h:mm tt"))</span>
+<span class="event-name">@item.Title</span>
+</button>
+}
+@if (!week && items.Count > 3) { <button class="more-events" @onclick="() => SelectDate(date)" @onclick:stopPropagation disabled="@busy">+ @(items.Count - 3) more</button> }
+</section>
+}
+</div></div>
+<section class="agenda"><div class="agenda-heading"><div><p class="eyebrow">A CLOSER LOOK</p><h3>@selected.ToString("dddd, MMMM d")</h3></div><span>@EventsFor(selected).Count() plans for the day</span></div>
+@if (!EventsFor(selected).Any()) { <div class="empty-day"><span>☼</span><div><strong>A little breathing room.</strong><p>No events for this day. Enjoy the open space, or make a new plan.</p></div><button @onclick="OpenEditor">＋ Add a plan</button></div> }
+@foreach (var item in EventsFor(selected)) { <div class="agenda-item"><span class="agenda-line @Color(item)"></span><div class="agenda-time">@(item.AllDay ? "All day" : item.Start.ToString("h:mm tt"))<small>@(item.AllDay ? "" : item.End.ToString("h:mm tt"))</small></div><div><strong>@item.Title</strong><p>@sources.FirstOrDefault(c => c.Id == item.CalendarId)?.Name @(string.IsNullOrEmpty(item.Location) ? "" : " · " + item.Location)</p></div></div> }
+</section>
+<footer class="main-footer"><span><span class="status-dot"></span>@(busy ? "Updating your calendar…" : connected ? "Connected to Google Calendar" : "Sample data · connect Google to sync")</span><span>@zone.Id · Monday start</span></footer>
+</main></div>
+@code {
+private static readonly string[] DayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+private DateTime selected = DateTime.Today, today = DateTime.Today;
+private TimeZoneInfo zone = TimeZoneInfo.Local;
+private bool connected, week, editing, busy, allDay, showEventDialog;
+private ElementReference eventDialog;
+private string? error, message;
+private List<CalendarSource> sources = [];
+private List<CalendarEvent> events = [];
+private HashSet<string> enabled = [];
+private string eventTitle = "", eventCalendar = "", eventLocation = "";
+private DateTime eventStart, eventEnd;
+private DateTime RangeStart => CalendarDates.WeekStart(week ? selected : new DateTime(selected.Year, selected.Month, 1));
+private IEnumerable<CalendarEvent> VisibleEvents => events.Where(e => enabled.Contains(e.CalendarId) && e.Start < RangeStart.AddDays(week ? 7 : 42) && e.End > RangeStart);
+private IEnumerable<CalendarEvent> EventsFor(DateTime date) => events.Where(e => enabled.Contains(e.CalendarId) && CalendarDates.OccursOn(e, date)).OrderByDescending(e => e.AllDay).ThenBy(e => e.Start);
+private string Color(CalendarEvent e) => sources.FirstOrDefault(c => c.Id == e.CalendarId)?.Color ?? "sage";
+private string DayClass(DateTime date) => $"{(date.Date == today ? "is-today" : "")} {(date.Date == selected.Date ? "is-selected" : "")} {(date.Month != selected.Month ? "muted" : "")}";
+protected override async Task OnInitializedAsync() {
+connected = (await Authentication.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated == true;
+if (!connected) {
+sources = [new("personal", "Personal", "sage", true), new("work", "Work", "lavender", true), new("family", "Family", "peach", true)];
+enabled = sources.Select(c => c.Id).ToHashSet();
+var first = new DateTime(selected.Year, selected.Month, 1);
+for (var i = 0; i < 28; i++) {
+var d = first.AddDays(i);
+if (d.DayOfWeek == DayOfWeek.Monday) events.Add(new(Guid.NewGuid().ToString(), "work", "Weekly planning", d.AddHours(9), d.AddHours(10), false, "Home office"));
+if (d.DayOfWeek == DayOfWeek.Wednesday) events.Add(new(Guid.NewGuid().ToString(), "personal", "A little time outside", d.AddHours(17), d.AddHours(18), false, "Neighborhood park"));
+if (d.DayOfWeek == DayOfWeek.Saturday) events.Add(new(Guid.NewGuid().ToString(), "family", "Slow Saturday brunch", d.AddHours(10), d.AddHours(11.5), false, "Our favorite café"));
+}
+events.Add(new("demo-today", "work", "Make something good", selected.AddHours(11), selected.AddHours(12), false, "Studio"));
+}
+}
+protected override async Task OnAfterRenderAsync(bool firstRender) {
+if (showEventDialog) { showEventDialog = false; await JS.InvokeVoidAsync("daylight.openDialog", eventDialog); }
+if (!firstRender) return;
+try { zone = TimeZoneInfo.FindSystemTimeZoneById(await JS.InvokeAsync<string>("daylight.timeZone")); }
+catch (Exception ex) when (ex is JSException or TimeZoneNotFoundException or InvalidTimeZoneException) { zone = TimeZoneInfo.Utc; }
+today = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, zone).Date; selected = today;
+if (connected) await Reload(); else StateHasChanged();
+}
+private async Task Reload() {
+if (busy || !connected) return;
+busy = true; error = null;
+try {
+if (sources.Count == 0) { sources = await Calendar.CalendarsAsync(); enabled = sources.Select(c => c.Id).ToHashSet(); }
+events = await Calendar.EventsAsync(sources, RangeStart, RangeStart.AddDays(week ? 7 : 42), zone);
+} catch (Exception ex) when (ex is InvalidOperationException or HttpRequestException or TaskCanceledException) {
+error = ex is InvalidOperationException ? ex.Message : "Couldn't reach Google Calendar. Check your connection and retry."; events = [];
+} finally { busy = false; StateHasChanged(); }
+}
+private async Task SelectDate(DateTime date) { if (busy) return; selected = date; message = null; await Reload(); }
+private Task Move(int amount) => SelectDate(week ? selected.AddDays(amount * 7) : selected.AddMonths(amount));
+private Task MoveMonth(int amount) => SelectDate(selected.AddMonths(amount));
+private Task Today() => SelectDate(today);
+private async Task SetView(bool value) { week = value; await Reload(); }
+private async Task JumpDate(ChangeEventArgs e) { if (DateTime.TryParse(e.Value?.ToString(), out var d) && d.Year is >= 1900 and <= 2100) await SelectDate(d); }
+private async Task JumpYear(ChangeEventArgs e) { if (int.TryParse(e.Value?.ToString(), out var y) && y is >= 1900 and <= 2100) await SelectDate(selected.AddYears(y - selected.Year)); }
+private void Toggle(string id) { if (!enabled.Remove(id)) enabled.Add(id); }
+private async Task SelectEvent(CalendarEvent item, DateTime date) { await SelectDate(date); message = $"{item.Title} · {(item.AllDay ? "All day" : $"{item.Start:g} – {item.End:g}")}"; }
+private void OpenEditor() {
+editing = true; showEventDialog = true; error = null; message = null; eventTitle = ""; eventLocation = ""; allDay = false;
+eventCalendar = sources.FirstOrDefault(c => c.Writable)?.Id ?? "";
+eventStart = selected.Date.AddHours(9); eventEnd = eventStart.AddHours(1);
+}
+private async Task CloseEditor() {
+if (busy) return;
+await JS.InvokeVoidAsync("daylight.closeDialog", eventDialog);
+editing = false; error = null;
+}
+private async Task Save() {
+if (busy) return;
+error = null; message = null;
+var start = allDay ? eventStart.Date : eventStart; var end = allDay ? eventEnd.Date : eventEnd;
+if (allDay && end == start) end = start.AddDays(1);
+if (string.IsNullOrWhiteSpace(eventTitle) || end <= start) { error = "Give your event a title and an end after its start."; return; }
+if (!allDay && (zone.IsInvalidTime(start) || zone.IsInvalidTime(end) || zone.IsAmbiguousTime(start) || zone.IsAmbiguousTime(end))) { error = "This time falls on a daylight-saving clock change. Please choose an unambiguous time."; return; }
+var calendar = sources.FirstOrDefault(c => c.Id == eventCalendar && c.Writable);
+if (calendar is null) { error = "Choose a writable calendar first."; return; }
+busy = true;
+try {
+if (connected) await Calendar.CreateAsync(calendar, eventTitle, start, end, allDay, eventLocation, zone);
+else events.Add(new(Guid.NewGuid().ToString(), calendar.Id, eventTitle.Trim(), start, end, allDay, eventLocation));
+enabled.Add(calendar.Id); selected = start.Date;
+await JS.InvokeVoidAsync("daylight.closeDialog", eventDialog);
+editing = false;
+message = connected ? "Your event was saved to Google Calendar." : "Demo event added for this session.";
+} catch (Exception ex) when (ex is InvalidOperationException or HttpRequestException or TaskCanceledException) {
+error = ex is InvalidOperationException ? ex.Message : "The save could not be confirmed. Refresh before retrying to avoid a duplicate event.";
+} finally { busy = false; }
+if (error is null && connected) await Reload();
+}
+}
