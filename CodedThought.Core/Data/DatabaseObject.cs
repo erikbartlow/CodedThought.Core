@@ -270,6 +270,32 @@ namespace CodedThought.Core.Data
             }
         }
 
+        /// <summary>Begins a transaction only when one is not already active.</summary>
+        /// <returns><c>true</c> when this call created the transaction and therefore owns it; <c>false</c> when the caller already owns an active transaction.</returns>
+        protected bool BeginOwnedTransaction()
+        {
+            if (Transaction != null)
+                return false;
+            BeginTransaction();
+            return true;
+        }
+
+        /// <summary>Commits the transaction only when it is owned by the caller of <see cref="BeginOwnedTransaction" />.</summary>
+        /// <param name="owned">The value returned by <see cref="BeginOwnedTransaction" />.</param>
+        protected void CommitOwnedTransaction(bool owned)
+        {
+            if (owned)
+                CommitTransaction();
+        }
+
+        /// <summary>Rolls back the transaction only when it is owned by the caller of <see cref="BeginOwnedTransaction" />.</summary>
+        /// <param name="owned">The value returned by <see cref="BeginOwnedTransaction" />.</param>
+        protected void RollbackOwnedTransaction(bool owned)
+        {
+            if (owned)
+                RollbackTransaction();
+        }
+
         /// <summary>Closes the connection</summary>
         public void CloseConnection()
         {
@@ -893,10 +919,6 @@ namespace CodedThought.Core.Data
             {
                 throw new CodedThoughtApplicationException("Failed to add retrieve data from: " + tableName, ex);
             }
-            finally
-            {
-                CommitTransaction();
-            }
 
             return reader;
         }
@@ -1023,7 +1045,6 @@ namespace CodedThought.Core.Data
         {
             try
             {
-                BeginTransaction();
                 string sql;
 
                 sql = $"DELETE FROM {GetTableName(schemaName, tableName)}{GenerateWriteTableHint()} ";
@@ -1034,16 +1055,12 @@ namespace CodedThought.Core.Data
                     sql += $"WHERE {GenerateWhereClauseFromParams(parameters)}";
                 }
 
+                // A single DELETE is already atomic, so it runs without an explicit transaction unless the caller supplied one.
                 ExecuteNonQuery(sql.ToString(), parameters);
             }
             catch (Exception ex)
             {
-                RollbackTransaction();
                 throw new CodedThoughtApplicationException("Failed to delete record from: " + tableName, ex);
-            }
-            finally
-            {
-                CommitTransaction();
             }
         }
         #endregion Remove Methods
@@ -1074,7 +1091,6 @@ namespace CodedThought.Core.Data
         {
             try
             {
-                BeginTransaction();
                 StringBuilder sql = new();
                 sql.Append($"UPDATE {GetTableName(schemaName, tableName)}{GenerateWriteTableHint()} SET ");
                 sql.Append(GenerateUpdateList(parameters));
@@ -1089,16 +1105,12 @@ namespace CodedThought.Core.Data
                     whereParamCollection.Clear();
                 }
 
+                // A single UPDATE is already atomic, so it runs without an explicit transaction unless the caller supplied one.
                 ExecuteNonQuery(sql.ToString(), parameters);
             }
             catch (Exception ex)
             {
-                RollbackTransaction();
                 throw new CodedThoughtApplicationException("Failed to update record to: " + tableName, ex);
-            }
-            finally
-            {
-                CommitTransaction();
             }
         }
         #endregion Update Methods
@@ -1192,7 +1204,6 @@ namespace CodedThought.Core.Data
                     cmd.CommandText = commandText;
                     cmd.CommandType = type;
                     cmd.CommandTimeout = CommandTimeout > -1 ? CommandTimeout : Connection.ConnectionTimeout;
-                    cmd.Prepare();
                     if (Transaction != null)
                         cmd.Transaction = Transaction;
 
@@ -1208,12 +1219,8 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                RollbackTransaction();
+                // The transaction, if any, belongs to the caller so it is left for the caller to roll back.
                 throw new CodedThoughtApplicationException(ex.Message + "[" + commandText + "]", ex);
-            }
-            finally
-            {
-                CommitTransaction();
             }
         }
 
@@ -1256,7 +1263,9 @@ namespace CodedThought.Core.Data
         {
             try
             {
-                DataReaderBehavior = CommandBehavior.SequentialAccess | CommandBehavior.CloseConnection;
+                // Only apply the default behavior when the caller has not requested one.
+                if (DataReaderBehavior == CommandBehavior.Default)
+                    DataReaderBehavior = CommandBehavior.SequentialAccess | CommandBehavior.CloseConnection;
 
                 if (Connection.State == ConnectionState.Closed)
                     OpenConnection();
@@ -1267,7 +1276,6 @@ namespace CodedThought.Core.Data
                     cmd.CommandText = commandText;
                     cmd.CommandType = type;
                     cmd.CommandTimeout = CommandTimeout > -1 ? CommandTimeout : Connection.ConnectionTimeout;
-                    cmd.Prepare();
                     if (Transaction != null)
                         cmd.Transaction = Transaction;
 
@@ -1372,7 +1380,6 @@ namespace CodedThought.Core.Data
                     cmd.CommandText = commandText;
                     cmd.CommandType = type;
                     cmd.CommandTimeout = CommandTimeout > -1 ? CommandTimeout : Connection.ConnectionTimeout;
-                    cmd.Prepare();
                     AddParametersToCommand(parameters, cmd);
 
                     IDataAdapter adapter = CreateDataAdapter(cmd);
@@ -1410,7 +1417,6 @@ namespace CodedThought.Core.Data
                     cmd.CommandText = commandText;
                     cmd.CommandType = type;
                     cmd.CommandTimeout = CommandTimeout > -1 ? CommandTimeout : Connection.ConnectionTimeout;
-                    cmd.Prepare();
                     if (Transaction != null)
                         cmd.Transaction = Transaction;
 

@@ -386,9 +386,14 @@ namespace CodedThought.Core.Data {
             DataTableAttribute attrTable = GetTableAttribute<T>();
             if (attrTable.Key != null) {
                 object oPrimaryKey = typeof(T).GetProperty(attrTable.Key.PropertyName).GetValue(obj, null);
-                bIsNew = attrTable.Key.ColumnType == DbType.Guid || ((Guid)oPrimaryKey) == Guid.Empty
-                    ? oPrimaryKey.ToString() == string.Empty
-                    : oPrimaryKey.IsNumericType() ? ((int)oPrimaryKey) <= 0 : !string.IsNullOrEmpty(oPrimaryKey.ToString());
+                // The key type decides what "cleared" means, so it is matched on the value rather than cast up front.
+                bIsNew = oPrimaryKey switch {
+                    null => true,
+                    Guid gPrimaryKey => gPrimaryKey == Guid.Empty,
+                    _ => oPrimaryKey.IsNumericType()
+                        ? System.Convert.ToInt64(oPrimaryKey) <= 0
+                        : string.IsNullOrEmpty(oPrimaryKey.ToString())
+                };
             }
             // Determine if a new GUID needs to be generated based on the DataTableUsageAttributes.
             if (attrTable.AutoGenerateUniqueIdentifier && bIsNew) {
@@ -1452,40 +1457,66 @@ namespace CodedThought.Core.Data {
             return (List<T>)list;
         }
 
+        /// <summary>Resolves every column ordinal to its mapped column attribute and target property once per result set.</summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="attrTable">    The table mapping for the entity.</param>
+        /// <param name="fieldCount">   The number of columns in the result set.</param>
+        /// <param name="getColumnName">Returns the column name for an ordinal.</param>
+        /// <param name="columnMap">    The mapped column attribute per ordinal, or <c>null</c> where the column is unmapped.</param>
+        /// <param name="propertyMap">  The target property per ordinal, or <c>null</c> where the column is unmapped.</param>
+        private static void BuildColumnMap<T>(DataTableAttribute attrTable, int fieldCount, Func<int, string> getColumnName, out DataColumnAttribute?[] columnMap, out PropertyInfo?[] propertyMap) where T : class, new() {
+            columnMap = new DataColumnAttribute?[fieldCount];
+            propertyMap = new PropertyInfo?[fieldCount];
+            for (int i = 0; i < fieldCount; i++) {
+                string columnName = getColumnName(i);
+                DataColumnAttribute? attrColumn = null;
+                foreach (DataColumnAttribute candidate in attrTable.Properties) {
+                    if (string.Equals(candidate.ColumnName, columnName, StringComparison.OrdinalIgnoreCase)) {
+                        attrColumn = candidate;
+                        break;
+                    }
+                }
+                if (attrColumn == null)
+                    continue;
+
+                columnMap[i] = attrColumn;
+                // An extended non-enum property is set on the extended object, so the setter comes from that type instead of the entity.
+                propertyMap[i] = attrColumn.ExtendedPropertyType != null && !attrColumn.ExtendedPropertyType.IsEnum
+                    ? attrColumn.ExtendedPropertyType.GetProperty(attrColumn.ExtendedPropertyName)
+                    : typeof(T).GetProperty(attrColumn.PropertyName);
+            }
+        }
+
         protected void CreateBusinessEntity<T>(ref IList<T> list, IDataReader reader) where T : class, new() {
             T entity;
             DataTableAttribute attrTable = (DataTableAttribute)ORM[typeof(T).FullName][typeof(T)];
+            BuildColumnMap<T>(attrTable, reader.FieldCount, reader.GetName, out DataColumnAttribute?[] columnMap, out PropertyInfo?[] propertyMap);
             while (reader.Read()) {
                 entity = new T();
-                for (int i = 0; i < reader.FieldCount; i++) {
-                    foreach (DataColumnAttribute attrColumn in attrTable.Properties) {
-                        if (attrColumn.ColumnName.ToLower() == reader.GetName(i).ToLower()) {
-                            //extended object defined:
-                            // - create an instance of the extended object (must have a parameterless constructor
-                            // - set the extended object's value with the data from the database
-                            // - set the mapped property value to the etended object
-                            if (attrColumn.ExtendedPropertyType != null) {
-                                object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
+                for (int i = 0; i < columnMap.Length; i++) {
+                    DataColumnAttribute? attrColumn = columnMap[i];
+                    if (attrColumn == null)
+                        continue;
 
-                                //type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                                if (extendedObj.GetType().IsEnum) {
-                                    PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
-                                    object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
-                                    Type enumUnderlyingType = System.Enum.GetUnderlyingType(extendedObj.GetType());
-                                    object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
-                                    pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int)enumValue), null);
-                                } else {
-                                    PropertyInfo pi = attrColumn.ExtendedPropertyType.GetProperty(attrColumn.ExtendedPropertyName);
-                                    object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
-                                    pi.SetValue(extendedObj, objValue, null);
-                                }
-                            } else {//normal property - set it directly
-                                PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
-                                object obj = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
-                                pi.SetValue(entity, obj, null);
-                            }
-                            break;
+                    PropertyInfo pi = propertyMap[i];
+                    //extended object defined:
+                    // - create an instance of the extended object (must have a parameterless constructor
+                    // - set the extended object's value with the data from the database
+                    // - set the mapped property value to the etended object
+                    if (attrColumn.ExtendedPropertyType != null) {
+                        if (attrColumn.ExtendedPropertyType.IsEnum) {
+                            object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
+                            Type enumUnderlyingType = System.Enum.GetUnderlyingType(attrColumn.ExtendedPropertyType);
+                            object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
+                            pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int)enumValue), null);
+                        } else {
+                            object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
+                            object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
+                            pi.SetValue(extendedObj, objValue, null);
                         }
+                    } else {//normal property - set it directly
+                        object obj = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
+                        pi.SetValue(entity, obj, null);
                     }
                 }
                 list.Add(entity);
@@ -1495,37 +1526,33 @@ namespace CodedThought.Core.Data {
         protected void CreateBusinessEntity<T>(ref IList<T> list, DataTable dt) where T : class, new() {
             T entity;
             DataTableAttribute attrTable = (DataTableAttribute)ORM[typeof(T).FullName][typeof(T)];
+            BuildColumnMap<T>(attrTable, dt.Columns.Count, i => dt.Columns[i].ColumnName, out DataColumnAttribute?[] columnMap, out PropertyInfo?[] propertyMap);
             foreach (DataRow row in dt.Rows) {
                 entity = new T();
-                for (int i = 0; i < dt.Columns.Count; i++) {
-                    foreach (DataColumnAttribute attrColumn in attrTable.Properties) {
-                        if (attrColumn.ColumnName.ToLower() == dt.Columns[i].ColumnName.ToLower()) {
-                            //extended object defined:
-                            // - create an instance of the extended object (must have a parameterless constructor
-                            // - set the extended object's value with the data from the database
-                            // - set the mapped property value to the etended object
-                            if (attrColumn.ExtendedPropertyType != null) {
-                                object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
+                for (int i = 0; i < columnMap.Length; i++) {
+                    DataColumnAttribute? attrColumn = columnMap[i];
+                    if (attrColumn == null)
+                        continue;
 
-                                //type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                                if (extendedObj.GetType().IsEnum) {
-                                    PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
-                                    object objValue = GetReaderValueAs(row[i], pi.PropertyType);
-                                    Type enumUnderlyingType = System.Enum.GetUnderlyingType(extendedObj.GetType());
-                                    object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
-                                    pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int)enumValue), null);
-                                } else {
-                                    PropertyInfo pi = attrColumn.ExtendedPropertyType.GetProperty(attrColumn.ExtendedPropertyName);
-                                    object objValue = GetReaderValueAs(row[i], pi.PropertyType);
-                                    pi.SetValue(extendedObj, objValue, null);
-                                }
-                            } else {//normal property - set it directly
-                                PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
-                                object obj = GetReaderValueAs(row[i], pi.PropertyType);
-                                pi.SetValue(entity, obj, null);
-                            }
-                            break;
+                    PropertyInfo pi = propertyMap[i];
+                    //extended object defined:
+                    // - create an instance of the extended object (must have a parameterless constructor
+                    // - set the extended object's value with the data from the database
+                    // - set the mapped property value to the etended object
+                    if (attrColumn.ExtendedPropertyType != null) {
+                        if (attrColumn.ExtendedPropertyType.IsEnum) {
+                            object objValue = GetReaderValueAs(row[i], pi.PropertyType);
+                            Type enumUnderlyingType = System.Enum.GetUnderlyingType(attrColumn.ExtendedPropertyType);
+                            object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
+                            pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int)enumValue), null);
+                        } else {
+                            object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
+                            object objValue = GetReaderValueAs(row[i], pi.PropertyType);
+                            pi.SetValue(extendedObj, objValue, null);
                         }
+                    } else {//normal property - set it directly
+                        object obj = GetReaderValueAs(row[i], pi.PropertyType);
+                        pi.SetValue(entity, obj, null);
                     }
                 }
                 list.Add(entity);
@@ -1543,35 +1570,33 @@ namespace CodedThought.Core.Data {
             } else {
                 T entity;
                 DataTableAttribute attrTable = (DataTableAttribute)ORM[typeof(T).FullName][typeof(T)];
+                BuildColumnMap<T>(attrTable, reader.FieldCount, reader.GetName, out DataColumnAttribute?[] columnMap, out PropertyInfo?[] propertyMap);
                 while (reader.Read()) {
                     entity = new T();
-                    for (int i = 0; i < reader.FieldCount; i++) {
-                        DataColumnAttribute attrColumn = attrTable.Properties.SingleOrDefault(p => p.ColumnName.ToLower() == reader.GetName(i).ToLower());
-                        if (attrColumn != null) {
-                            //extended object defined:
-                            // - create an instance of the extended object (must have a parameterless constructor
-                            // - set the extended object's value with the data from the database
-                            // - set the mapped property value to the etended object
-                            if (attrColumn.ExtendedPropertyType != null) {
-                                object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
+                    for (int i = 0; i < columnMap.Length; i++) {
+                        DataColumnAttribute? attrColumn = columnMap[i];
+                        if (attrColumn == null)
+                            continue;
 
-                                //type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                                if (extendedObj.GetType().IsEnum) {
-                                    PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
-                                    object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
-                                    Type enumUnderlyingType = System.Enum.GetUnderlyingType(extendedObj.GetType());
-                                    object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
-                                    pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int)enumValue), null);
-                                } else {
-                                    PropertyInfo pi = attrColumn.ExtendedPropertyType.GetProperty(attrColumn.ExtendedPropertyName);
-                                    object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
-                                    pi.SetValue(extendedObj, objValue, null);
-                                }
-                            } else {//normal property - set it directly
-                                PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
-                                object obj = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
-                                pi.SetValue(entity, obj, null);
+                        PropertyInfo pi = propertyMap[i];
+                        //extended object defined:
+                        // - create an instance of the extended object (must have a parameterless constructor
+                        // - set the extended object's value with the data from the database
+                        // - set the mapped property value to the etended object
+                        if (attrColumn.ExtendedPropertyType != null) {
+                            if (attrColumn.ExtendedPropertyType.IsEnum) {
+                                object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
+                                Type enumUnderlyingType = System.Enum.GetUnderlyingType(attrColumn.ExtendedPropertyType);
+                                object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
+                                pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int)enumValue), null);
+                            } else {
+                                object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
+                                object objValue = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
+                                pi.SetValue(extendedObj, objValue, null);
                             }
+                        } else {//normal property - set it directly
+                            object obj = GetReaderValueAs(reader.GetValue(i), pi.PropertyType);
+                            pi.SetValue(entity, obj, null);
                         }
                     }
                     list.Add(entity);
@@ -1585,35 +1610,33 @@ namespace CodedThought.Core.Data {
             } else {
                 T entity;
                 DataTableAttribute attrTable = (DataTableAttribute)ORM[typeof(T).FullName][typeof(T)];
+                BuildColumnMap<T>(attrTable, dt.Columns.Count, i => dt.Columns[i].ColumnName, out DataColumnAttribute?[] columnMap, out PropertyInfo?[] propertyMap);
                 foreach (DataRow row in dt.Rows) {
                     entity = new T();
-                    for (int i = 0; i < dt.Columns.Count; i++) {
-                        DataColumnAttribute attrColumn = attrTable.Properties.SingleOrDefault(p => p.ColumnName.ToLower() == dt.Columns[i].ColumnName.ToLower());
-                        if (attrColumn != null) {
-                            //extended object defined:
-                            // - create an instance of the extended object (must have a parameterless constructor
-                            // - set the extended object's value with the data from the database
-                            // - set the mapped property value to the etended object
-                            if (attrColumn.ExtendedPropertyType != null) {
-                                object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
+                    for (int i = 0; i < columnMap.Length; i++) {
+                        DataColumnAttribute? attrColumn = columnMap[i];
+                        if (attrColumn == null)
+                            continue;
 
-                                //type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public)
-                                if (extendedObj.GetType().IsEnum) {
-                                    PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
-                                    object objValue = GetReaderValueAs(row[i], pi.PropertyType);
-                                    Type enumUnderlyingType = System.Enum.GetUnderlyingType(extendedObj.GetType());
-                                    object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
-                                    pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int)enumValue), null);
-                                } else {
-                                    PropertyInfo pi = attrColumn.ExtendedPropertyType.GetProperty(attrColumn.ExtendedPropertyName);
-                                    object objValue = GetReaderValueAs(row[i], pi.PropertyType);
-                                    pi.SetValue(extendedObj, objValue, null);
-                                }
-                            } else {//normal property - set it directly
-                                PropertyInfo pi = typeof(T).GetProperty(attrColumn.PropertyName);
-                                object obj = GetReaderValueAs(row[i], pi.PropertyType);
-                                pi.SetValue(entity, obj, null);
+                        PropertyInfo pi = propertyMap[i];
+                        //extended object defined:
+                        // - create an instance of the extended object (must have a parameterless constructor
+                        // - set the extended object's value with the data from the database
+                        // - set the mapped property value to the etended object
+                        if (attrColumn.ExtendedPropertyType != null) {
+                            if (attrColumn.ExtendedPropertyType.IsEnum) {
+                                object objValue = GetReaderValueAs(row[i], pi.PropertyType);
+                                Type enumUnderlyingType = System.Enum.GetUnderlyingType(attrColumn.ExtendedPropertyType);
+                                object enumValue = System.Convert.ChangeType(objValue, enumUnderlyingType);
+                                pi.SetValue(entity, Enum.ToObject(pi.PropertyType, (int)enumValue), null);
+                            } else {
+                                object extendedObj = Activator.CreateInstance(attrColumn.ExtendedPropertyType);
+                                object objValue = GetReaderValueAs(row[i], pi.PropertyType);
+                                pi.SetValue(extendedObj, objValue, null);
                             }
+                        } else {//normal property - set it directly
+                            object obj = GetReaderValueAs(row[i], pi.PropertyType);
+                            pi.SetValue(entity, obj, null);
                         }
                     }
                     list.Add(entity);
