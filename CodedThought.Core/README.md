@@ -176,12 +176,6 @@ builder.Configuration.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembl
 builder.Configuration.AddCoreSettingsConfiguration(env: builder.Environment, "Settings/appsettings.json", optional: false, reloadOnChange: true);
 ```
 
-## Release Notes
-| Feature | Description &amp; Remarks
-| ------ | ------
-| .NET 10 | CodedThought.Core now supports up to .NET 10
-| Row Locking | The DatabaseObject in the Data namespace now supports row locking if the referenced provider supports it. Currently SQLServer, MySQL, and PostgreSQL do support this feature. Look for the EnableRowLocking property in the DatabaseObject and GenericDataStores. See usage below.
-
 #### Row Locking Usage
 ```cs
 public class DataController : GenericDataStoreController {
@@ -220,3 +214,35 @@ public class DataController : GenericDataStoreController {
         #endregion Constructors  
 }
 ```
+
+## Release Notes
+
+### 10.0.1.4
+
+| Feature | Description &amp; Remarks
+| ------ | ------
+| Transaction ownership | A method now only commits or rolls back a transaction it opened itself. Previously `Get` and `ExecuteNonQuery` ended the caller's transaction, which made `GenericDataStore.Transaction(Action)` unreliable.
+| Fewer round trips on writes | Single-statement writes no longer open an explicit transaction, cutting inserts and deletes from 3 round trips to 1 and updates from 4 to 2.
+| Faster entity hydration | `CreateBusinessEntity` maps reader ordinals to properties once per reader rather than once per cell.
+| Primary key fix | `Save<T>` no longer throws an `InvalidCastException` when the entity's primary key is an integer.
+| CommandBehavior fix | `ExecuteReader( sql, parameters, behavior )` now honors the supplied `CommandBehavior` instead of replacing it.
+
+#### Write Path Performance
+
+A single `INSERT`, `UPDATE`, or `DELETE` is already atomic, so the explicit `BEGIN TRANSACTION` and `COMMIT TRANSACTION` that used to surround it only added two network round trips. Removing them, together with the dead `cmd.Prepare()` calls, brings the framework in line with hand-written ADO.NET.
+
+Measured against a remote SQL Server where one round trip cost approximately 45.5 ms, averaged over interleaved A/B passes of 30 iterations:
+
+| Operation | Before | After | Round Trips
+| ------ | ------ | ------ | ------
+| Insert | 135 ms | 46 ms | 3 to 1
+| Delete | 133 ms | 45 ms | 3 to 1
+| Update | 179 ms | 91 ms | 4 to 2
+
+> Note: These figures are specific to a high-latency connection. The improvement is a reduction in round trips, so the benefit shrinks as server latency approaches zero. Reads were already efficient and are unchanged.
+
+`Update` improves even for callers that already wrap their work in a transaction. A read before the write used to commit that transaction, forcing the following write to open a new one.
+
+#### Upgrade Notes
+
+Code that relied on `Get` or `ExecuteNonQuery` implicitly committing an open transaction must now commit explicitly. Such code previously committed at an unpredictable point, so a mid-sequence failure could not be rolled back.
