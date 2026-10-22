@@ -115,6 +115,38 @@ namespace CodedThought.Core.Configuration
             return builder;
         }
 
+        /// <summary>
+        /// Gets the Api connection from the ctSettings file with the Primary=true setting.
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <returns>The primary ApiServer connection, or <c>null</c> when none is configured.</returns>
+        public static ApiConnectionSetting? GetCorePrimaryApiConnection(this IConfiguration configuration)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
+
+            CoreSettings options = new() { Settings = [], Connections = [] };
+            configuration.GetSection(nameof(CoreSettings)).Bind(options);
+            ConnectionSetting? connection = options.Connections.FirstOrDefault(x => x.Primary && x.ProviderType.Equals("apiserver", StringComparison.OrdinalIgnoreCase));
+            return connection != null ? new ApiConnectionSetting(connection) : null;
+        }
+
+        /// <summary>
+        /// Gets the Api connection from the ctSettings file matching the passed name.
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="name">The configured connection name.</param>
+        /// <returns>The matching ApiServer connection, or <c>null</c> when none is configured.</returns>
+        public static ApiConnectionSetting? GetCoreApiConnection(this IConfiguration configuration, string name)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
+            ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+            CoreSettings options = new() { Settings = [], Connections = [] };
+            configuration.GetSection(nameof(CoreSettings)).Bind(options);
+            ConnectionSetting? connection = options.Connections.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && x.ProviderType.Equals("apiserver", StringComparison.OrdinalIgnoreCase));
+            return connection != null ? new ApiConnectionSetting(connection) : null;
+        }
+
         /// <summary>Builds the environment specific name for the passed settings file, preserving any directory in the path.</summary>
         private static string BuildEnvironmentFileName(string settingsFileName, string environmentName)
         {
