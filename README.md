@@ -170,16 +170,41 @@ The ParameterCollection inherits from CollectionBase and implements the IList, I
 Using the configuration-specific extension routines you can auto-load the appSettings and any environment-based JSON configurations.
 >Note:  You can add any additional Core Data Providers like SQL Server, Oracle, or PostgreSQL. The connection configuration contains the provider type.
 ```cs
-// Inject the data provider to be used in later data controllers.
-builder.Services.AddCoreDataProvider<MySqlDatabaseObject>();
+// Load the settings file, its environment overlay, and the environment variables.
 builder.Configuration.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 builder.Configuration.AddCoreSettingsConfiguration(env: builder.Environment, "Settings/appsettings.json", optional: false, reloadOnChange: true);
+
+// Bind and validate the CoreSettings section. Invalid settings fail at startup.
+builder.Services.AddCoreSettings(builder.Configuration);
+
+// Register the data provider used by later data controllers. A provider instance is created per data operation.
+builder.Services.AddCoreDataProvider<MySqlDatabaseObject>();
 ```
 
 ## Release Notes
+
+### Scaled Application Support
+| Feature | Description &amp; Remarks
+| ------ | ------
+| Per-Operation Data Providers | **Breaking.** _AddCoreDataProvider_ no longer registers the provider as a singleton. The registration probes the provider once at startup to record which database it supports, then _DatabaseObject.GetDatabaseObjectFromService_ creates a fresh provider per data operation. Concurrent callers no longer share a connection or transaction, and ADO.NET connection pooling is restored.
+| Deterministic Disposal | **Breaking.** _GenericDataStore_ and _DatabaseObject_ implement IDisposable and IAsyncDisposable with a full disposal chain. Callers must dispose the store, or the controller that owns it, or connections are held until garbage collection.
+| ORM Metadata Cache | The entity-to-table map is now held in a non-expiring ConcurrentDictionary rather than an expiring memory-cache entry, so concurrent store construction no longer races to rebuild it.
+| Connection String Redaction | Connection strings are no longer written into data-layer exception messages. The connection _Name_ is reported instead.
+
+### Configuration
+| Feature | Description &amp; Remarks
+| ------ | ------
+| Options Pattern | _AddCoreSettings(IConfiguration)_ binds the CoreSettings section through _IOptions&lt;CoreSettings&gt;_ and validates it with _ValidateOnStart()_. _CoreSettingsValidator_ rejects duplicate connection names, a missing or ambiguous Primary connection, unsupported provider types, blank connection strings, and negative timeouts, so a misconfigured host fails at startup rather than on its first query.
+| Required Connection Accessors | **Breaking.** _GetCorePrimaryConnection_ and _GetDatabaseConnection_ now return a nullable ConnectionSetting. Use _GetRequiredCorePrimaryConnection_ or _GetRequiredDatabaseConnection_ when a missing connection should throw; the failure message lists the connections that are configured.
+| Environment Variable Overlay | The _AddCoreSettingsConfiguration_ overloads honor their _optional_ and _reloadOnChange_ arguments, always add the optional _ctSettings.{Environment}.json_ overlay, and append the environment variable provider by default.
+| Validation Messages | **Breaking.** _ValidationConfigurationProvider_ implements the new _IValidationMessageProvider_ instead of _IConfigurationProvider_, and the static mutable _ExceptionMessages.ConfigurationProvider_ is gone. _ExceptionMessages_ is now an instance type; use _ExceptionMessages.Default_ for the built-in messages or register a provider with _AddCoreValidationMessages_.
+| WINFORM Setting Removed | **Breaking.** The WINFORM setting and the _CoreSettings.IsWinForm_ property are removed. Settings keys are now matched without regard to case through _TryGetSetting_ and _GetSetting_.
+
+### Build
 | Feature | Description &amp; Remarks
 | ------ | ------
 | .NET 10 | CodedThought.Core now supports up to .NET 10
+| Central Package Management | Package versions live in the root _Directory.Packages.props_ and project _PackageReference_ entries are versionless. This resolved the NU1605 downgrades between projects referencing different _Microsoft.Extensions.Caching.Abstractions_ versions.
 | Row Locking | The DatabaseObject in the Data namespace now supports row locking if the referenced provider supports it. Currently SQLServer, MySQL, and PostgreSQL do support this feature. Look for the EnableRowLocking property in the DatabaseObject and GenericDataStores. See usage below.
 
 #### Row Locking Usage
@@ -204,7 +229,7 @@ public class DataController : GenericDataStoreController {
                 _serviceProvider = serviceProvider;
                 _memoryCache = cache;
                 _configuration = configuration;
-                _dbConnection = configuration.GetCorePrimaryConnection();
+                _dbConnection = configuration.GetRequiredCorePrimaryConnection();
                 _dbConnection.ConnectionString = Core.Security.Encryption.DecryptString(_dbConnection.ConnectionString, _encryptionKey);
                 _databaseObject = DatabaseObject.DatabaseObjectFactory(_serviceProvider, _memoryCache, _dbConnection);
                 DataStore = new GenericDataStore(serviceProvider, cache, _dbConnection);

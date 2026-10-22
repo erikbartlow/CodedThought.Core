@@ -11,7 +11,7 @@ namespace CodedThought.Core.Data
     /// <summary>
     /// DatabaseObject encapsulates functionality of executing queries and non queries on a database. The DatabaseObject maintains connections, and transactions related to any database activity.
     /// </summary>
-    public abstract class DatabaseObject : IDatabaseObject, IDbSchema
+    public abstract class DatabaseObject : IDatabaseObject, IDbSchema, IDisposable
     {
 
         #region Private Constants
@@ -38,6 +38,9 @@ namespace CodedThought.Core.Data
         private int _nextParamNumber = 0;
 
         private object _syncLock = new();
+
+        /// <summary>Tracks whether the connection and transaction held by this instance have already been released.</summary>
+        private bool _disposed = false;
 
         private delegate IServiceCollection ServiceResolver(string key);
 
@@ -72,16 +75,14 @@ namespace CodedThought.Core.Data
         /// <exception cref="CodedThoughtApplicationException"></exception>
         public static DatabaseObject DatabaseObjectFactory(IServiceProvider serviceProvider, IMemoryCache cache, ConnectionSetting connection)
         {
-            DatabaseObject retVal;
+            DatabaseObject? dbo = null;
             try
             {
                 if (string.IsNullOrEmpty(connection.ConnectionString))
                 {
                     throw new MissingArguementException("Connection is missing the connection string property.  Please check the CodedThought Settings json file.");
                 }
-                // Try to get the database object from the cache.
-                DatabaseObject? dbo;
-                // If it isn't in the cache yet or has timed out then get it from dependency injection.
+                // Each call returns a provider instance dedicated to this operation.
                 dbo = (DatabaseObject) GetDatabaseObjectFromService(serviceProvider, connection);
 
                 if (dbo != null)
@@ -96,7 +97,7 @@ namespace CodedThought.Core.Data
                     {
                         if (!dbo.TestConnection())
                         {
-                            throw new CodedThoughtApplicationException($"Unable to determine if the web service is online.  A Ping test was unsuccessfull.  Pleaes review connection string:  {dbo.CoreConnection.ConnectionString}.");
+                            throw new CodedThoughtApplicationException($"Unable to determine if the web service is online.  A Ping test was unsuccessfull.  Pleaes review the connection, {dbo.CoreConnection.Name}.");
                         }
                     }
                     return dbo;
@@ -105,7 +106,9 @@ namespace CodedThought.Core.Data
             }
             catch (Exception ex)
             {
-                throw new CodedThoughtApplicationException($"Cannot obtain DB Connection [{connection.ConnectionString}]", ex);
+                // The provider owns a connection, so release it rather than leaving it to the garbage collector.
+                dbo?.Dispose();
+                throw new CodedThoughtApplicationException($"Cannot obtain DB Connection [{connection.Name}]", ex);
             }
         }
         /// <summary>
@@ -119,41 +122,61 @@ namespace CodedThought.Core.Data
         /// <exception cref="CodedThoughtApplicationException"></exception>
         public static DatabaseObject DatabaseObjectFactory(IServiceProvider serviceProvider, runtime.MemoryCache cache, ConnectionSetting connection)
         {
-            DatabaseObject retVal;
+            DatabaseObject? dbo = null;
             try
             {
                 if (string.IsNullOrEmpty(connection.ConnectionString))
                 {
                     throw new MissingArguementException("Connection is missing the connection string property.  Please check the CodedThought Settings json file.");
                 }
-                DatabaseObject? dbo;
                 dbo = (DatabaseObject) GetDatabaseObjectFromService(serviceProvider, connection);
                 return dbo != null ? dbo : throw new CodedThoughtApplicationException("Cannot obtain DB Object from the factory.");
             }
             catch (Exception ex)
             {
-                throw new CodedThoughtApplicationException($"Cannot obtain DB Connection [{connection.ConnectionString}]", ex);
+                // The provider owns a connection, so release it rather than leaving it to the garbage collector.
+                dbo?.Dispose();
+                throw new CodedThoughtApplicationException($"Cannot obtain DB Connection [{connection.Name}]", ex);
             }
         }
         /// <summary>
-        /// Gets the <see cref="IDatabaseObject"/> from the dependency injection services based on the connection key and provider type.
+        /// Gets a new <see cref="IDatabaseObject"/> from the dependency injection services based on the connection key and provider type.
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="connection"></param>
+        /// <remarks>
+        /// Providers registered through AddCoreDataProvider are created here so the instance is owned by the caller and never shared with another operation.
+        /// </remarks>
         /// <returns></returns>
-        private static IDatabaseObject GetDatabaseObjectFromService(IServiceProvider serviceProvider, ConnectionSetting connection)
+        private static IDatabaseObject? GetDatabaseObjectFromService(IServiceProvider serviceProvider, ConnectionSetting connection)
         {
             try
             {
+                DBSupported requestedDatabase = (DBSupported) Enum.Parse(typeof(DBSupported), connection.ProviderType);
+
+                foreach (CoreDataProviderRegistration registration in serviceProvider.GetServices<CoreDataProviderRegistration>())
+                {
+                    if (registration.SupportedDatabase != requestedDatabase)
+                        continue;
+                    IDatabaseObject provider = (IDatabaseObject) ActivatorUtilities.CreateInstance(serviceProvider, registration.ProviderType);
+                    ((DatabaseObject) provider).SetDatabaseObjectProperties(connection, connection.ConnectionString, connection.DefaultSchema);
+                    return provider;
+                }
+
+                // Fall back to providers registered directly against IDatabaseObject.
+                IDatabaseObject? matchedProvider = null;
                 foreach (IDatabaseObject dbo in serviceProvider.GetServices<IDatabaseObject>())
                 {
-                    if (dbo.SupportedDatabase == (DBSupported) Enum.Parse(typeof(DBSupported), connection.ProviderType))
+                    if (matchedProvider == null && dbo.SupportedDatabase == requestedDatabase)
                     {
                         ((DatabaseObject) dbo).SetDatabaseObjectProperties(connection, connection.ConnectionString, connection.DefaultSchema);
-                        return dbo;
+                        matchedProvider = dbo;
+                        continue;
                     }
+                    // Resolving the set creates every registered provider, so release the ones that were not selected.
+                    dbo.Dispose();
                 }
-                return null;
+                return matchedProvider;
             }
             catch (Exception)
             {
@@ -301,17 +324,81 @@ namespace CodedThought.Core.Data
         {
             try
             {
-                if (_connection != null)
-                {
-                    _connection.Close();
-                    _connection = null;
-                }
+                // Providers keep their own connection instance, so close whichever connection is currently active.
+                ActiveConnection?.Close();
+                _connection = null;
             }
             catch (Exception)
             {
                 //TODO We do not want any exception flying out of here.  Any exception caught here
                 //must be logged and consumed
             }
+        }
+
+        /// <summary>Gets the connection currently held by this instance, or <c>null</c> when no connection has been created yet.</summary>
+        private IDbConnection? ActiveConnection
+        {
+            get
+            {
+                if (_connection != null)
+                    return _connection;
+                try
+                {
+                    // The Connection property is overridden by the providers and throws when nothing has been created yet.
+                    return Connection;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>Releases the transaction and connection held by this instance.</summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>Releases the transaction and connection held by this instance.</summary>
+        /// <param name="disposing"><c>true</c> when called from <see cref="Dispose()" />; otherwise, <c>false</c>.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                // Abandon any transaction the caller left open before the connection is returned to the pool.
+                try
+                {
+                    if (Transaction != null)
+                    {
+                        Transaction.Rollback();
+                        Transaction.Dispose();
+                    }
+                }
+                catch (Exception)
+                {
+                    //TODO Any exception caught here must be logged and consumed.
+                }
+                finally
+                {
+                    Transaction = null;
+                }
+
+                try
+                {
+                    ActiveConnection?.Dispose();
+                }
+                catch (Exception)
+                {
+                    //TODO Any exception caught here must be logged and consumed.
+                }
+                _connection = null;
+            }
+            _disposed = true;
         }
 
         private void DatabaseObject_BulkCopySqlRowsCopied(object sender, SqlRowsCopiedEventArgs e) => throw new NotImplementedException();
@@ -337,7 +424,8 @@ namespace CodedThought.Core.Data
         /// <value>The column delimiter.</value>
         public virtual string ColumnDelimiter { get; set; }
 
-        public ServiceLifetime ServiceLifetime => throw new NotImplementedException();
+        /// <summary>Gets the lifetime the provider is registered with.  Providers hold per-operation state so they are transient.</summary>
+        public virtual ServiceLifetime ServiceLifetime => ServiceLifetime.Transient;
 
         public abstract ParameterCollection CreateParameterCollection();
 
@@ -1461,16 +1549,13 @@ namespace CodedThought.Core.Data
                 if (Connection.State == ConnectionState.Closed)
                     OpenConnection();
 
-                // Bulk Insert the DataTable to the database.
-                using (Connection)
-                {
-                    // make sure to enable triggers more on triggers in next post
-                    SqlBulkCopy bulkCopy =
+                // Bulk Insert the DataTable to the database.  The connection belongs to this instance and is released when it is disposed.
+                using (SqlBulkCopy bulkCopy =
                         new((SqlConnection) Connection)
                         {
                             BulkCopyTimeout = CommandTimeout
-                        };
-
+                        })
+                {
                     // Set up the bulk copy mappings
                     int x = 0;
                     foreach (DataColumn col in records.Columns)
@@ -1488,15 +1573,7 @@ namespace CodedThought.Core.Data
                     bulkCopy.NotifyAfter = records.Rows.Count < notificationRecordInterval ? records.Rows.Count / 2 : notificationRecordInterval;
                     bulkCopy.BatchSize = 10000;
                     bulkCopy.SqlRowsCopied += ExecuteBulkCopy_SqlRowsCopied;
-                    try
-                    {
-                        bulkCopy.WriteToServer(records);
-                    }
-                    catch { throw; }
-                    finally
-                    {
-                        Connection.Close();
-                    }
+                    bulkCopy.WriteToServer(records);
                 }
             }
             return true;

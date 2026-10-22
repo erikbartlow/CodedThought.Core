@@ -3,19 +3,23 @@ using CodedThought.Core.Data.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Caching.Memory;
 
+using System.Collections.Concurrent;
+
 namespace CodedThought.Core.Data {
 
     /// <summary>Reference Delegate for using the Transaction Method <see cref="TransactionInvoker" /></summary>
     public delegate void TransactionInvoker();
 
     /// <summary>DBStore implementation that uses attributes and reflection to map objects into tables</summary>
-    public class GenericDataStore : IDBStore {
+    public class GenericDataStore : IDBStore, IDisposable {
 
         #region Declarations
 
         protected const string ORM_KEY = "ORM";
         protected const string ORM_ASSEMBLIES_KEY = "ORM_ASSEMBLIES";
-        protected Dictionary<string, Dictionary<Type, Attribute>>? ORM; //object-relational-mapping
+        /// <summary>Serializes creation of the shared ORM map so concurrent data stores cannot generate or mutate it at the same time.</summary>
+        private static readonly object _ormSyncLock = new();
+        protected ConcurrentDictionary<string, Dictionary<Type, Attribute>>? ORM; //object-relational-mapping
         protected List<string>? listLoadedAssemblies;
         protected DatabaseConnection? _specifiedDatabaseConnection;
         protected readonly IMemoryCache? _cache = null;
@@ -23,6 +27,7 @@ namespace CodedThought.Core.Data {
         protected string _defaultSchema;
         protected readonly bool _useHttpCache;
         private bool _enableRowLocking;
+        private bool _disposed;
 
         public event SqlRowsCopiedEventHandler? BulkCopySqlRowsCopied;
 
@@ -120,15 +125,23 @@ namespace CodedThought.Core.Data {
         private GenericDataStore(runtime.MemoryCache cache) : this() {
             _runtimeCache = cache;
             _useHttpCache = false;
-            if (!_runtimeCache.TryGetValue(ORM_KEY, out ORM)) {
-                ORM = [];
+            // The map is cached as soon as it is created so every data store shares one instance.
+            lock (_ormSyncLock) {
+                if (!_runtimeCache.TryGetValue(ORM_KEY, out ORM)) {
+                    ORM = new();
+                    _runtimeCache.AddToLocalCache(ORM_KEY, ORM, OrmLocalCachePolicy());
+                }
             }
         }
         private GenericDataStore(IMemoryCache cache) : this() {
             _cache = cache;
             _useHttpCache = true;
-            if (!_cache.TryGetValue(ORM_KEY, out ORM)) {
-                ORM = [];
+            // The map is cached as soon as it is created so every data store shares one instance.
+            lock (_ormSyncLock) {
+                if (!_cache.TryGetValue(ORM_KEY, out ORM)) {
+                    ORM = new();
+                    _cache.AddToHttpCache(ORM_KEY, ORM, OrmHttpCachePolicy());
+                }
             }
         }
 
@@ -183,54 +196,70 @@ namespace CodedThought.Core.Data {
         /// Parses an assembly for ORM mappings.
         /// </summary>
         /// <param name="assembly">The assembly to parse.</param>
+        /// <remarks>The ORM map is shared by every data store in the process, so generation is serialized to keep concurrent callers from mapping the same assembly twice.</remarks>
         public virtual void LoadAssemblyAndORM(Assembly callingAssembly) {
-            if (UseHttpCache) {
-                listLoadedAssemblies = _cache.GetFromHttpCache<List<string>>(ORM_ASSEMBLIES_KEY);
-                if (listLoadedAssemblies == null) {
-                    // Load all data aware assemblies.
-                    listLoadedAssemblies = [];
-                    List<Assembly> dataAwareAssemblies = GetDataAwareAssemblies();
-                    dataAwareAssemblies.ForEach(a => {
-                        listLoadedAssemblies.Add(a.GetName().Name);
-                        GenerateMapCollection(ORM, a);
-                        // Cache the objects for next time.
-                        _cache.AddToHttpCache(ORM_KEY, ORM);
-                        _cache.AddToHttpCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
-                    });
-                }
-                listLoadedAssemblies ??= [];
-                if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name)) {
-                    listLoadedAssemblies.Add(callingAssembly.GetName().Name);
-                    GenerateMapCollection(ORM, callingAssembly);
+            lock (_ormSyncLock) {
+                if (UseHttpCache) {
+                    listLoadedAssemblies = _cache.GetFromHttpCache<List<string>>(ORM_ASSEMBLIES_KEY);
+                    if (listLoadedAssemblies == null) {
+                        // Load all data aware assemblies.
+                        listLoadedAssemblies = [];
+                        List<Assembly> dataAwareAssemblies = GetDataAwareAssemblies();
+                        dataAwareAssemblies.ForEach(a => {
+                            listLoadedAssemblies.Add(a.GetName().Name);
+                            GenerateMapCollection(ORM, a);
+                            // Cache the objects for next time.
+                            _cache.AddToHttpCache(ORM_KEY, ORM, OrmHttpCachePolicy());
+                            _cache.AddToHttpCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies, OrmHttpCachePolicy());
+                        });
+                    }
+                    listLoadedAssemblies ??= [];
+                    if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name)) {
+                        listLoadedAssemblies.Add(callingAssembly.GetName().Name);
+                        GenerateMapCollection(ORM, callingAssembly);
 
-                    //re-cache the objects after updates
-                    _cache.AddToHttpCache(ORM_KEY, ORM);
-                    _cache.AddToHttpCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
-                }
-            } else {
-                listLoadedAssemblies = _runtimeCache.GetFromLocalCache<List<string>>(ORM_ASSEMBLIES_KEY);
-                if (listLoadedAssemblies == null) {
-                    // Load all data aware assemblies.
-                    listLoadedAssemblies = [];
-                    List<Assembly> dataAwareAssemblies = GetDataAwareAssemblies();
-                    dataAwareAssemblies.ForEach(a => {
-                        listLoadedAssemblies.Add(a.GetName().Name);
-                        GenerateMapCollection(ORM, a);
-                        // Cache the objects for next time.
-                        _runtimeCache.AddToLocalCache(ORM_KEY, ORM);
-                        _runtimeCache.AddToLocalCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
-                    });
-                }
-                if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name)) {
-                    listLoadedAssemblies.Add(callingAssembly.GetName().Name);
-                    GenerateMapCollection(ORM, callingAssembly);
+                        //re-cache the objects after updates
+                        _cache.AddToHttpCache(ORM_KEY, ORM, OrmHttpCachePolicy());
+                        _cache.AddToHttpCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies, OrmHttpCachePolicy());
+                    }
+                } else {
+                    listLoadedAssemblies = _runtimeCache.GetFromLocalCache<List<string>>(ORM_ASSEMBLIES_KEY);
+                    if (listLoadedAssemblies == null) {
+                        // Load all data aware assemblies.
+                        listLoadedAssemblies = [];
+                        List<Assembly> dataAwareAssemblies = GetDataAwareAssemblies();
+                        dataAwareAssemblies.ForEach(a => {
+                            listLoadedAssemblies.Add(a.GetName().Name);
+                            GenerateMapCollection(ORM, a);
+                            // Cache the objects for next time.
+                            _runtimeCache.AddToLocalCache(ORM_KEY, ORM, OrmLocalCachePolicy());
+                            _runtimeCache.AddToLocalCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies, OrmLocalCachePolicy());
+                        });
+                    }
+                    if (!listLoadedAssemblies.Contains(callingAssembly.GetName().Name)) {
+                        listLoadedAssemblies.Add(callingAssembly.GetName().Name);
+                        GenerateMapCollection(ORM, callingAssembly);
 
-                    //re-cache the objects after updates
-                    _runtimeCache.AddToLocalCache(ORM_KEY, ORM);
-                    _runtimeCache.AddToLocalCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies);
+                        //re-cache the objects after updates
+                        _runtimeCache.AddToLocalCache(ORM_KEY, ORM, OrmLocalCachePolicy());
+                        _runtimeCache.AddToLocalCache(ORM_ASSEMBLIES_KEY, listLoadedAssemblies, OrmLocalCachePolicy());
+                    }
                 }
             }
         }
+
+        /// <summary>Builds the cache options used for the ORM map.  The map describes the assemblies loaded in the process, so it must not expire while the process is running.</summary>
+        /// <returns></returns>
+        private static MemoryCacheEntryOptions OrmHttpCachePolicy() => new() {
+            Priority = Microsoft.Extensions.Caching.Memory.CacheItemPriority.NeverRemove,
+            Size = 1024
+        };
+
+        /// <summary>Builds the cache policy used for the ORM map.  The map describes the assemblies loaded in the process, so it must not expire while the process is running.</summary>
+        /// <returns></returns>
+        private static runtime.CacheItemPolicy OrmLocalCachePolicy() => new() {
+            Priority = runtime.CacheItemPriority.NotRemovable
+        };
 
         /// <summary>Retrieves an object from the database of type T for the given primary key.</summary>
         /// <typeparam name="T">The type of object to retrieve.</typeparam>
@@ -1828,8 +1857,8 @@ namespace CodedThought.Core.Data {
         /// DataTableAttribute) and generates a DictionaryCollection of each type and its DB mappings
         /// </summary>
         /// <returns></returns>
-        protected void GenerateMapCollection(Dictionary<string, Dictionary<Type, Attribute>> mapCollection, Assembly assembly) {
-            mapCollection ??= [];
+        protected void GenerateMapCollection(ConcurrentDictionary<string, Dictionary<Type, Attribute>> mapCollection, Assembly assembly) {
+            mapCollection ??= new();
 
             foreach (Type type in assembly.GetTypes()) {
                 if (mapCollection.ContainsKey(type.FullName) || mapCollection.ContainsKey($"{type.FullName}.api")) {
@@ -1853,7 +1882,7 @@ namespace CodedThought.Core.Data {
                     Dictionary<Type, Attribute> dbDic = new() {
                         { type, attrTable }
                     };
-                    mapCollection.Add(type.FullName, dbDic);
+                    mapCollection.TryAdd(type.FullName, dbDic);
                 }
 
                 // Look for API Attributes
@@ -1865,7 +1894,7 @@ namespace CodedThought.Core.Data {
                     Dictionary<Type, Attribute> apiDic = new() {
                         { type, paramTable }
                     };
-                    mapCollection.Add($"{type.FullName}.api", apiDic);
+                    mapCollection.TryAdd($"{type.FullName}.api", apiDic);
                 }
             }
         }
@@ -1931,6 +1960,29 @@ namespace CodedThought.Core.Data {
             } catch { throw; }
         }
         #endregion Class Mapping
+
+        #region IDisposable Members
+
+        /// <summary>Releases the database provider, and with it the connection, held by this data store.</summary>
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>Releases the database provider, and with it the connection, held by this data store.</summary>
+        /// <param name="disposing"><c>true</c> when called from <see cref="Dispose()" />; otherwise, <c>false</c>.</param>
+        protected virtual void Dispose(bool disposing) {
+            if (_disposed)
+                return;
+
+            if (disposing) {
+                // The provider instance belongs to this data store, so releasing it returns the connection to the pool.
+                DatabaseObjectInstance?.Dispose();
+            }
+            _disposed = true;
+        }
+
+        #endregion IDisposable Members
 
         #region IDBStore Members
 

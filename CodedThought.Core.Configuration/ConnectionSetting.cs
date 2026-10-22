@@ -1,9 +1,16 @@
-﻿namespace CodedThought.Core.Configuration
+﻿using System.Collections.Frozen;
+
+namespace CodedThought.Core.Configuration
 {
 
     public class ConnectionSetting : IConnectionSetting
     {
-        private string _providerType;
+        /// <summary>The provider types the framework ships a data provider for.</summary>
+        private static readonly FrozenSet<string> _supportedProviders = new[]
+        {
+            "SqlServer", "Oracle", "MongoDb", "OleDb", "MySql", "ApiServer", "PostgreSQL"
+        }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>Primary constructor for the CoreSetting object.</summary>
         public ConnectionSetting()
         {
@@ -12,9 +19,13 @@
             DefaultSchema = "dbo";
             Primary = false;
             ProviderName = "SqlServer";
-            _providerType = "SqlServer";
-            Timeout = 0;
+            ProviderType = "SqlServer";
+            Timeout = 30;
         }
+
+        /// <summary>Gets the provider types accepted by <see cref="ProviderType" />.</summary>
+        public static IReadOnlyCollection<string> SupportedProviders => _supportedProviders;
+
         /// <summary>
         /// The name is used when retrieving the provider object from cache.
         /// </summary>
@@ -25,64 +36,34 @@
         public bool Primary { get; set; }
 
         /// <summary>Gets or sets the database provider type.</summary>
-        public string ProviderType
-        {
-            get => _providerType;
-            set
-            {
-                try
-                {
-                    CheckProvider(value);
-                    _providerType = value;
-                }
-                catch { throw; }
-            }
-        }
+        /// <remarks>
+        /// The value is not validated on assignment so that a malformed configuration file surfaces through the options validator with the offending connection name rather than as a binding failure.
+        /// </remarks>
+        public string ProviderType { get; set; }
 
         public string DefaultSchema { get; set; }
         public string ConnectionString { get; set; }
         public string ProviderName { get; set; }
         public Int32 Timeout { get; set; }
 
-        /// <summary>
-        /// Checks the provider for supported types.
-        /// </summary>
-        /// <exception cref="Exception"></exception>
-        public void CheckProvider()
-        {
-            string providerValue = ProviderType;
-            List<string> validProviders = [];
-            validProviders.AddRange("SqlServer,Oracle,MongoDb,OleDb,MySql,ApiServer,PostgreSQL".ToLower().Split(",".ToCharArray()));
+        /// <summary>Checks this connection's <see cref="ProviderType" /> against the supported types.</summary>
+        /// <exception cref="ArgumentException"></exception>
+        public void CheckProvider() => CheckProvider(ProviderType);
 
-            if (String.IsNullOrEmpty(providerValue))
-            {
-                throw new Exception($"The connection provider is required.  Please use one of the following provider, {string.Join(", ", [.. validProviders])}");
-
-            }
-            else
-            {
-                throw new Exception($"The connection provider, {providerValue}, is not supported.  Please use one of the following provider, {string.Join(", ", validProviders.ToArray())}");
-            }
-        }
-        /// <summary>Checks the provider for supported types.</summary>
+        /// <summary>Checks the passed provider type against the supported types.</summary>
+        /// <exception cref="ArgumentException"></exception>
         public void CheckProvider(string providerType)
         {
-            string providerValue = providerType;
-            List<string> validProviders = [];
-            validProviders.AddRange("SqlServer,Oracle,MongoDb,OleDb,MySql,ApiServer,PostgreSQL".ToLower().Split(",".ToCharArray()));
+            if (IsProviderSupported(providerType))
+                return;
 
-            if (!validProviders.Contains(providerValue.ToLower()))
-            {
-                if (String.IsNullOrEmpty(providerValue))
-                {
-                    throw new Exception($"The connection provider is required.  Please use one of the following provider, {string.Join(", ", [.. validProviders])}");
-
-                }
-                else
-                {
-                    throw new Exception($"The connection provider, {providerValue}, is not supported.  Please use one of the following provider, {string.Join(", ", validProviders.ToArray())}");
-                }
-            }
+            string supported = string.Join(", ", _supportedProviders);
+            throw String.IsNullOrWhiteSpace(providerType)
+                ? new ArgumentException($"The connection provider is required.  Please use one of the following providers: {supported}.", nameof(providerType))
+                : new ArgumentException($"The connection provider, {providerType}, is not supported.  Please use one of the following providers: {supported}.", nameof(providerType));
         }
+
+        /// <summary>Gets whether the passed provider type is one the framework supports.</summary>
+        public static bool IsProviderSupported(string? providerType) => !String.IsNullOrWhiteSpace(providerType) && _supportedProviders.Contains(providerType);
     }
 }

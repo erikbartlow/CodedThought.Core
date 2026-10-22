@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Primitives;
-
-using System.Text.Json;
 
 namespace CodedThought.Core.Configuration.Validation
 {
@@ -11,9 +8,11 @@ namespace CodedThought.Core.Configuration.Validation
         Required, Equals, GreaterThan, GreaterThanEqTo, LessThan, LessThanEqTo, NotEqual, InvalidEmail, NotInList, NotBetween, NotUpper, NotLower, ExceedsMax, MinimumNotReached
     }
 
-    public class ValidationConfigurationProvider(IConfiguration configuration) : IConfigurationProvider
+    /// <summary>Reads the configured validation messages, falling back to the built in defaults for any key not supplied.</summary>
+    public class ValidationConfigurationProvider : IValidationMessageProvider
     {
-        private readonly IConfiguration? _configuration = configuration;
+        private readonly IConfiguration? _configuration;
+        private readonly Dictionary<ValidationMessageKeys, string> _messages = [];
         private const string VALIDATION_MESSAGE_CONFIG_KEY = "AppSettings:CodedThoughtValidationMessages";
         private const string REQUIRED_MESSAGE = "This value is required.";
         private const string EQUALS_MESSAGE = "The target value does not equal comparison value.";
@@ -30,54 +29,53 @@ namespace CodedThought.Core.Configuration.Validation
         private const string MAXEXCEEDED_MESSAGE = "The value provided has exceeded the set maximum value.";
         private const string MINIMUMNOTREACHED_MESSAGE = "The value provided is not at or above the minimum value set.";
 
-        private List<ValidationMessageElement>? ValidationMessages { get; set; } = [];
+        /// <summary>Creates a provider that serves only the built in default messages.</summary>
+        public ValidationConfigurationProvider() { }
 
-        public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath) => throw new NotImplementedException();
+        /// <summary>Creates a provider and reads the configured messages.</summary>
+        /// <param name="configuration"></param>
+        public ValidationConfigurationProvider(IConfiguration configuration)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
 
-        public IChangeToken GetReloadToken() => throw new NotImplementedException();
+            _configuration = configuration;
+            Load();
+        }
 
+        /// <summary>Reads the configured messages, replacing anything read previously.</summary>
         public void Load()
         {
-            IConfigurationSection messagesSection = _configuration.GetSection(VALIDATION_MESSAGE_CONFIG_KEY);
-            IEnumerable<IConfigurationSection> msgArray = messagesSection.GetChildren();
-            foreach (IConfigurationSection msg in msgArray)
+            _messages.Clear();
+            if (_configuration is null)
+                return;
+
+            foreach (IConfigurationSection msg in _configuration.GetSection(VALIDATION_MESSAGE_CONFIG_KEY).GetChildren())
             {
-                if (Enum.TryParse<ValidationMessageKeys>(msg.Key, out ValidationMessageKeys currentKey))
-                {
-                    ValidationMessages.Add(new(msg.Key, String.IsNullOrEmpty(msg.Value) ? GetDefaultValidationMessage(currentKey) : msg.Value));
-                }
+                // Blank values mean "use the default", so they are not recorded.
+                if (Enum.TryParse(msg.Key, ignoreCase: true, out ValidationMessageKeys currentKey) && !String.IsNullOrWhiteSpace(msg.Value))
+                    _messages[currentKey] = msg.Value;
             }
         }
 
-        public void Set(string key, string value)
+        public bool TryGetMessage(ValidationMessageKeys key, out string message)
         {
-            throw new NotImplementedException();
-        }
+            if (_messages.TryGetValue(key, out string? configured))
+            {
+                message = configured;
+                return true;
+            }
 
-        public bool TryGet(string key, out string value)
-        {
-            ValidationMessageElement val = ValidationMessages.FirstOrDefault<ValidationMessageElement>(v => v.Key == key);
-            if (val == null)
-            {
-                string defaultMsg = GetDefaultValidationMessage(Enum.Parse<ValidationMessageKeys>(key));
-                value = defaultMsg;
-            }
-            else
-            {
-                value = val.Value;
-            }
-            // We always return true here since the default message will be returned if a custom one isn't found in the configuration file.
-            return true;
+            message = GetDefaultValidationMessage(key);
+            return false;
         }
 
         public string GetMessage(ValidationMessageKeys key)
         {
-            string msg;
-            TryGet(key.ToString(), out msg);
-            return msg;
+            TryGetMessage(key, out string message);
+            return message;
         }
 
-        private string GetDefaultValidationMessage(ValidationMessageKeys messageKey)
+        private static string GetDefaultValidationMessage(ValidationMessageKeys messageKey)
         {
             switch (messageKey)
             {

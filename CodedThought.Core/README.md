@@ -221,6 +221,11 @@ public class DataController : GenericDataStoreController {
 
 | Feature | Description &amp; Remarks
 | ------ | ------
+| Provider lifetime | `AddCoreDataProvider` now registers the provider as a transient instead of building one instance for the whole process. Each `GenericDataStore` receives its own provider, so concurrent requests no longer share a connection and transaction. **Breaking:** a provider instance is no longer reusable after it has been disposed.
+| Deterministic cleanup | `DatabaseObject` and `GenericDataStore` implement `IDisposable`. Disposing a store rolls back any transaction left open and returns its connection to the pool. Dispose the store, or the `GenericDataStoreController` that owns it, once the work is complete.
+| ORM cache | The class mapping is held in a `ConcurrentDictionary`, generated under a lock, and cached without an expiry. Previously concurrent callers could corrupt the map, and the 60 minute expiry caused it to be rebuilt while in use.
+| Connection strings redacted | Connection failures report the connection name rather than the full connection string.
+| Bulk copy cleanup | `ExecuteBulkCopy` disposes the `SqlBulkCopy` instance and no longer disposes the shared connection, which previously left the provider unusable after a bulk insert.
 | Transaction ownership | A method now only commits or rolls back a transaction it opened itself. Previously `Get` and `ExecuteNonQuery` ended the caller's transaction, which made `GenericDataStore.Transaction(Action)` unreliable.
 | Fewer round trips on writes | Single-statement writes no longer open an explicit transaction, cutting inserts and deletes from 3 round trips to 1 and updates from 4 to 2.
 | Faster entity hydration | `CreateBusinessEntity` maps reader ordinals to properties once per reader rather than once per cell.

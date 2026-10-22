@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CodedThought.Core.Data.Interfaces {
 
-	public interface IDatabaseObject {
+	public interface IDatabaseObject : IDisposable {
 
 
 		#region Properties

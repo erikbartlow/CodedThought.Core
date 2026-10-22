@@ -8,6 +8,13 @@ namespace CodedThought.Core.Validation.Expressions {
 		private ExpressionFlags _flags = ExpressionFlags.None;
 		private List<object> _modifierParameters = new();
 		private ExpressionOperands _operand = ExpressionOperands.Equals;
+		private ExceptionMessages _messages = ExceptionMessages.Default;
+
+		/// <summary>Gets or sets the messages used when a modifier fails.  Defaults to the built in messages.</summary>
+		public ExceptionMessages Messages {
+			get { return _messages; }
+			set { _messages = value ?? ExceptionMessages.Default; }
+		}
 
 		/// <summary>Gets a value indicating whether this instance refers to "this" instead of a passed target value.</summary>
 		/// <value><c>true</c> if this instance is this; otherwise, <c>false</c>.</value>
@@ -138,7 +145,7 @@ namespace CodedThought.Core.Validation.Expressions {
 							isValid = value.ToString().ExpressionUpper();
 							if (!isValid) {
 								result.Result = ValidationResultTypes.FAIL_WITH_MESSAGE;
-								result.Exception = new ValidationException(ExceptionMessages.NotUpperCaseMessage);
+								result.Exception = new ValidationException(_messages.NotUpperCaseMessage);
 							}
 							break;
 
@@ -148,7 +155,7 @@ namespace CodedThought.Core.Validation.Expressions {
 							isValid = value.ToString().ExpressionLower();
 							if (!isValid) {
 								result.Result = ValidationResultTypes.FAIL_WITH_MESSAGE;
-								result.Exception = new ValidationException(ExceptionMessages.NotLowerCaseMessage);
+								result.Exception = new ValidationException(_messages.NotLowerCaseMessage);
 							}
 							break;
 
@@ -159,7 +166,7 @@ namespace CodedThought.Core.Validation.Expressions {
 							if (value is String) { isValid = Convert.ToString(value).ExpressionMax(Convert.ToInt32(_modifierParameters[0])); }
 							if (!isValid) {
 								result.Result = ValidationResultTypes.FAIL_WITH_MESSAGE;
-								result.Exception = new ValidationException(ExceptionMessages.ExceedsMaxMessage);
+								result.Exception = new ValidationException(_messages.ExceedsMaxMessage);
 							}
 							break;
 
@@ -170,7 +177,7 @@ namespace CodedThought.Core.Validation.Expressions {
 							if (value is String) { isValid = Convert.ToString(value).ExpressionMin(Convert.ToInt32(_modifierParameters[0])); }
 							if (!isValid) {
 								result.Result = ValidationResultTypes.FAIL_WITH_MESSAGE;
-								result.Exception = new ValidationException(ExceptionMessages.MinimumNotReachedMessage);
+								result.Exception = new ValidationException(_messages.MinimumNotReachedMessage);
 							}
 							break;
 
@@ -179,7 +186,7 @@ namespace CodedThought.Core.Validation.Expressions {
 							isValid = Convert.ToString(value).ExpressionIsEmail();
 							if (!isValid) {
 								result.Result = ValidationResultTypes.FAIL_WITH_MESSAGE;
-								result.Exception = new ValidationException(ExceptionMessages.InvalidEmailMessage);
+								result.Exception = new ValidationException(_messages.InvalidEmailMessage);
 							}
 							break;
 
@@ -188,7 +195,7 @@ namespace CodedThought.Core.Validation.Expressions {
 							isValid = value.ToString().ExpressionIn(_modifierParameters);
 							if (!isValid) {
 								result.Result = ValidationResultTypes.FAIL_WITH_MESSAGE;
-								result.Exception = new ValidationException(ExceptionMessages.NotInListMessage);
+								result.Exception = new ValidationException(_messages.NotInListMessage);
 							}
 							break;
 
@@ -197,7 +204,7 @@ namespace CodedThought.Core.Validation.Expressions {
 							isValid = value.ToString().ExpressionInDB(_modifierParameters);
 							if (!isValid) {
 								result.Result = ValidationResultTypes.FAIL_WITH_MESSAGE;
-								result.Exception = new ValidationException(ExceptionMessages.NotInListMessage);
+								result.Exception = new ValidationException(_messages.NotInListMessage);
 							}
 							break;
 
@@ -205,7 +212,7 @@ namespace CodedThought.Core.Validation.Expressions {
 							if (value == null || value.ToString() == String.Empty) { isValid = false; }
 							if (!isValid) {
 								result.Result = ValidationResultTypes.FAIL_WITH_MESSAGE;
-								result.Exception = new ValidationException(ExceptionMessages.RequiredMessage);
+								result.Exception = new ValidationException(_messages.RequiredMessage);
 							}
 							break;
 

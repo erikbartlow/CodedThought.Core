@@ -13,10 +13,11 @@
 		/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
 		public void Dispose() {
 			if (DataStore != null) {
-				if (DataStore.Connection.State != System.Data.ConnectionState.Closed)
-					DataStore.Connection.Close();
+				// Disposing the store releases the provider and its connection.
+				DataStore.Dispose();
 				DataStore = null;
 			}
+			GC.SuppressFinalize(this);
 		}
 
 		/// <summary>Tests the database connection.</summary>

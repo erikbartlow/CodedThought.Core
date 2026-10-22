@@ -11,7 +11,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-The only dependencies are [CodedThought.Core](https://www.nuget.org/packages/CodedThought.Core/) and [NewtonSoft.Json](https://www.newtonsoft.com/json).
+The only dependencies are [CodedThought.Core](https://www.nuget.org/packages/CodedThought.Core/) and `Microsoft.Extensions.Caching.Abstractions`.
 
 ### Installing
 
@@ -22,10 +22,11 @@ Installation is simply done by installing the CodedThought.Core.Validation packa
 
 #### Config File Validation Settings
 
-Add the `CodedThoughtValidationSettings` section in the `appSettings.json` or custom `json` settings file.
-  
+Add the `CodedThoughtValidationMessages` section under `AppSettings` in the `appSettings.json` or custom `json` settings file. A key left blank falls back to its built-in default.
+
 ```json
-  CodedThoughtValidationMessages:{
+"AppSettings": {
+  "CodedThoughtValidationMessages": {
     "Required" : "",
     "Equals" : "",
     "GreaterThan" : "",
@@ -41,7 +42,26 @@ Add the `CodedThoughtValidationSettings` section in the `appSettings.json` or cu
     "ExceedsMax" : "",
     "MinimumNotReached" : ""
   }
+}
 ```
+
+#### Registering the Messages
+
+Register the provider so the configured messages are read once at startup. Without the registration the built-in defaults are used.
+
+```cs
+builder.Services.AddCoreValidationMessages(builder.Configuration);
+```
+
+An `Expression` reads its messages from its `Messages` property, which defaults to `ExceptionMessages.Default`. Assign an `ExceptionMessages` built from the injected `IValidationMessageProvider` to use the configured messages.
+
+### Release Notes
+
+| Feature | Description &amp; Remarks
+| ------ | ------
+| Instance Based Messages | **Breaking.** The static mutable _ExceptionMessages.ConfigurationProvider_ is removed and the message properties are now instance members. Use _ExceptionMessages.Default_ for the built-in messages, or construct _ExceptionMessages_ with an _IValidationMessageProvider_. One host's configured messages can no longer leak into another's.
+| Validation Message Provider | **Breaking.** _ValidationConfigurationProvider_ implements the new _IValidationMessageProvider_ instead of _IConfigurationProvider_. _TryGet_, _Set_, _GetChildKeys_, and _GetReloadToken_ are replaced by _TryGetMessage(ValidationMessageKeys, out string)_ and _GetMessage(ValidationMessageKeys)_.
+| Per Expression Messages | _Expression_ exposes a _Messages_ property so each expression can resolve its own message set rather than reading from shared static state.
 
 ## Modifier Reference
 Every expression can be broken down into two parts.  The target and the modifer.
