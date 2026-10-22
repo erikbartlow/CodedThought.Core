@@ -201,12 +201,9 @@ namespace CodedThought.Core.Data.ExcelSystem {
 		/// <exception cref="CodedThoughtException"></exception>
 		public static DataSet OpenExcelFileAsDataSet(string fullFileName, bool hasHeaders = false) {
 			try {
-				Stream excelStream;
-				DataSet dsExcel = new();
-				// Open a file stream to the file.
-				excelStream = File.Open(fullFileName, FileMode.Open, FileAccess.Read);
-				using (StreamReader sr = new(fullFileName, FileEncodingToUse)) {
-					return OpenExcelFileAsDataSet(sr, System.IO.Path.GetExtension(fullFileName), hasHeaders);
+				// Open a file stream to the file and let the stream overload select the reader.
+				using (FileStream excelStream = File.Open(fullFileName, FileMode.Open, FileAccess.Read)) {
+					return OpenExcelFileAsDataSet((Stream) excelStream, System.IO.Path.GetExtension(fullFileName), hasHeaders);
 				}
 			} catch (IOException ioEx) {
 				throw new CodedThoughtException("There was an error accessing the file.", ioEx);
@@ -217,9 +214,14 @@ namespace CodedThought.Core.Data.ExcelSystem {
 			}
 		}
 
+		/// <summary>Opens the excel file as data set.</summary>
+		/// <param name="uploadStream"> The upload stream.</param>
+		/// <param name="fileExtension">The file extension including the period.</param>
+		/// <returns></returns>
+		/// <exception cref="CodedThoughtException"></exception>
 		public static DataSet OpenExcelFileAsDataSet(StreamReader uploadStream, string fileExtension, bool hasHeaders = false) {
 			try {
-				return OpenExcelFileAsDataSet(uploadStream, fileExtension, hasHeaders);
+				return OpenExcelFileAsDataSet(uploadStream.BaseStream, fileExtension, hasHeaders);
 			} catch (IOException ioEx) {
 				throw new CodedThoughtException("There was an error accessing the file.", ioEx);
 			} catch (CodedThoughtException hpEx) {
@@ -335,10 +337,21 @@ namespace CodedThought.Core.Data.ExcelSystem {
 			}
 		}
 
-		public static DataSet OpenCSVFileAsDataSet(Stream uploadStream, string delimiter, bool hasHeaders = false, int columnCount = 0) {
+		/// <summary>Opens the CSV file as <see cref="DataSet" /> using an explicit column count.</summary>
+		/// <param name="uploadStream">The upload stream.</param>
+		/// <param name="delimiter">   The delimiter.</param>
+		/// <param name="hasHeaders">  if set to <c>true</c> [has headers].</param>
+		/// <param name="columnCount"> The number of columns to create when there is no header row.</param>
+		/// <returns></returns>
+		public static DataSet OpenCSVFileAsDataSet(Stream uploadStream, string delimiter, bool hasHeaders, int columnCount) {
 			// Variable to track the current row in case a row is not importable with the expected conditions.
 			int currentImportRow = 1;
 			string errorRow = string.Empty;
+
+			// A header row makes the column count redundant, so defer to the header based reader.
+			if (hasHeaders)
+				return OpenCSVFileAsDataSet(uploadStream, delimiter, true);
+			if (columnCount == 0) { throw new Exception("When hasHeaders is set to false a column count must be set."); }
 
 			try {
 				using (StreamReader csv = new(uploadStream, FileEncodingToUse)) {
@@ -346,10 +359,6 @@ namespace CodedThought.Core.Data.ExcelSystem {
 					string thisRow;
 					string[] currentRow;
 					string oldDelimiter = delimiter;
-
-					if (hasHeaders)
-						return OpenCSVFileAsDataSet(uploadStream, delimiter, hasHeaders);
-					if (hasHeaders == false && columnCount == 0) { throw new Exception("When hasHeaders is set to false a column count must be set."); }
 
 					// Check for double delimiters
 					if (delimiter.Length > 1) {
@@ -447,21 +456,31 @@ namespace CodedThought.Core.Data.ExcelSystem {
 			}
 		}
 
-		public static DataSet OpenCSVFileAsDataSet<T>(Stream uploadStream, string delimiter, bool hasHeaders = false, int columnCount = 0) {
+		/// <summary>Opens the CSV file as a typed <see cref="DataSet" /> using an explicit column count.</summary>
+		/// <param name="uploadStream">The upload stream.</param>
+		/// <param name="delimiter">   The delimiter.</param>
+		/// <param name="hasHeaders">  if set to <c>true</c> [has headers].</param>
+		/// <param name="columnCount"> The number of columns to create when there is no header row.</param>
+		/// <returns></returns>
+		public static DataSet OpenCSVFileAsDataSet<T>(Stream uploadStream, string delimiter, bool hasHeaders, int columnCount) {
 			// Variable to track the current row in case a row is not importable with the expected conditions.
 			int currentImportRow = 1;
 			string errorRow = string.Empty;
+
+			// A header row makes the column count redundant, so defer to the header based reader.
+			if (hasHeaders)
+				return OpenCSVFileAsDataSet<T>(uploadStream, delimiter, true);
+			if (columnCount == 0) { throw new Exception("When hasHeaders is set to false a column count must be set."); }
+
+			PropertyInfo[] properties = typeof(T).GetProperties();
+			if (columnCount > properties.Length) { throw new Exception($"The column count of {columnCount} is greater than the {properties.Length} properties available on {typeof(T).Name}."); }
+
 			try {
 				using (StreamReader csv = new(uploadStream, FileEncodingToUse)) {
 					DataTable dt = new();
 					string thisRow;
 					string[] currentRow;
 					string oldDelimiter = delimiter;
-					PropertyInfo[] properties = typeof(T).GetProperties();
-					columnCount = properties.Length;
-					if (hasHeaders)
-						return OpenCSVFileAsDataSet(uploadStream, delimiter, hasHeaders);
-					if (hasHeaders == false && columnCount == 0) { throw new Exception("When hasHeaders is set to false a column count must be set."); }
 
 					// Check for double delimiters
 					if (delimiter.Length > 1) {
